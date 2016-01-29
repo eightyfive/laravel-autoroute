@@ -6,6 +6,13 @@ Autoroute is a simple helper for registering Laravel routes in a more concise wa
 ```
 composer require eightyfive/laravel-autoroute
 ```
+
+Then add the Service Provider in your `config/app.php` file:
+
+```
+    Eyf\AutorouteServiceProvider::class,
+```
+
 Then run `php artisan vendor:publish` in order to copy `autoroute.php` config in your project.
 
 ### State of the art
