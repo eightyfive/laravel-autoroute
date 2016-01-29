@@ -61,7 +61,7 @@ Behind the scene it will be transformed into the normal Laravel controller strin
 
 Autoroute will also generate a default route _name_ for you if not passed: `index.contact`.
 
-**Note**: All of this is configurable. See "Options".
+**All of this is configurable. See "Options"**
 
 ## Constraints
 Constraints are used to match [route parameters](https://laravel.com/docs/5.2/routing#route-parameters) against regular expressions.
