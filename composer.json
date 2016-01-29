@@ -1,6 +1,7 @@
 {
     "name": "eightyfive/laravel-autoroute",
     "description": "Laravel routes helper",
+    "version": "0.0.1",
     "license": "None",
     "authors": [
         {
@@ -9,6 +10,7 @@
         }
     ],
     "require": {
+        "php": ">=5.6",
         "illuminate/support": "^5.2"
     },
     "autoload": {
