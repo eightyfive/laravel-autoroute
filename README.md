@@ -74,7 +74,7 @@ Constraints are used to match [route parameters](https://laravel.com/docs/5.2/ro
         ...
     ]
 ```
-**Note**: Every route parameter _must_ have a constraint defined. If not Autoroute will throws an `Exception`.
+__Note__: Every route parameter _must_ have a constraint defined. If not Autoroute will throws an `Exception`.
 
 
 ## Examples
@@ -134,9 +134,9 @@ Will generate:
 ```
 Will generate:
 - `Auth\\AuthController@login`
-- `auth.register` (namespace has been ignored)
+- `auth.register` - namespace has been ignored
 - `get`
-- `/auth/register`  (namespace has been ignored)
+- `/auth/register` - namespace has been ignored
 
 ### Route with camelCase `ctrl`
 ```php
@@ -165,8 +165,8 @@ Whethers or not to ignore `index` keyword when generating `url`.
 ```php
     'ingnore_index' => true,
 ```
-- `index.contact` > `/contact`
-- `auth/index` > `/auth`
+- `index.contact` gives `/contact` url
+- `auth/index` gives `/auth` url
 
 **Example**
 ```php
@@ -197,7 +197,7 @@ The `route_name` option tells how to format the _route name_.
 ```php
     'route_name' => '{ctrl}.{action}',
 ```
-- `auth.login` gives `auth/login` route name
+- `auth.login` gives `auth.login` route name
 
 **Example**
 ```php
@@ -207,7 +207,7 @@ The `route_name` option tells how to format the _route name_.
 - `auth>login` gives `auth/login` route name
 
 ### `filters` options
-The `filters` option holds a set of filters to apply to both `$ctrl` and `$action` strings.
+The `filters` option holds a set of filters to apply to both `{ctrl}` and `{action}`.
 
 **Possible values**
 - `slug`
