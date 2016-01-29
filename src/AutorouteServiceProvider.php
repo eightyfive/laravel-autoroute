@@ -24,7 +24,7 @@ class AutorouteServiceProvider extends ServiceProvider
             return new Autoroute(
                 $app['router'],
                 $config['routes'],
-                $config['requirements'],
+                $config['constraints'],
                 $config['options']
             );
         });

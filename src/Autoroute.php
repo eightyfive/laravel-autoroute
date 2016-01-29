@@ -12,10 +12,10 @@ class Autoroute {
     protected $options;
 
     protected $defaults = [
+        'ignore_index' => true,
         'separator' => '.',
-        'route_name' => '{ctrl}-{action}',
-        'transform_ctrl' => 'snake',
-        'transform_action' => 'snake',
+        'route_name' => '{ctrl}/{action}',
+        'filters' => ['snake', 'slug']
     ];
 
     public function __construct(Router $router, array $routes, array $requirements, $options = [])
@@ -24,6 +24,9 @@ class Autoroute {
         $this->routes = $routes;
         $this->requirements = $requirements;
         $this->options = array_merge($this->defaults, $options);
+        $this->filters = array_filter($this->options['filters'], function($filter) {
+            return in_array($filter, ['slug', 'snake', 'camel']);
+        });
     }
 
     public function make()
@@ -35,15 +38,19 @@ class Autoroute {
         return $routes;
     }
 
-    public function makeRoute($path, $ctrl, $verb = null, $name = null)
+    public function makeRoute($url, $ctrl, $verb = null, $name = null)
     {
         if ($verb) {
-            if (1 === preg_match('/^(get|post|put|delete|match|any)$/i', $verb)) {
-                $verb = strtolower($verb);
+            if (is_array($verb)) {
+                $match = $verb;
             } else {
-                // Verb is the route name
-                $name = $verb;
-                $verb = null;
+                if (1 === preg_match('/^(get|post|put|delete|any)$/i', $verb)) {
+                    $verb = strtolower($verb);
+                } else {
+                    // Verb is the route name
+                    $name = $verb;
+                    $verb = null;
+                }
             }
         }
 
@@ -53,21 +60,25 @@ class Autoroute {
 
         list($ctrl, $action, $namespace) = $this->parseController($ctrl);
 
-        $method = $this->getMethod($ctrl, $action, $namespace);
+        $controller = $this->getController($ctrl, $action, $namespace);
 
-        if (!$path) {
-            $path = $this->getPath($ctrl, $action);
+        if (!$url) {
+            $url = $this->getPath($ctrl, $action);
         }
         if (!$name) {
             $name = $this->getRouteName($ctrl, $action);
         }
 
-        $route = call_user_func([$this->router, $verb], $path, $method);
+        if (isset($match)) {
+            $route = call_user_func([$this->router, 'match'], $match, $url, $controller);
+        } else {
+            $route = call_user_func([$this->router, $verb], $url, $controller);
+        }
         $route->name($name);
 
         // Requirements
         $params = [];
-        $found = preg_match_all("/\{\w+\}/", $path, $params);
+        $found = preg_match_all("/\{\w+\}/", $url, $params);
         if ($found && $found > 0) {
             $params = array_map(function($key) {
                 return trim($key, '{}');
@@ -87,38 +98,38 @@ class Autoroute {
 
     protected function parseController($ctrl)
     {
-        // Namespace ?
+        $crumbs = explode($this->options['separator'], $ctrl);
+        $action = array_pop($crumbs);
+        $ctrl = array_pop($crumbs);
+
         $namespace = null;
-        $ctrl = explode('\\', $ctrl);
-        if (count($ctrl) > 1) {
-            $namespace = $ctrl;
-            $ctrl = array_pop($namespace);
-            $namespace = implode('\\', $namespace);
-        } else {
-            $ctrl = implode('', $ctrl);
+        if (count($crumbs)) {
+            $namespace = implode('\\', array_map(function($crumb) {
+                return ucfirst($crumb);
+            }, $crumbs));
         }
 
-        $ctrl = explode($this->options['separator'], $ctrl);
-
-        return [$ctrl[0], $ctrl[1], $namespace];
+        return [$ctrl, $action, $namespace];
     }
 
     protected function getPath($ctrl, $action)
     {
-        $path = [$ctrl, $action];
-        if ($ctrl === 'index') {
-            array_shift($path);
+        $url = [$ctrl, $action];
+        if ($this->options['ignore_index']) {
+            if ($ctrl === 'index') {
+                array_shift($url);
+            }
+            if ($action === 'index') {
+                array_shift($url);
+            }
         }
-        if ($action === 'index') {
-            array_shift($path);
-        }
-        return '/'.implode('/', $path);
+        return '/'.implode('/', $url);
     }
 
     protected function getRouteName($ctrl, $action)
     {
-        $ctrl   = $this->transformName($ctrl,   $this->options['transform_ctrl']);
-        $action = $this->transformName($action, $this->options['transform_action']);
+        $ctrl   = $this->transformName($ctrl);
+        $action = $this->transformName($action);
 
         $route = $this->options['route_name'];
         $route = str_replace('{ctrl}', $ctrl, $route);
@@ -127,27 +138,22 @@ class Autoroute {
         return $route;
     }
 
-    protected function getMethod($ctrl, $action, $namespace = null)
+    protected function getController($ctrl, $action, $namespace = null)
     {
-        $method = $namespace ? [$namespace, '\\'] : [];
-        $method = array_merge($method, [
+        $controller = $namespace ? [$namespace, '\\'] : [];
+        $controller = array_merge($controller, [
             ucfirst($ctrl),
             'Controller@',
             $action
         ]);
 
-        return implode('', $method);
+        return implode('', $controller);
     }
 
-    protected function transformName($name, $strategy)
+    protected function transformName($name)
     {
-        if ($strategy === 'slug-ish') {
-            // for CamelCase ctrl or method names
-            // ex: `apiAuth.userSearch` --> `api_auth-user_search`
-            $name = Str::snake($name);
-            $name = Str::slug($name);
-        } else {
-            $name = call_user_func([Str::class, $strategy]);
+        foreach ($this->filters as $filter) {
+            $name = call_user_func([Str::class, $filter], $name);
         }
         return $name;
     }
