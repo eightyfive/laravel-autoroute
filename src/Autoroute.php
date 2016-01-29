@@ -6,6 +6,8 @@ use Illuminate\Support\Str;
 
 class Autoroute {
 
+    const VERB = '/^(get|post|put|delete|any)$/i';
+
     protected $router;
     protected $routes;
     protected $requirements;
@@ -38,8 +40,20 @@ class Autoroute {
         return $routes;
     }
 
-    public function makeRoute($url, $ctrl, $verb = null, $name = null)
+    public function makeRoute($ctrl, $url = null, $verb = null, $name = null)
     {
+        // 3 arguments: is $verb the $url ?
+        if ($verb && preg_match(Autoroute::VERB, $verb) !== 1) {
+            $name = $verb;
+            $verb = null;
+        }
+
+        // 2 arguments: is $url the $verb ?
+        if ($url && preg_match(Autoroute::VERB, $url) === 1) {
+            $verb = $url;
+            $url = null;
+        }
+
         if ($verb) {
             if (is_array($verb)) {
                 $match = $verb;
