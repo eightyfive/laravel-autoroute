@@ -56,9 +56,11 @@ _Notes_:
 **Note**: This is configurable. See "Options".
 
 **Generated controller string**
+
 Behind the scene it will be transformed into the normal Laravel controller string: `IndexController@contact`.
 
 **Generated route name**
+
 Autoroute will also generate a default route _name_ for you if not passed: `index.contact`.
 
 ## Constraints
