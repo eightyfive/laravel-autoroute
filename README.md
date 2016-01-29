@@ -53,8 +53,6 @@ _Notes_:
 ### Controller format
 `$ctrl` variable is of form: `{ctrl}.{action}`. Ex: `index.contact`.
 
-**Note**: This is configurable. See "Options".
-
 **Generated controller string**
 
 Behind the scene it will be transformed into the normal Laravel controller string: `IndexController@contact`.
@@ -62,6 +60,8 @@ Behind the scene it will be transformed into the normal Laravel controller strin
 **Generated route name**
 
 Autoroute will also generate a default route _name_ for you if not passed: `index.contact`.
+
+**Note**: All of this is configurable. See "Options".
 
 ## Constraints
 Constraints are used to match [route parameters](https://laravel.com/docs/5.2/routing#route-parameters) against regular expressions.
