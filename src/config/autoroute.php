@@ -10,9 +10,7 @@ return [
     ],
 
     'options' => [
-        // 'ignore_index' => true,
         // 'separator' => '.',
-        // 'route_name' => '{ctrl}/{action}',
-        // 'filters' => ['snake', 'slug']
+        // 'route_name' => '{ctrl}.{action}',
     ],
 ];

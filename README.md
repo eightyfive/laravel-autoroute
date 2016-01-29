@@ -9,7 +9,7 @@ composer require eightyfive/laravel-autoroute
 
 Then add the Service Provider in your `config/app.php` file:
 
-```
+```php
     Eyf\AutorouteServiceProvider::class,
 ```
 
@@ -50,13 +50,16 @@ _Notes_:
 2. `index` keyword in `$ctrl` is ignored by default (See examples & "Options")
 3. **Caveat**: if you don't pass `$verb`, but do pass a custom route `$name` of yours as the third parameter, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
 
-`index.contact` is of form: `{ctrl}.{$action}`.
+### Controller (`$ctrl`) format
+`$ctrl` is of form: `{ctrl}.{action}`. Ex: `index.contact`.
 
 **Note**: This is configurable. See "Options".
 
+### Generated "real"controller string
 Behind the scene it will be transformed to normal Laravel controller string: `IndexController@contact`.
 
-Autoroute will also generate a default route _name_ for you if not passed: `index/contact`.
+### Generated route name
+Autoroute will also generate a default route _name_ for you if not passed: `index.contact`.
 
 ## Constraints
 Constraints are used to match [route parameters](https://laravel.com/docs/5.2/routing#route-parameters) against regular expressions.
@@ -82,7 +85,7 @@ Constraints are used to match [route parameters](https://laravel.com/docs/5.2/ro
 ```
 Will generate:
 - `IndexController@contact` (controller)
-- `index/contact` (route name)
+- `index.contact` (route name)
 - `get` (verb)
 - `/contact` (url) - `index` has been ignored
 
@@ -108,7 +111,7 @@ Will generate:
 ```
 Will generate:
 - `AuthController@login`
-- `auth/login` (route name...)
+- `auth.login`
 - `post`
 - `/auth/login`
 
@@ -119,7 +122,7 @@ Will generate:
 ```
 Will generate:
 - `AuthController@login`
-- `auth/login` (route name!)
+- `auth.login`
 - `get`, `post`
 - `/auth/login`
 
@@ -129,7 +132,7 @@ Will generate:
 ```
 Will generate:
 - `Auth\\AuthController@login`
-- `auth/register` (namespace has been ignored)
+- `auth.register` (namespace has been ignored)
 - `get`
 - `/auth/register`  (namespace has been ignored)
 
@@ -139,7 +142,7 @@ Will generate:
 ```
 Will generate:
 - `AuthController@facebookCallback`
-- `auth/facebook-callback`
+- `auth.facebook-callback`
 - `get`
 - `/auth/facebook-callback`
 
@@ -148,7 +151,7 @@ Will generate:
 ```
 Will generate:
 - `UserAccountController@myProfile`
-- `user-account/my-profile`
+- `user-account.my-profile`
 - `get`
 - `/user-account/my-profile`
 
@@ -167,8 +170,8 @@ Whethers or not to ignore `index` keyword when generating `url`.
 ```php
     'ingnore_index' => false,
 ```
-- `index.contact` > `/index/contact`
-- `auth/index` > `/auth/index`
+- `index.contact` gives `/index/contact` url
+- `auth.index` gives `/auth/index` url
 
 ### `separator` option
 You can specify the separtor to use in order to [`explode`](http://php.net/manual/en/function.explode.php) the `$ctrl` string.
@@ -190,16 +193,16 @@ The `route_name` option tells how to format the _route name_.
 
 **Default**
 ```php
-    'route_name' => '{ctrl}/{action}',
+    'route_name' => '{ctrl}.{action}',
 ```
 - `auth.login` gives `auth/login` route name
 
 **Example**
 ```php
     'separator' => '>',
-    'route_name' => '{ctrl}|{action}',
+    'route_name' => '{ctrl}/{action}',
 ```
-- `auth>login` gives `auth|login` route name
+- `auth>login` gives `auth/login` route name
 
 ### `filters` options
 The `filters` option holds a set of filters to apply to both `$ctrl` and `$action` strings.
@@ -208,21 +211,21 @@ The `filters` option holds a set of filters to apply to both `$ctrl` and `$actio
 - `slug`
 - `snake`
 - `camel`
-- Any combination: `camel|snake`, `snake|slug|camel`...
+- Any combination: `['camel', 'snake']`, `['snake', 'slug', 'camel']`...
 
 **Default**
 ```php
-    'filters' => 'snake|slug'
+    'filters' => ['snake', 'slug']
 ```
-- `userAccount.myProfile` gives `user-account/my-profile` route name
+- `userAccount.myProfile` gives `user-account.my-profile` route name
 - `userAccount.myProfile` gives `/user-account/my-profile` url
 
 **Example**
 ```php
-    'spearator' => '~'
+    'separator' => '~'
     'route_name' => '{ctrl}--{action}',
     'filters' => 'snake'
 ```
-- `userAccount.myProfile` gives `user_account--my_profile` route name
-- `userAccount.myProfile` gives `/user_account/my_profile` url
+- `userAccount~myProfile` gives `user_account--my_profile` route name
+- `userAccount~myProfile` gives `/user_account/my_profile` url
 

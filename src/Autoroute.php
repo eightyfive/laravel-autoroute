@@ -14,7 +14,7 @@ class Autoroute {
     protected $defaults = [
         'ignore_index' => true,
         'separator' => '.',
-        'route_name' => '{ctrl}/{action}',
+        'route_name' => '{ctrl}.{action}',
         'filters' => ['snake', 'slug']
     ];
 
