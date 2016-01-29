@@ -26,7 +26,7 @@ Declare your routes in `config/autoroute.php`:
     ]
 ```
 
-Then register them in normal `app/Http/routes.php`:
+Then register them as normal in `app/Http/routes.php`:
 ```php
 Route::group(['middleware' => ['web']], function () {
     app('autoroute')->make();
@@ -39,7 +39,7 @@ Each route is represented by an array of this form:
 ```php
     [$url, $ctrl, $verb, $name]
 ```
-You can omit `$verb` and pass a custom route `$name` of yours directly instead:
+You can omit `$verb` and pass a custom route `$name` directly instead:
 ```php
     [$url, $ctrl, $name]
 ```
@@ -50,15 +50,15 @@ _Notes_:
 2. `index` keyword in `$ctrl` is ignored by default (See examples & "Options")
 3. **Caveat**: if you don't pass `$verb`, but do pass a custom route `$name` of yours as the third parameter, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
 
-### Controller (`$ctrl`) format
-`$ctrl` is of form: `{ctrl}.{action}`. Ex: `index.contact`.
+### Controller format
+`$ctrl` variable is of form: `{ctrl}.{action}`. Ex: `index.contact`.
 
 **Note**: This is configurable. See "Options".
 
-### Generated "real"controller string
-Behind the scene it will be transformed to normal Laravel controller string: `IndexController@contact`.
+**Generated controller string**
+Behind the scene it will be transformed into the normal Laravel controller string: `IndexController@contact`.
 
-### Generated route name
+**Generated route name**
 Autoroute will also generate a default route _name_ for you if not passed: `index.contact`.
 
 ## Constraints
