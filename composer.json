@@ -1,5 +1,21 @@
 {
+    "name": "eightyfive/laravel-autoroute",
+    "description": "Laravel routes helper",
+    "license": "None",
+    "authors": [
+        {
+            "name": "Benoit Sagols",
+            "email": "benoit.sagols@gmail.com"
+        }
+    ],
     "require": {
         "illuminate/support": "^5.2"
     }
+    "autoload": {
+        "psr-4": {
+            "Eyf\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
