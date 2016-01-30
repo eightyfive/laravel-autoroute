@@ -47,7 +47,7 @@ You can omit `$verb` and pass a custom route `$name` directly instead:
 _Notes_:
 
 1. `$url` is always required. Pass `null` if you want Autoroute to auto-generate the url based on `$ctrl`
-2. `index` keyword in `$ctrl` is ignored by default (See examples & "Options")
+2. `index` keyword in `$ctrl` is ignored by default (See [examples](#examples) & [options](#options))
 3. **Caveat**: if you don't pass `$verb`, but do pass a custom route `$name` of yours as the third parameter, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
 
 ### Controller format
@@ -61,7 +61,7 @@ Behind the scene it will be transformed into the normal Laravel controller strin
 
 Autoroute will also generate a default route _name_ for you if not passed: `index.contact`.
 
-**All of this is configurable. See "Options"**
+**All of this is configurable.** See [options](#options)
 
 ## Constraints
 Constraints are used to match [route parameters](https://laravel.com/docs/5.2/routing#route-parameters) against regular expressions.
@@ -79,7 +79,7 @@ __Note__: Every route parameter _must_ have a constraint defined. If not Autorou
 
 ## Examples
 
-**All examples illustrate the default options**. See "Options" for alternatives.
+**All examples illustrate the default options**. See [options](#options) for alternatives.
 
 ### Simplest route
 ```php
