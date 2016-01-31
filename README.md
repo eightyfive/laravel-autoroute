@@ -60,7 +60,7 @@ Behind the scene it will be transformed into the normal Laravel controller strin
 
 Autoroute will also generate a default route _name_ for you if not passed: `index.contact`.
 
-**All of this is configurable.** See [options](#options)
+**All of this is configurable.** See [options](#options).
 
 #### Specify custom pathname
 In order to specify a custom pathname and bypass default Autoroute pathname generation, pass the `$ctrl` parameter as key / value:
