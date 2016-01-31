@@ -70,7 +70,7 @@ Autoroute will also generate a default route _name_ for you if not passed: `user
 In order to specify a custom pathname and bypass default Autoroute pathname generation, pass the `$ctrl` parameter as key / value:
 
 ```
-    ['user.account' => 'my/profile'] // instead of generated: 'user/account' pathname
+    ['user.profile' => 'my/profile-page'] // instead of generated: 'user/profile' pathname
 ```
 
 ## Constraints
