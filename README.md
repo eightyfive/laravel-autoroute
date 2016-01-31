@@ -80,7 +80,7 @@ Constraints are used to match [route parameters](https://laravel.com/docs/5.2/ro
 ```php
     'constraints' => [
         'id' => '\d+',
-        'hotel_name' => '[\w-]+',
+        'username' => '[\w-]+',
         ...
     ]
 ```
