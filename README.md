@@ -19,10 +19,10 @@ Then run `php artisan vendor:publish` in order to copy `autoroute.php` config in
 Declare your routes in `config/autoroute.php`:
 ```php
     'routes' => [
-        [null, 'index.contact'],
-        [null, 'index.homePage', 'home'],
-        ['/login', 'auth.login'],
-        ['/login', 'auth.login', 'POST']
+        ['index.contact'],
+        ['index.homePage', 'home'], // custom route name
+        ['auth.login' => '/login', 'login'], // custom pathname & route name
+        ['auth.login' => '/login', 'POST'] // POST request...
     ]
 ```
 
@@ -37,18 +37,17 @@ Route::group(['middleware' => ['web']], function () {
 
 Each route is represented by an array of this form:
 ```php
-    [$url, $ctrl, $verb, $name]
+    [$ctrl, $verb, $name]
 ```
-You can omit `$verb` and pass a custom route `$name` directly instead:
+You can omit the `$verb` and pass directly a custom route `$name` instead:
 ```php
-    [$url, $ctrl, $name]
+    [$ctrl, $name]
 ```
 
 _Notes_:
 
-1. `$url` is always required. Pass `null` if you want Autoroute to auto-generate the url based on `$ctrl`
-2. `index` keyword in `$ctrl` is ignored by default (See [examples](#examples) & [options](#options))
-3. **Caveat**: if you don't pass `$verb`, but do pass a custom route `$name` of yours as the third parameter, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
+1. `index` keyword in `$ctrl` is ignored by default (See [examples](#examples) & [options](#options))
+2. **Caveat**: if you don't pass `$verb`, but do pass a custom route `$name` instead, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
 
 ### Controller format
 `$ctrl` variable is of form: `{ctrl}.{action}`. Ex: `index.contact`.
@@ -62,6 +61,13 @@ Behind the scene it will be transformed into the normal Laravel controller strin
 Autoroute will also generate a default route _name_ for you if not passed: `index.contact`.
 
 **All of this is configurable.** See [options](#options)
+
+#### Specify custom pathname
+In order to specify a custom pathname and bypass default Autoroute pathname generation, pass the `$ctrl` parameter as key / value:
+
+```
+    ['user.account' => 'my/profile'] // instead of generated: 'user/account' pathname
+```
 
 ## Constraints
 Constraints are used to match [route parameters](https://laravel.com/docs/5.2/routing#route-parameters) against regular expressions.
@@ -83,17 +89,17 @@ __Note__: Every route parameter _must_ have a constraint defined. If not Autorou
 
 ### Simplest route
 ```php
-    [null, 'index.contact']
+    ['index.contact']
 ```
 Will generate:
 - `IndexController@contact` (controller)
 - `index.contact` (route name)
 - `get` (verb)
-- `/contact` (url) - `index` has been ignored
+- `contact` (pathname) - `index` has been ignored
 
-### Route with custom `url`
+### Route with custom `pathname`
 ```php
-    ['/contact-us', 'index.contact']
+    ['index.contact' => '/contact-us']
 ```
 Will generate:
 - Same as above
@@ -101,7 +107,7 @@ Will generate:
 
 ### Route with custom `name`
 ```php
-    [null, 'index.contact', 'contact_us']
+    ['index.contact', 'contact_us']
 ```
 Will generate:
 - Same as first example
@@ -109,71 +115,71 @@ Will generate:
 
 ### `POST` route
 ```php
-    [null, 'auth.login', 'POST']
+    ['auth.login', 'POST']
 ```
 Will generate:
 - `AuthController@login`
 - `auth.login`
 - `post`
-- `/auth/login`
+- `auth/login`
 
 
 ### `match` route
 ```php
-    [null, 'auth.login', ['get', 'POST']]
+    ['auth.login', ['get', 'POST']]
 ```
 Will generate:
 - `AuthController@login`
 - `auth.login`
 - `get`, `post`
-- `/auth/login`
+- `auth/login`
 
 ### Route with namespace
 ```php
-    [null, 'auth.auth.register']
+    ['auth.auth.register']
 ```
 Will generate:
 - `Auth\\AuthController@login`
 - `auth.register` - namespace has been ignored
 - `get`
-- `/auth/register` - namespace has been ignored
+- `auth/register` - namespace has been ignored
 
 ### Route with camelCase `ctrl`
 ```php
-    [null, 'auth.facebookCallback']
+    ['auth.facebookCallback']
 ```
 Will generate:
 - `AuthController@facebookCallback`
 - `auth.facebook-callback`
 - `get`
-- `/auth/facebook-callback`
+- `auth/facebook-callback`
 
 ```php
-    [null, 'userAccount.myProfile']
+    ['userAccount.myProfile']
 ```
 Will generate:
 - `UserAccountController@myProfile`
 - `user-account.my-profile`
 - `get`
-- `/user-account/my-profile`
+- `user-account/my-profile`
 
 ## Options
 ### `ignore_index` option
-Whethers or not to ignore `index` keyword when generating `url`.
+Whethers or not to ignore `index` keyword when generating `pathname`.
 
 **Default**
 ```php
-    'ingnore_index' => true,
+    'ignore_index' => true,
 ```
-- `index.contact` gives `/contact` url
-- `auth/index` gives `/auth` url
+- `index.contact` gives `contact` pathname
+- `auth.index` gives `auth` pathname
 
 **Example**
 ```php
-    'ingnore_index' => false,
+    'ignore_index' => false,
 ```
-- `index.contact` gives `/index/contact` url
-- `auth.index` gives `/auth/index` url
+- `index.contact` gives `index/contact` pathname
+- `auth.index` gives `auth/index` pathname
 
 ### `separator` option
 You can specify the separtor to use in order to [`explode`](http://php.net/manual/en/function.explode.php) the `$ctrl` string.
@@ -220,7 +226,7 @@ The `filters` option holds a set of filters to apply to both `{ctrl}` and `{acti
     'filters' => ['snake', 'slug']
 ```
 - `userAccount.myProfile` gives `user-account.my-profile` route name
-- `userAccount.myProfile` gives `/user-account/my-profile` url
+- `userAccount.myProfile` gives `user-account/my-profile` pathname
 
 **Example**
 ```php
@@ -229,5 +235,5 @@ The `filters` option holds a set of filters to apply to both `{ctrl}` and `{acti
     'filters' => 'snake'
 ```
 - `userAccount~myProfile` gives `user_account--my_profile` route name
-- `userAccount~myProfile` gives `/user_account/my_profile` url
+- `userAccount~myProfile` gives `user_account/my_profile` pathname
 

@@ -6,7 +6,7 @@ use Illuminate\Support\Str;
 
 class Autoroute {
 
-    const VERB = '/^(get|post|put|delete|any)$/i';
+    const IS_VERB = '/^(get|post|put|delete|any)$/i';
 
     protected $router;
     protected $routes;
@@ -35,36 +35,34 @@ class Autoroute {
     {
         $routes = [];
         foreach ($this->routes as $route) {
+            $ctrl = key($route);
+
+            if (is_string($ctrl)) {
+                $pathname = current($route);
+            } else {
+                $ctrl = current($route);
+                $pathname = null;
+            }
+            array_shift($route);
+            array_unshift($route, $ctrl, $pathname);
+
             $routes[] = call_user_func_array([$this, 'makeRoute'], $route);
         }
         return $routes;
     }
 
-    public function makeRoute($ctrl, $url = null, $verb = null, $name = null)
+    public function makeRoute($ctrl, $pathname, $verb = null, $name = null)
     {
-        // 3 arguments: is $verb the $url ?
-        if ($verb && preg_match(Autoroute::VERB, $verb) !== 1) {
-            $name = $verb;
-            $verb = null;
-        }
-
-        // 2 arguments: is $url the $verb ?
-        if ($url && preg_match(Autoroute::VERB, $url) === 1) {
-            $verb = $url;
-            $url = null;
-        }
-
         if ($verb) {
             if (is_array($verb)) {
                 $match = $verb;
+            } else if (preg_match(Autoroute::IS_VERB, $verb) === 1) {
+                // Normalize $verb
+                $verb = strtolower($verb);
             } else {
-                if (1 === preg_match('/^(get|post|put|delete|any)$/i', $verb)) {
-                    $verb = strtolower($verb);
-                } else {
-                    // Verb is the route name
-                    $name = $verb;
-                    $verb = null;
-                }
+                // $verb is the custom Route $name..
+                $name = $verb;
+                $verb = null;
             }
         }
 
@@ -76,23 +74,25 @@ class Autoroute {
 
         $controller = $this->getController($ctrl, $action, $namespace);
 
-        if (!$url) {
-            $url = $this->getPath($ctrl, $action);
+        if (!$pathname) {
+            $pathname = $this->getPath($ctrl, $action);
         }
         if (!$name) {
             $name = $this->getRouteName($ctrl, $action);
         }
 
+        // dd($ctrl, $pathname, $verb, $name);
+
         if (isset($match)) {
-            $route = call_user_func([$this->router, 'match'], $match, $url, $controller);
+            $route = call_user_func([$this->router, 'match'], $match, $pathname, $controller);
         } else {
-            $route = call_user_func([$this->router, $verb], $url, $controller);
+            $route = call_user_func([$this->router, $verb], $pathname, $controller);
         }
         $route->name($name);
 
         // Requirements
         $params = [];
-        $found = preg_match_all("/\{\w+\}/", $url, $params);
+        $found = preg_match_all("/\{\w+\}/", $pathname, $params);
         if ($found && $found > 0) {
             $params = array_map(function($key) {
                 return trim($key, '{}');
@@ -128,16 +128,16 @@ class Autoroute {
 
     protected function getPath($ctrl, $action)
     {
-        $url = [$ctrl, $action];
+        $pathname = [$ctrl, $action];
         if ($this->options['ignore_index']) {
             if ($ctrl === 'index') {
-                array_shift($url);
+                array_shift($pathname);
             }
             if ($action === 'index') {
-                array_shift($url);
+                array_shift($pathname);
             }
         }
-        return '/'.implode('/', $url);
+        return implode('/', $pathname);
     }
 
     protected function getRouteName($ctrl, $action)

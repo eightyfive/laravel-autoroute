@@ -15,7 +15,7 @@ class AutorouteServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/config/autoroute.php',
+            __DIR__ . '/../config/autoroute.php',
             'autoroute'
         );
 
