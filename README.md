@@ -50,7 +50,7 @@ _Notes_:
 2. **Caveat**: if you don't pass `$verb`, but do pass a custom route `$name` instead, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
 
 ### Controller format
-`$ctrl` variable is of form: `{ctrl}.{action}`. Ex: `user.profile`.
+`$ctrl` parameter is of form: `{ctrl}.{action}`. Ex: `user.profile`.
 
 **Generated controller string**
 
