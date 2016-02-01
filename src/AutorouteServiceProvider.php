@@ -33,7 +33,7 @@ class AutorouteServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__ . '/config/autoroute.php' => config_path('autoroute.php')
+            __DIR__ . '/../config/autoroute.php' => config_path('autoroute.php')
         ]);
     }
 
