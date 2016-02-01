@@ -2,6 +2,8 @@
 ## Introduction
 Autoroute is a simple helper for registering Laravel routes in a more concise way.
 
+"La route? Là où on va on a pas besoin.. De route."
+
 ### Install
 ```
 composer require eightyfive/laravel-autoroute
