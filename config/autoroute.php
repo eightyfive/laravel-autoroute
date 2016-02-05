@@ -2,7 +2,7 @@
 
 return [
     'routes' => [
-        // [null, 'index.home']
+        // ['index.index'] // Ex: home..
     ],
 
     'constraints' => [
@@ -10,7 +10,19 @@ return [
     ],
 
     'options' => [
-        // 'separator' => '.',
-        // 'route_name' => '{ctrl}.{action}',
+        // All defaults
+        // 'ignore_index' => true,
+        // 'ctrl_separator' => '.',
+        // 'route_separator' => '.',
+        // 'filters' => ['snake', 'slug'],
+        // 'resource_names' => [
+        //     'index'   => true,
+        //     'create'  => true,
+        //     'store'   => true,
+        //     'show'    => true,
+        //     'edit'    => true,
+        //     'update'  => true,
+        //     'destroy' => true
+        // ]
     ],
 ];
