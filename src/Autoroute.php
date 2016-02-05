@@ -270,8 +270,9 @@ class Autoroute {
         $action = $this->transformName($action);
         $sep    = $this->options['route_separator'];
 
+        $route = "{$ctrl}{$sep}{$action}";
         if (!count($namespace)) {
-            return "{$ctrl}{$sep}{$action}";
+            return $route;
         }
 
         $autoroute = $this;
