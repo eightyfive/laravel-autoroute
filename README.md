@@ -47,28 +47,15 @@ _Notes_:
 1. `index` keyword in `$ctrl` is ignored by default (See [examples](#examples) & [options](#options))
 2. **Caveat**: if you don't pass `$verb`, but do pass a custom route `$name` instead, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
 
-### Controller format
-`$ctrl` parameter is of form: `{ctrl}.{action}`.
+### `$ctrl` format
+`$ctrl` parameter is a string of form: `{controller}.{action}`.
 
-- Ex: `user.profile`
+Based on that string, Autoroute will generate the normal Laravel controller string and, if not passed, it will also generate a default route name & pathname for you.
 
-**Generated controller string**
-
-Behind the scene it will be transformed into the normal Laravel controller string:
-
-- `UserController@profile`
-
-**Generated pathname**
-
-Autoroute will generate a simple pathname based on `$ctrl` string:
-
-- `user/profile`
-
-**Generated route name**
-
-Autoroute will also generate a default route _name_ for you if not passed:
-
-- `user.profile`
+- Ex: `$ctrl = 'user.profile'`
+- `UserController@profile` – Laravel controller string
+- `user.profile` – Default route name
+- `user/profile` – Default pathname
 
 **All of this is configurable.** See [options](#options).
 
