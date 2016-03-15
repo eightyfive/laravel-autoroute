@@ -148,6 +148,11 @@ class Autoroute {
             $pathname = $controller;
         }
 
+        $autoroute = $this;
+        $pathname = array_map(function($str) use ($autoroute) {
+            return $autoroute->transformName($str);
+        }, $pathname);
+
         return implode('/', $pathname);
     }
 
