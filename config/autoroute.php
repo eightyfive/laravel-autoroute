@@ -1,10 +1,6 @@
 <?php
 
 return [
-    'routes' => [
-        // ['index.index'] // Ex: home..
-    ],
-
     'constraints' => [
         // 'id' => '\d+', // Ex.
     ],

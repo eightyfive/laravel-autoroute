@@ -18,20 +18,16 @@ Then add the Service Provider in your `config/app.php` file:
 Then run `php artisan vendor:publish` in order to copy `autoroute.php` config in your project.
 
 ### State of the art
-Declare your routes in `config/autoroute.php`:
+Register your routes as normal in `app/Http/routes.php`:
+
 ```php
-    'routes' => [
+Route::group(['middleware' => ['web']], function () {
+    app('autoroute')->make([
         ['index.contact'],
         ['index.homePage', 'home'], // custom route name
         ['auth.login' => '/login', 'login'], // custom pathname & route name
         ['auth.login' => '/login', 'POST'] // POST request...
-    ]
-```
-
-Then register them as normal in `app/Http/routes.php`:
-```php
-Route::group(['middleware' => ['web']], function () {
-    app('autoroute')->make();
+    ]);
     ...
 ```
 
@@ -60,7 +56,7 @@ Behind the scene it will be transformed into the normal Laravel controller strin
 
 **Generated pathname**
 
-Autoroute will generate a simple pathname based on `$ctrl` string: `user/profile`
+Autoroute will generate a simple pathname based on `$ctrl` string: `user/profile`.
 
 **Generated route name**
 
@@ -109,7 +105,7 @@ Will generate:
 ```
 Will generate:
 - Same as above
-- `/contact-us`
+- But with `contact-us` as pathname
 
 ### Route with custom `name`
 ```php
@@ -125,7 +121,7 @@ Will generate:
 ```
 Will generate:
 - `AuthController@login`
-- `auth.login`
+- `auth.login` (route name)
 - `post`
 - `auth/login`
 
@@ -146,9 +142,14 @@ Will generate:
 ```
 Will generate:
 - `Auth\\AuthController@login`
-- `auth.register` - namespace has been ignored
+- `auth.auth.register`
 - `get`
-- `auth/register` - namespace has been ignored
+- `auth/auth/register`
+
+In order to avoid `auth` keyword repetition:
+```php
+    ['auth.auth.register' => 'auth/register', 'auth.register']
+```
 
 ### Route with camelCase `ctrl`
 ```php
@@ -156,7 +157,7 @@ Will generate:
 ```
 Will generate:
 - `AuthController@facebookCallback`
-- `auth.facebook-callback`
+- `auth.facebook-callback` (route name)
 - `get`
 - `auth/facebook-callback`
 
@@ -165,13 +166,13 @@ Will generate:
 ```
 Will generate:
 - `UserAccountController@myProfile`
-- `user-account.my-profile`
+- `user-account.my-profile` (route name)
 - `get`
 - `user-account/my-profile`
 
 ## Options
 ### `ignore_index` option
-Whethers or not to ignore `index` keyword when generating `pathname`.
+Whether or not to ignore then `index` keyword when generating `pathname`.
 
 **Default**
 ```php
@@ -187,39 +188,40 @@ Whethers or not to ignore `index` keyword when generating `pathname`.
 - `index.contact` gives `index/contact` pathname
 - `auth.index` gives `auth/index` pathname
 
-### `separator` option
+### `ctrl_separator` option
 You can specify the separtor to use in order to [`explode`](http://php.net/manual/en/function.explode.php) the `$ctrl` string.
 
 **Default**
 ```php
-    'separator' => '.',
+    'ctrl_separator' => '.',
 ```
 - `index.contact`
 
 **Example**
 ```php
-    'separator' => '->',
+    'ctrl_separator' => '->',
 ```
 - `index->contact`
 
-### `route_name` option
-The `route_name` option tells how to format the _route name_.
+### `route_separator` option
+You can specify the separtor to use when generating the route name.
 
 **Default**
 ```php
-    'route_name' => '{ctrl}.{action}',
+    'ctrl_separator' => '.',
+    'route_separator' => '.',
 ```
-- `auth.login` gives `auth.login` route name
+- `index.contact` gives 'index.contact' route name
 
 **Example**
 ```php
-    'separator' => '>',
-    'route_name' => '{ctrl}/{action}',
+    'ctrl_separator' => '->',
+    'route_separator' => '--',
 ```
-- `auth>login` gives `auth/login` route name
+- `index->contact` gives 'index--contact' route name
 
 ### `filters` options
-The `filters` option holds a set of filters to apply to both `{ctrl}` and `{action}`.
+The `filters` option holds a set of filters to apply to every segment of a `$ctrl` string (namespace, controller, action) when generating route names.
 
 **Possible values**
 - `slug`
@@ -236,9 +238,9 @@ The `filters` option holds a set of filters to apply to both `{ctrl}` and `{acti
 
 **Example**
 ```php
-    'separator' => '~'
-    'route_name' => '{ctrl}--{action}',
-    'filters' => 'snake'
+    'ctrl_separator' => '~'
+    'route_separator' => '{ctrl}--{action}',
+    'filters' => ['snake']
 ```
 - `userAccount~myProfile` gives `user_account--my_profile` route name
 - `userAccount~myProfile` gives `user_account/my_profile` pathname
