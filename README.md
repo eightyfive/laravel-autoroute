@@ -43,6 +43,9 @@ You can omit the `$verb` and pass directly a custom route `$name` instead:
     [$ctrl, $name]
 ```
 
+_Notes_:
+- **Caveat**: if you don't pass `$verb`, but do pass a custom route `$name` instead, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
+
 In order to specify a custom pathname and bypass default Autoroute pathname generation, pass the `$ctrl` parameter as key / value:
 ```
     [$ctrl => $pathname, $verb, $name]
@@ -52,9 +55,6 @@ And you can still omit `$verb`:
 ```
     [$ctrl => $pathname, $name]
 ```
-
-_Notes_:
-- **Caveat**: if you don't pass `$verb`, but do pass a custom route `$name` instead, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
 
 ### `$ctrl` format
 `$ctrl` parameter is a string of form: `{controller}.{action}`.
