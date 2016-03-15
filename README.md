@@ -67,7 +67,6 @@ Based on that string, Autoroute will generate the normal Laravel controller stri
 - `user/profile` – Default pathname
 
 _Notes_:
-
 - `index` keyword in `$ctrl` is ignored by default (See [examples](#examples) & [options](#options))
 
 **All of this is configurable.** See [options](#options).
