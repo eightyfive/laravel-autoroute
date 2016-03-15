@@ -48,11 +48,9 @@ In order to specify a custom pathname and bypass default Autoroute pathname gene
     [$ctrl => $pathname, $verb, $name]
 ```
 
-And same combinations as above still stand true:
+And you can still omit `$verb`:
 ```
-    [$ctrl => $pathname, $verb]
     [$ctrl => $pathname, $name]
-    [$ctrl => $pathname]
 ```
 
 _Notes_:
