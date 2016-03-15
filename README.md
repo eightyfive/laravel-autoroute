@@ -52,15 +52,21 @@ _Notes_:
 
 **Generated controller string**
 
-Behind the scene it will be transformed into the normal Laravel controller string: `UserController@profile`.
+Behind the scene it will be transformed into the normal Laravel controller string:
+
+`UserController@profile`
 
 **Generated pathname**
 
-Autoroute will generate a simple pathname based on `$ctrl` string: `user/profile`.
+Autoroute will generate a simple pathname based on `$ctrl` string:
+
+`user/profile`
 
 **Generated route name**
 
-Autoroute will also generate a default route _name_ for you if not passed: `user.profile`.
+Autoroute will also generate a default route _name_ for you if not passed:
+
+`user.profile`
 
 **All of this is configurable.** See [options](#options).
 
