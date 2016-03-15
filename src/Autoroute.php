@@ -16,6 +16,7 @@ class Autoroute {
         'ctrl_separator' => '.',
         'route_separator' => '.',
         'ignore_index' => true,
+        'resource_namespaces' => [],
         'filters' => ['snake', 'slug'],
         'resource_names' => [
             'index'   => true,
@@ -102,24 +103,32 @@ class Autoroute {
         $controller = explode($this->options['ctrl_separator'], $ctrl);
         $controllerStr = $this->getControllerString($controller, true);
 
-        $resource = array_pop($controller);
-        $namespace = implode('.', $controller);
+        $namespaces = $this->options['resource_namespaces'];
+        $resource = $controller;
+        foreach ($namespaces as $namespace) {
+            $res = array_slice($resource, 0, count($namespace));
+            if ($res === $namespace) {
+                $resource = array_slice($resource, count($namespace));
+                break;
+            }
+        }
 
+        $resource = implode('.', $resource);
         if (!array_key_exists('names', $options)) {
-            $options['names'] = $this->getResourceNames($resource, $namespace);
+            $options['names'] = $this->getResourceNames($resource, $controller);
         }
 
         return $this->router->resource($resource, $controllerStr, $options);
     }
 
-    public function getResourceNames($resource, $namespace)
+    public function getResourceNames($resource, $controller)
     {
         $names = [];
         foreach ($this->options['resource_names'] as $key => $name) {
             if ($name === true) {
                 $name = $key;
             }
-            $names[$key] = implode('.', [$namespace, $resource, $name]);
+            $names[$key] = implode($this->options['route_separator'], array_merge($controller, [$name]));
         }
         return $names;
     }

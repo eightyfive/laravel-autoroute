@@ -11,6 +11,9 @@ return [
         // 'ctrl_separator' => '.',
         // 'route_separator' => '.',
         // 'filters' => ['snake', 'slug'],
+        // 'resource_namespaces' => [
+        //     [],
+        // ]
         // 'resource_names' => [
         //     'index'   => true,
         //     'create'  => true,
