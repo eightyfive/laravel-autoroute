@@ -49,22 +49,26 @@ _Notes_:
 
 ### Controller format
 `$ctrl` parameter is of form: `{ctrl}.{action}`.
+
 Ex: `user.profile`
 
 **Generated controller string**
 
 Behind the scene it will be transformed into the normal Laravel controller string:
-`UserController@profile`
+
+Ex: `UserController@profile`
 
 **Generated pathname**
 
 Autoroute will generate a simple pathname based on `$ctrl` string:
-`user/profile`
+
+Ex: `user/profile`
 
 **Generated route name**
 
 Autoroute will also generate a default route _name_ for you if not passed:
-`user.profile`
+
+Ex: `user.profile`
 
 **All of this is configurable.** See [options](#options).
 
