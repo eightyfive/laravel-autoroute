@@ -31,7 +31,7 @@ Route::group(['middleware' => ['web']], function () {
     ...
 ```
 
-## Routes
+## Route format
 
 Each route is represented by an array of this form:
 ```php
