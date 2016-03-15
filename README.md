@@ -66,10 +66,10 @@ Based on that string, Autoroute will generate the normal Laravel controller stri
 - `user.profile` – Default route name
 - `user/profile` – Default pathname
 
+**All of this is configurable.** See [options](#options).
+
 _Notes_:
 - `index` keyword in `$ctrl` is ignored by default (See [examples](#examples) & [options](#options))
-
-**All of this is configurable.** See [options](#options).
 
 ## Constraints
 Constraints are used to match [route parameters](https://laravel.com/docs/5.2/routing#route-parameters) against regular expressions.
