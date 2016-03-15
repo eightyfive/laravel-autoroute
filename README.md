@@ -172,7 +172,7 @@ Will generate:
 
 ## Options
 ### `ignore_index` option
-Whether or not to ignore then `index` keyword when generating `pathname`.
+Whether or not to ignore the `index` keyword when generating `pathname`.
 
 **Default**
 ```php
@@ -211,14 +211,14 @@ You can specify the separtor to use when generating the route name.
     'ctrl_separator' => '.',
     'route_separator' => '.',
 ```
-- `index.contact` gives 'index.contact' route name
+- `index.contact` gives `index.contact` route name
 
 **Example**
 ```php
     'ctrl_separator' => '->',
     'route_separator' => '--',
 ```
-- `index->contact` gives 'index--contact' route name
+- `index->contact` gives `index--contact` route name
 
 ### `filters` options
 The `filters` option holds a set of filters to apply to every segment of a `$ctrl` string (namespace, controller, action) when generating route names.
@@ -239,7 +239,7 @@ The `filters` option holds a set of filters to apply to every segment of a `$ctr
 **Example**
 ```php
     'ctrl_separator' => '~'
-    'route_separator' => '{ctrl}--{action}',
+    'route_separator' => '--',
     'filters' => ['snake']
 ```
 - `userAccount~myProfile` gives `user_account--my_profile` route name
