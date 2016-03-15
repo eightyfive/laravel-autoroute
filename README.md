@@ -37,15 +37,19 @@ Each route is represented by an array of this form:
 ```php
     [$ctrl, $verb, $name]
 ```
+
 You can omit the `$verb` and pass directly a custom route `$name` instead:
 ```php
     [$ctrl, $name]
 ```
 
-_Notes_:
+In order to specify a custom pathname and bypass default Autoroute pathname generation, pass the `$ctrl` parameter as key / value:
+```
+    [$ctrl => $pathname, $verb, $name]
+```
 
-1. `index` keyword in `$ctrl` is ignored by default (See [examples](#examples) & [options](#options))
-2. **Caveat**: if you don't pass `$verb`, but do pass a custom route `$name` instead, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
+_Notes_:
+- **Caveat**: if you don't pass `$verb`, but do pass a custom route `$name` instead, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
 
 ### `$ctrl` format
 `$ctrl` parameter is a string of form: `{controller}.{action}`.
@@ -59,12 +63,9 @@ Based on that string, Autoroute will generate the normal Laravel controller stri
 
 **All of this is configurable.** See [options](#options).
 
-#### Specify a custom pathname
-In order to specify a custom pathname and bypass default Autoroute pathname generation, pass the `$ctrl` parameter as key / value:
+_Notes_:
 
-```
-    ['user.profile' => 'my/profile-page'] // instead of generated: 'user/profile' pathname
-```
+- `index` keyword in `$ctrl` is ignored by default (See [examples](#examples) & [options](#options))
 
 ## Constraints
 Constraints are used to match [route parameters](https://laravel.com/docs/5.2/routing#route-parameters) against regular expressions.
