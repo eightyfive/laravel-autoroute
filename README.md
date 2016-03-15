@@ -46,7 +46,9 @@ You can omit the `$verb` and pass directly a custom route `$name` instead:
 In order to specify a custom pathname and bypass default Autoroute pathname generation, pass the `$ctrl` parameter as key / value:
 ```
     [$ctrl => $pathname, $verb, $name]
-    [$ctrl => $pathname, $name] // Alternatively
+    [$ctrl => $pathname, $verb]
+    [$ctrl => $pathname, $name]
+    [$ctrl => $pathname]
 ```
 
 _Notes_:
