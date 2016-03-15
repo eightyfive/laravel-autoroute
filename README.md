@@ -43,8 +43,7 @@ You can omit the `$verb` and pass directly a custom route `$name` instead:
     [$ctrl, $name]
 ```
 
-_Notes_:
-- **Caveat**: if you don't pass `$verb`, but do pass a custom route `$name` instead, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
+__Caveat__: if you don't pass `$verb`, but do pass a custom route `$name` instead, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
 
 In order to specify a custom pathname and bypass default Autoroute pathname generation, pass the `$ctrl` parameter as key / value:
 ```
@@ -68,8 +67,7 @@ Based on that string, Autoroute will generate the normal Laravel controller stri
 
 **All of this is configurable.** See [options](#options).
 
-_Notes_:
-- `index` keyword in `$ctrl` is ignored by default (See [examples](#examples) & [options](#options))
+__Note__: `index` keyword in `$ctrl` is ignored by default (See [examples](#examples) & [options](#options))
 
 ## Constraints
 Constraints are used to match [route parameters](https://laravel.com/docs/5.2/routing#route-parameters) against regular expressions.
