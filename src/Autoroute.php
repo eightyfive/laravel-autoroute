@@ -135,13 +135,14 @@ class Autoroute {
 
     protected function getControllerString($controller, $isResource = false)
     {
+        if (!$isResource) {
+            $action = array_pop($controller);
+        }
+
         $controller = array_map(function($segment) {
             return ucfirst($segment);
         }, $controller);
 
-        if (!$isResource) {
-            $action = array_pop($controller);
-        }
         $controller = implode('\\', $controller).'Controller';
 
         return isset($action) ? $controller.'@'.$action : $controller;
