@@ -221,6 +221,10 @@ class Autoroute {
                 $name = $verb;
                 $verb = null;
             }
+
+            if (isset($verb) && $verb !== 'resource' && !$name && isset($route[2])) {
+                $name = $route[2];
+            }
         }
 
         if (!$verb) {
