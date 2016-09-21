@@ -16,7 +16,7 @@ class Autoroute {
         'ctrl_separator' => '.',
         'route_separator' => '.',
         'ignore_index' => true,
-        'resource_namespaces' => [],
+        'prefix_resource' => true,
         'filters' => ['snake', 'slug'],
         'resource_names' => [
             'index'   => true,
@@ -57,15 +57,21 @@ class Autoroute {
 
     protected function makeRoute($ctrl, $pathname, $verb, $name, $options)
     {
+        $prefix = trim($this->router->getLastGroupPrefix(), '/');
+        $prefix = explode('/', $prefix);
+        $prefix = array_filter($prefix, function ($segment) {
+            return strpos($segment, '{') === false;
+        });
+
         if ($verb === 'resource') {
-            return $this->makeResourceRoute($ctrl, $options);
+            return $this->makeResourceRoute($ctrl, $options, $prefix);
         }
 
         $controller = explode($this->options['ctrl_separator'], $ctrl);
         $controllerStr = $this->getControllerString($controller);
 
         if (!$pathname) {
-            $pathname = $this->getPathname($controller);
+            $pathname = $this->getPathname($controller, $prefix);
         }
         if (!$name) {
             $name = $this->getRouteName($controller);
@@ -88,33 +94,30 @@ class Autoroute {
 
             $where = [];
             foreach ($params as $key) {
-                if (!isset($this->constraints[$key])) {
-                    throw new \Exception("Requirement not found for '{$key}'");
+                if (isset($this->constraints[$key])) {
+                    $where[$key] = $this->constraints[$key];
                 }
-                $where[$key] = $this->constraints[$key];
             }
             $route->where($where);
         }
         return $route;
     }
 
-    protected function makeResourceRoute($ctrl, $options)
+    protected function makeResourceRoute($ctrl, $options, array $prefix)
     {
         $controller = explode($this->options['ctrl_separator'], $ctrl);
         $controllerStr = $this->getControllerString($controller, true);
 
-        $namespaces = $this->options['resource_namespaces'];
-        $resource = $controller;
-        foreach ($namespaces as $namespace) {
-            $res = array_slice($resource, 0, count($namespace));
-            if ($res === $namespace) {
-                $resource = array_slice($resource, count($namespace));
-                break;
-            }
+        if ($prefix) {
+            $resource = array_filter($controller, function ($segment) use ($prefix) {
+                return !in_array($segment, $prefix);
+            });
+        } else {
+            $resource = $controller;
         }
 
         $resource = implode('.', $resource);
-        if (!array_key_exists('names', $options)) {
+        if (!array_key_exists('names', $options) && $this->options['prefix_resource'] === true) {
             $options['names'] = $this->getResourceNames($resource, $controller);
         }
 
@@ -133,14 +136,14 @@ class Autoroute {
         return $names;
     }
 
-    protected function getControllerString($controller, $isResource = false)
+    protected function getControllerString(array $controller, $isResource = false)
     {
         if (!$isResource) {
             $action = array_pop($controller);
         }
 
         $controller = array_map(function($segment) {
-            return ucfirst($segment);
+            return ucfirst(camel_case($segment));
         }, $controller);
 
         $controller = implode('\\', $controller).'Controller';
@@ -148,7 +151,7 @@ class Autoroute {
         return isset($action) ? $controller.'@'.$action : $controller;
     }
 
-    protected function getPathname($controller)
+    protected function getPathname(array $controller, array $prefix)
     {
         if ($this->options['ignore_index']) {
             $pathname = array_filter($controller, function($str) {
@@ -163,10 +166,16 @@ class Autoroute {
             return $autoroute->transformName($str);
         }, $pathname);
 
+        if ($prefix) {
+            $pathname = array_filter($pathname, function ($segment) use ($prefix) {
+                return !in_array($segment, $prefix);
+            });
+        }
+
         return implode('/', $pathname);
     }
 
-    protected function getRouteName($controller)
+    protected function getRouteName(array $controller)
     {
         $autoroute = $this;
         $controller = array_map(function($str) use ($autoroute) {
