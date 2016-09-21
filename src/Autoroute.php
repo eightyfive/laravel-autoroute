@@ -140,6 +140,7 @@ class Autoroute {
     {
         if (!$isResource) {
             $action = array_pop($controller);
+            $action = camel_case($action);
         }
 
         $controller = array_map(function($segment) {
