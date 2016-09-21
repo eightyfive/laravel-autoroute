@@ -44,6 +44,12 @@ class Autoroute {
 
     public function make(array $definitions)
     {
+        $prefix = trim($this->router->getLastGroupPrefix(), '/');
+        $prefix = explode('/', $prefix);
+        $prefix = array_filter($prefix, function ($segment) {
+            return strpos($segment, '{') === false;
+        });
+
         $routes = [];
         foreach ($definitions as $route) {
             list(
@@ -53,19 +59,13 @@ class Autoroute {
                 $name,
                 $options) = $this->normalizeRoute($route);
 
-            $routes[] = $this->makeRoute($ctrl, $pathname, $verb, $name, $options);
+            $routes[] = $this->makeRoute($ctrl, $pathname, $verb, $name, $options, $prefix);
         }
         return $routes;
     }
 
-    protected function makeRoute($ctrl, $pathname, $verb, $name, $options)
+    protected function makeRoute($ctrl, $pathname, $verb, $name, $options, $prefix)
     {
-        $prefix = trim($this->router->getLastGroupPrefix(), '/');
-        $prefix = explode('/', $prefix);
-        $prefix = array_filter($prefix, function ($segment) {
-            return strpos($segment, '{') === false;
-        });
-
         if ($verb === 'resource') {
             return $this->makeResourceRoute($ctrl, $options, $prefix);
         }
