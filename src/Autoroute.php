@@ -17,7 +17,12 @@ class Autoroute {
         'route_separator' => '.',
         'ignore_index' => true,
         'prefix_resource' => true,
-        'filters' => ['snake', 'slug'],
+        'transform' => [
+            'pathname' => [],
+            'route_name' => [],
+            'controller' => ['camel', 'ucfirst'],
+            'action' => ['camel'],
+        ],
         'resource_names' => [
             'index'   => true,
             'create'  => true,
@@ -34,9 +39,7 @@ class Autoroute {
         $this->router = $router;
         $this->constraints = $constraints;
         $this->options = array_merge($this->defaults, $options);
-        $this->filters = array_filter($this->options['filters'], function($filter) {
-            return in_array($filter, ['slug', 'snake', 'camel']);
-        });
+        $this->transform = $this->options['transform'];
     }
 
     public function make(array $definitions)
@@ -139,12 +142,11 @@ class Autoroute {
     protected function getControllerString(array $controller, $isResource = false)
     {
         if (!$isResource) {
-            $action = array_pop($controller);
-            $action = camel_case($action);
+            $action = $this->applyFilters(array_pop($controller), $this->transform['action']);
         }
 
         $controller = array_map(function($segment) {
-            return ucfirst(camel_case($segment));
+            return $this->applyFilters($segment, $this->transform['controller']);
         }, $controller);
 
         $controller = implode('\\', $controller).'Controller';
@@ -164,7 +166,7 @@ class Autoroute {
 
         $autoroute = $this;
         $pathname = array_map(function($str) use ($autoroute) {
-            return $autoroute->transformName($str);
+            return $autoroute->applyFilters($str, $this->transform['pathname']);
         }, $pathname);
 
         if ($prefix) {
@@ -180,18 +182,18 @@ class Autoroute {
     {
         $autoroute = $this;
         $controller = array_map(function($str) use ($autoroute) {
-            return $autoroute->transformName($str);
+            return $autoroute->applyFilters($str, $this->transform['route_name']);
         }, $controller);
 
         return implode($this->options['route_separator'], $controller);
     }
 
-    protected function transformName($name)
+    protected function applyFilters($str, $filters)
     {
-        foreach ($this->filters as $filter) {
-            $name = call_user_func([Str::class, $filter], $name);
+        foreach ($filters as $filter) {
+            $str = call_user_func([Str::class, $filter], $str);
         }
-        return $name;
+        return $str;
     }
 
     protected function normalizeRoute(array $route)

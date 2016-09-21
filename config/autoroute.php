@@ -7,11 +7,16 @@ return [
 
     'options' => [
         // All defaults
-        // 'ignore_index' => true,
         // 'ctrl_separator' => '.',
         // 'route_separator' => '.',
-        // 'filters' => ['snake', 'slug'],
+        // 'ignore_index' => true,
         // 'prefix_resource' => true,
+        // 'transform' => [
+        //     'pathname' => [],
+        //     'route_name' => [],
+        //     'controller' => ['camel', 'ucfirst'],
+        //     'action' => ['camel'],
+        // ],
         // 'resource_names' => [
         //     'index'   => true,
         //     'create'  => true,
