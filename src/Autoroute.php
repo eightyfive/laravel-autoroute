@@ -9,47 +9,44 @@ class Autoroute {
     const IS_VERB = '/^(get|post|put|delete|any)$/i';
 
     protected $router;
-    protected $constraints;
-    protected $options;
+    protected $resourceNames = ['index', 'create', 'store', 'show', 'edit', 'update', 'destroy'];
 
-    protected $defaults = [
-        'ctrl_separator' => '.',
-        'route_separator' => '.',
-        'ignore_index' => true,
-        'prefix_resource' => true,
-        'transform' => [
-            'pathname' => [],
-            'route_name' => [],
-            'controller' => ['camel', 'ucfirst'],
-            'action' => ['camel'],
-        ],
-        'resource_names' => [
-            'index'   => true,
-            'create'  => true,
-            'store'   => true,
-            'show'    => true,
-            'edit'    => true,
-            'update'  => true,
-            'destroy' => true
-        ]
-    ];
+    protected $ctrlSeparator = '.';
+    protected $routeSeparator = '.';
+    protected $strFilters = ['snake', 'slug'];
+    protected $ignoreIndex = true;
+    protected $pluralizeResource = true;
+    protected $fixResourceNames = true;
+    protected $constraints = [];
 
-    public function __construct(Router $router, array $constraints, $options = [])
-    {
+    public function __construct(Router $router, array $options = []) {
         $this->router = $router;
-        $this->constraints = $constraints;
-        $this->options = array_merge($this->defaults, $options);
-        $this->transform = $this->options['transform'];
+
+        if (isset($options['ctrl_separator'])) {
+            $this->ctrlSeparator = $options['ctrl_separator'];
+        }
+        if (isset($options['route_separator'])) {
+            $this->routeSeparator = $options['route_separator'];
+        }
+        if (isset($options['str_filters'])) {
+            $this->strFilters = $options['str_filters'];
+        }
+        if (isset($options['ignore_index'])) {
+            $this->ignoreIndex = $options['ignore_index'];
+        }
+        if (isset($options['resource_plural'])) {
+            $this->pluralizeResource = $options['resource_plural'];
+        }
+        if (isset($options['resource_names'])) {
+            $this->fixResourceNames = $options['resource_names'];
+        }
+        if (isset($options['constraints'])) {
+            $this->constraints = $options['constraints'];
+        }
     }
 
     public function make(array $definitions)
     {
-        $prefix = trim($this->router->getLastGroupPrefix(), '/');
-        $prefix = explode('/', $prefix);
-        $prefix = array_filter($prefix, function ($segment) {
-            return strpos($segment, '{') === false;
-        });
-
         $routes = [];
         foreach ($definitions as $route) {
             list(
@@ -59,18 +56,24 @@ class Autoroute {
                 $name,
                 $options) = $this->normalizeRoute($route);
 
-            $routes[] = $this->makeRoute($ctrl, $pathname, $verb, $name, $options, $prefix);
+            $routes[] = $this->makeRoute($ctrl, $pathname, $verb, $name, $options);
         }
         return $routes;
     }
 
-    protected function makeRoute($ctrl, $pathname, $verb, $name, $options, $prefix)
+    protected function makeRoute($ctrl, $pathname, $verb, $name, $options)
     {
+        $prefix = trim($this->router->getLastGroupPrefix(), '/');
+        $prefix = explode('/', $prefix);
+        $prefix = array_filter($prefix, function ($segment) {
+            return strpos($segment, '{') === false;
+        });
+
         if ($verb === 'resource') {
             return $this->makeResourceRoute($ctrl, $options, $prefix);
         }
 
-        $controller = explode($this->options['ctrl_separator'], $ctrl);
+        $controller = explode($this->ctrlSeparator, $ctrl);
         $controllerStr = $this->getControllerString($controller);
 
         if (!$pathname) {
@@ -108,7 +111,7 @@ class Autoroute {
 
     protected function makeResourceRoute($ctrl, $options, array $prefix)
     {
-        $controller = explode($this->options['ctrl_separator'], $ctrl);
+        $controller = explode($this->ctrlSeparator, $ctrl);
         $controllerStr = $this->getControllerString($controller, true);
 
         if ($prefix) {
@@ -120,8 +123,12 @@ class Autoroute {
         }
 
         $resource = implode('.', $resource);
-        if (!array_key_exists('names', $options) && $this->options['prefix_resource'] === true) {
+        if (!array_key_exists('names', $options) && $this->fixResourceNames) {
             $options['names'] = $this->getResourceNames($resource, $controller);
+        }
+
+        if ($this->pluralizeResource) {
+            $resource = str_plural($resource);
         }
 
         return $this->router->resource($resource, $controllerStr, $options);
@@ -130,11 +137,11 @@ class Autoroute {
     public function getResourceNames($resource, $controller)
     {
         $names = [];
-        foreach ($this->options['resource_names'] as $key => $name) {
-            if ($name === true) {
-                $name = $key;
-            }
-            $names[$key] = implode($this->options['route_separator'], array_merge($controller, [$name]));
+        foreach ($this->resourceNames as $name) {
+            $names[$name] = implode(
+                $this->routeSeparator,
+                array_merge($controller, [$name])
+            );
         }
         return $names;
     }
@@ -142,11 +149,11 @@ class Autoroute {
     protected function getControllerString(array $controller, $isResource = false)
     {
         if (!$isResource) {
-            $action = $this->applyFilters(array_pop($controller), $this->transform['action']);
+            $action = array_pop($controller);
         }
 
         $controller = array_map(function($segment) {
-            return $this->applyFilters($segment, $this->transform['controller']);
+            return ucfirst(camel_case($segment));
         }, $controller);
 
         $controller = implode('\\', $controller).'Controller';
@@ -156,7 +163,7 @@ class Autoroute {
 
     protected function getPathname(array $controller, array $prefix)
     {
-        if ($this->options['ignore_index']) {
+        if ($this->ignoreIndex) {
             $pathname = array_filter($controller, function($str) {
                 return $str !== 'index';
             });
@@ -166,7 +173,7 @@ class Autoroute {
 
         $autoroute = $this;
         $pathname = array_map(function($str) use ($autoroute) {
-            return $autoroute->applyFilters($str, $this->transform['pathname']);
+            return $autoroute->transformName($str);
         }, $pathname);
 
         if ($prefix) {
@@ -182,18 +189,18 @@ class Autoroute {
     {
         $autoroute = $this;
         $controller = array_map(function($str) use ($autoroute) {
-            return $autoroute->applyFilters($str, $this->transform['route_name']);
+            return $autoroute->transformName($str);
         }, $controller);
 
-        return implode($this->options['route_separator'], $controller);
+        return implode($this->routeSeparator, $controller);
     }
 
-    protected function applyFilters($str, $filters)
+    protected function transformName($name)
     {
-        foreach ($filters as $filter) {
-            $str = call_user_func([Str::class, $filter], $str);
+        foreach ($this->strFilters as $filter) {
+            $name = call_user_func([Str::class, $filter], $name);
         }
-        return $str;
+        return $name;
     }
 
     protected function normalizeRoute(array $route)
