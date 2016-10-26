@@ -128,7 +128,11 @@ class Autoroute {
         }
 
         if ($this->pluralizeResource) {
-            $resource = str_plural($resource);
+            $resources = explode('.', $resource);
+            $resources = array_map(function ($resource) {
+                return str_plural($resource);
+            }, $resources);
+            $resource = implode('.', $resources);
         }
 
         return $this->router->resource($resource, $controllerStr, $options);
