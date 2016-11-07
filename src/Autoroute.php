@@ -9,40 +9,25 @@ class Autoroute {
     const IS_VERB = '/^(get|post|put|delete|any)$/i';
 
     protected $router;
-    protected $resourceNames = ['index', 'create', 'store', 'show', 'edit', 'update', 'destroy'];
 
-    protected $ctrlSeparator = '.';
-    protected $routeSeparator = '.';
-    protected $strFilters = ['snake', 'slug'];
-    protected $ignoreIndex = true;
-    protected $pluralizeResource = true;
-    protected $fixResourceNames = true;
-    protected $constraints = [];
+    protected $ctrlSeparator;
+    protected $routeSeparator;
+    protected $strFilters;
+    protected $ignoreIndex;
+    protected $pluralizeResource;
+    protected $resourceNames;
+    protected $constraints;
 
     public function __construct(Router $router, array $options = []) {
         $this->router = $router;
 
-        if (isset($options['ctrl_separator'])) {
-            $this->ctrlSeparator = $options['ctrl_separator'];
-        }
-        if (isset($options['route_separator'])) {
-            $this->routeSeparator = $options['route_separator'];
-        }
-        if (isset($options['str_filters'])) {
-            $this->strFilters = $options['str_filters'];
-        }
-        if (isset($options['ignore_index'])) {
-            $this->ignoreIndex = $options['ignore_index'];
-        }
-        if (isset($options['resource_plural'])) {
-            $this->pluralizeResource = $options['resource_plural'];
-        }
-        if (isset($options['resource_names'])) {
-            $this->fixResourceNames = $options['resource_names'];
-        }
-        if (isset($options['constraints'])) {
-            $this->constraints = $options['constraints'];
-        }
+        $this->ctrlSeparator = $options['ctrl_separator'];
+        $this->routeSeparator = $options['route_separator'];
+        $this->strFilters = $options['str_filters'];
+        $this->ignoreIndex = $options['ignore_index'];
+        $this->pluralizeResource = $options['resource_plural'];
+        $this->constraints = $options['constraints'];
+        $this->resourceNames = $options['resource_names'];
     }
 
     public function make(array $definitions)
@@ -123,7 +108,7 @@ class Autoroute {
         }
 
         $resource = implode('.', $resource);
-        if (!array_key_exists('names', $options) && $this->fixResourceNames) {
+        if (!array_key_exists('names', $options) && $this->resourceNames) {
             $options['names'] = $this->getResourceNames($resource, $controller);
         }
 
