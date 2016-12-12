@@ -5,7 +5,6 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\Str;
 
 class Autoroute {
-
     const IS_VERB = '/^(get|post|put|delete|any)$/i';
 
     protected $router;
