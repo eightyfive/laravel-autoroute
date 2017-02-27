@@ -7,4 +7,5 @@ return [
     'str_filters' => ['snake', 'slug'],
     'resource_plural' => true,
     'resource_names' => ['index', 'create', 'store', 'show', 'edit', 'update', 'destroy', 'delete'],
+    'constraints' => [],
 ];
