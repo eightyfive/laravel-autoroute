@@ -19,7 +19,7 @@ class AutorouteServiceProvider extends ServiceProvider
             'autoroute'
         );
 
-        $this->app->singleton([Autoroute::class => 'autoroute'], function ($app) {
+        $this->app->singleton('autoroute', function ($app) {
             return new Autoroute(
                 $app['router'],
                 $app['config']->get('autoroute')
