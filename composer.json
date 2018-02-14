@@ -1,7 +1,7 @@
 {
     "name": "eightyfive/laravel-autoroute",
     "description": "Laravel routes helper",
-    "license": "None",
+    "license": "MIT",
     "authors": [
         {
             "name": "Benoit Sagols",
