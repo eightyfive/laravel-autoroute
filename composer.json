@@ -1,5 +1,5 @@
 {
-    "name": "eightyfive/laravel-autoroute",
+    "name": "eyf/laravel-autoroute",
     "description": "Laravel routes helper",
     "license": "MIT",
     "authors": [
@@ -14,9 +14,16 @@
     },
     "autoload": {
         "psr-4": {
-            "Eyf\\": "src/"
+            "Eyf\\Autoroute\\": "src/"
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Eyf\\Autoroute\\AutorouteServiceProvider"
+            ]
+        }
+    }
 }

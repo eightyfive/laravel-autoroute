@@ -1,44 +1,37 @@
 <?php
-namespace Eyf;
-
+namespace Eyf\Autoroute;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Contracts\Support\DeferrableProvider;
+use Illuminate\Routing\Router;
 
-class AutorouteServiceProvider extends ServiceProvider
+class AutorouteServiceProvider extends ServiceProvider implements
+    DeferrableProvider
 {
-
     /**
-     * Register the service provider.
+     * Register any application services.
      *
      * @return void
      */
     public function register()
     {
-        $this->mergeConfigFrom(
-            __DIR__ . '/../config/autoroute.php',
-            'autoroute'
-        );
+        $this->app->singleton(Autoroute::class, function ($app) {
+            $router = $app->make(Router::class);
+            $namer = $app->make(NamerInterface::class);
 
-        $this->app->singleton('autoroute', function ($app) {
-            return new Autoroute(
-                $app['router'],
-                $app['config']->get('autoroute')
-            );
+            return new Autoroute($router, $namer);
         });
-    }
 
-    public function boot()
-    {
-        $this->publishes([
-            __DIR__ . '/../config/autoroute.php' => config_path('autoroute.php')
-        ]);
+        $this->app->bind(NamerInterface::class, Namer::class);
     }
 
     /**
+     * Get the services provided by the provider.
+     *
      * @return string[]
      */
     public function provides()
     {
-        return ['autoroute'];
+        return [Autoroute::class];
     }
 }
