@@ -1,245 +1,85 @@
 # laravel-autoroute
-## Introduction
-Autoroute is a simple helper for registering Laravel routes in a more concise way.
+Autoroute helps your register Laravel routes as an array (think YAML).
 
 "La route? Là où on va on a pas besoin.. De route."
 
-### Install
+## Install
+
 ```
-composer require eightyfive/laravel-autoroute
+composer require eyf/laravel-autoroute
 ```
 
-Then add the Service Provider in your `config/app.php` file:
+## Usage
 
 ```php
-    Eyf\AutorouteServiceProvider::class,
+// app/Providers/RouteServiceProvider.php
+
+use Symfony\Component\Yaml\Yaml;
+use Eyf\Autoroute\Autoroute;
+
+class RouteServiceProvider extends ServiceProvider
+{
+    public function map(Autoroute $autoroute)
+    {
+        $routes = Yaml::parseFile(base_path('routes/api.yaml'));
+
+        $autoroute->create($routes);
+    }
+}
 ```
 
-Then run `php artisan vendor:publish` in order to copy `autoroute.php` config in your project.
+## `api.yaml` (Sample)
 
-### State of the art
-Register your routes as normal in `app/Http/routes.php`:
+```yaml
+group:
+  prefix: api/v1
+  middleware:
+    - "api"
+  namespace: App\Http\Controllers\Api
+  paths:
+    "users":
+      get:
+        uses: UserController@all
+        
+    "users/{id}":
+      get:
+        uses: UserController@first
+        
+      post:
+        uses: UserController@store
+        
+      put:
+        uses: UserController@update
+```
+
+## Default route names
+
+If you don't provide an `as` option in your route definition:
+
+```yaml
+    "users/{id}":
+      get:
+        uses: UserController@first
+        as: my_user_find_route_name
+```
+
+Autoroute will generate a default one based on namespace, controller and action names: `api.user.find`.
+
+### Custom default route name
+
+If you're not happy with the default route name format, you can implement your own `Eyf\Autoroute\NamerInterface` and bind it accordingly in your Laravel app service provider:
 
 ```php
-Route::group(['middleware' => ['web']], function () {
-    app('autoroute')->make([
-        ['index.contact'],
-        ['index.homePage', 'home'], // custom route name
-        ['auth.login' => '/login', 'login'], // custom pathname & route name
-        ['auth.login' => '/login', 'POST'] // POST request...
-    ]);
-    ...
+// app/Providers/AppServiceProvider.php
+
+use Eyf\Autoroute\NamerInterface;
+use App\Services\MyRouteNamer;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function register()
+    {
+        $this->app->bind(NamerInterface::class, MyRouteNamer::class)
+    }
+}
 ```
-
-## Route format
-
-Each route is represented by an array of this form:
-```php
-    [$ctrl, $verb, $name]
-```
-
-You can omit the `$verb` and pass directly a custom route `$name` instead:
-```php
-    [$ctrl, $name]
-```
-
-__Caveat__: if you don't pass `$verb`, but do pass a custom route `$name` instead, make sure this `$name` is not any of the HTTP verbs nor the `any` keyword.
-
-In order to specify a custom pathname and bypass default Autoroute pathname generation, pass the `$ctrl` parameter as key / value:
-```
-    [$ctrl => $pathname, $verb, $name]
-```
-
-And you can still omit `$verb`:
-```
-    [$ctrl => $pathname, $name]
-```
-
-### `$ctrl` format
-`$ctrl` parameter is a string of form: `{controller}.{action}`.
-
-Based on that string, Autoroute will generate the normal Laravel controller string and, if not passed, it will also generate a default route name & pathname for you.
-
-- Ex: `$ctrl = 'user.profile'`
-- `UserController@profile` – Laravel controller string
-- `user.profile` – Default route name
-- `user/profile` – Default pathname
-
-**All of this is configurable.** See [options](#options).
-
-__Note__: `index` keyword in `$ctrl` is ignored by default (See [examples](#examples) & [options](#options))
-
-## Constraints
-Constraints are used to match [route parameters](https://laravel.com/docs/5.2/routing#route-parameters) against regular expressions.
-
-**Example**
-```php
-    'constraints' => [
-        'id' => '\d+',
-        'username' => '[\w-]+',
-        ...
-    ]
-```
-__Note__: Every route parameter _must_ have a constraint defined. If not Autoroute will throws an `Exception`.
-
-
-## Examples
-
-**All examples illustrate the default options**. See [options](#options) for alternatives.
-
-### Simplest route
-```php
-    ['index.contact']
-```
-Will generate:
-- `IndexController@contact` (controller)
-- `index.contact` (route name)
-- `get` (verb)
-- `contact` (pathname) - `index` has been ignored
-
-### Route with custom `pathname`
-```php
-    ['index.contact' => '/contact-us']
-```
-Will generate:
-- Same as above
-- But with `contact-us` as pathname
-
-### Route with custom `name`
-```php
-    ['index.contact', 'contact_us']
-```
-Will generate:
-- Same as first example
-- But with `contact_us` as route name
-
-### `POST` route
-```php
-    ['auth.login', 'POST']
-```
-Will generate:
-- `AuthController@login`
-- `auth.login` (route name)
-- `post`
-- `auth/login`
-
-
-### `match` route
-```php
-    ['auth.login', ['get', 'POST']]
-```
-Will generate:
-- `AuthController@login`
-- `auth.login`
-- `get`, `post`
-- `auth/login`
-
-### Route with namespace
-```php
-    ['auth.auth.register']
-```
-Will generate:
-- `Auth\\AuthController@login`
-- `auth.auth.register`
-- `get`
-- `auth/auth/register`
-
-In order to avoid `auth` keyword repetition:
-```php
-    ['auth.auth.register' => 'auth/register', 'auth.register']
-```
-
-### Route with camelCase `ctrl`
-```php
-    ['auth.facebookCallback']
-```
-Will generate:
-- `AuthController@facebookCallback`
-- `auth.facebook-callback` (route name)
-- `get`
-- `auth/facebook-callback`
-
-```php
-    ['userAccount.myProfile']
-```
-Will generate:
-- `UserAccountController@myProfile`
-- `user-account.my-profile` (route name)
-- `get`
-- `user-account/my-profile`
-
-## Options
-### `ignore_index` option
-Whether or not to ignore the `index` keyword when generating `pathname`.
-
-**Default**
-```php
-    'ignore_index' => true,
-```
-- `index.contact` gives `contact` pathname
-- `auth.index` gives `auth` pathname
-
-**Example**
-```php
-    'ignore_index' => false,
-```
-- `index.contact` gives `index/contact` pathname
-- `auth.index` gives `auth/index` pathname
-
-### `ctrl_separator` option
-You can specify the separtor to use in order to [`explode`](http://php.net/manual/en/function.explode.php) the `$ctrl` string.
-
-**Default**
-```php
-    'ctrl_separator' => '.',
-```
-- `index.contact`
-
-**Example**
-```php
-    'ctrl_separator' => '->',
-```
-- `index->contact`
-
-### `route_separator` option
-You can specify the separtor to use when generating the route name.
-
-**Default**
-```php
-    'ctrl_separator' => '.',
-    'route_separator' => '.',
-```
-- `index.contact` gives `index.contact` route name
-
-**Example**
-```php
-    'ctrl_separator' => '->',
-    'route_separator' => '--',
-```
-- `index->contact` gives `index--contact` route name
-
-### `filters` options
-The `filters` option holds a set of filters to apply to every segment of a `$ctrl` string (namespace, controller, action) when generating route names.
-
-**Possible values**
-- `slug`
-- `snake`
-- `camel`
-- Any combination: `['camel', 'snake']`, `['snake', 'slug', 'camel']`...
-
-**Default**
-```php
-    'filters' => ['snake', 'slug']
-```
-- `userAccount.myProfile` gives `user-account.my-profile` route name
-- `userAccount.myProfile` gives `user-account/my-profile` pathname
-
-**Example**
-```php
-    'ctrl_separator' => '~'
-    'route_separator' => '--',
-    'filters' => ['snake']
-```
-- `userAccount~myProfile` gives `user_account--my_profile` route name
-- `userAccount~myProfile` gives `user_account/my_profile` pathname
-
