@@ -1,5 +1,5 @@
 # laravel-autoroute
-Autoroute helps your register Laravel routes as an array (think YAML).
+Autoroute helps you register Laravel routes as an `array` (think YAML).
 
 "La route? Là où on va on a pas besoin.. De route."
 
@@ -28,7 +28,7 @@ class RouteServiceProvider extends ServiceProvider
 }
 ```
 
-## `api.yaml` (Sample)
+### Sample `api.yaml`
 
 ```yaml
 group:
@@ -39,11 +39,11 @@ group:
   paths:
     "users":
       get:
-        uses: UserController@all
+        uses: UserController@index
         
     "users/{id}":
       get:
-        uses: UserController@first
+        uses: UserController@find
         
       post:
         uses: UserController@store
@@ -59,11 +59,11 @@ If you don't provide an `as` option in your route definition:
 ```yaml
     "users/{id}":
       get:
-        uses: UserController@first
+        uses: UserController@find
         as: my_user_find_route_name
 ```
 
-Autoroute will generate a default one based on namespace, controller and action names: `api.user.find`.
+Autoroute will generate a default one based on the current namespace, controller and action names: `api.user.find`.
 
 ### Custom default route name
 
@@ -79,7 +79,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->app->bind(NamerInterface::class, MyRouteNamer::class)
+        $this->app->bind(NamerInterface::class, MyRouteNamer::class);
     }
 }
 ```
