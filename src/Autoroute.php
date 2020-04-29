@@ -8,7 +8,7 @@ class Autoroute
     protected $namer;
     protected $router;
 
-    public function __construct(Router $router, AutorouteNamer $namer)
+    public function __construct(Router $router, NamerInterface $namer)
     {
         $this->namer = $namer;
         $this->router = $router;
@@ -63,7 +63,7 @@ class Autoroute
 
                 $name = $this->namer->getRouteName(
                     $options['uses'],
-                    $group['namespace']
+                    $group ? $group['namespace'] : ''
                 );
 
                 $route->name($name);

@@ -5,29 +5,31 @@ use Illuminate\Support\Str;
 
 class Namer implements NamerInterface
 {
-    public function getRouteName(string $controller, string $namespace)
+    public function getRouteName(string $uses, string $group = '')
     {
-        $controller = explode('@', $controller);
-        $action = array_pop($controller);
-        $action = Str::snake($action);
+        list($rest, $action) = explode('@', $uses);
 
-        $controller = array_pop($controller);
+        // Controller
+        $namespace = explode('\\', $rest);
+
+        $controller = array_pop($namespace);
         $controller = str_replace('Controller', '', $controller);
-        $controller = explode('\\', $controller);
-        array_push($controller, $action);
 
-        $namespace = str_replace('App\\Http\\Controllers', '', $namespace);
-        if (!empty($namespace)) {
-            $namespace = trim($namespace, '\\');
-            $namespace = explode('\\', $namespace);
-        } else {
-            $namespace = [];
+        // Controller namespace
+        $group = str_replace('App\\Http\\Controllers', '', $group);
+
+        if (!empty($group)) {
+            $group = trim($group, '\\');
+            $group = explode('\\', $group);
+
+            $namespace = array_merge($group, $namespace);
         }
 
-        $name = array_merge($namespace, $controller);
-        $name = array_map('strtolower', $name);
-        $name = implode('.', $name);
+        $route = array_merge($namespace, [$controller, $action]);
+        $route = array_map(function ($name) {
+            return Str::snake($name);
+        }, $route);
 
-        return $name;
+        return implode('.', $route);
     }
 }
