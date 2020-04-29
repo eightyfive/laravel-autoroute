@@ -41,12 +41,12 @@ group:
       get:
         uses: UserController@index
         
+      post:
+        uses: UserController@store
+        
     "users/{id}":
       get:
         uses: UserController@find
-        
-      post:
-        uses: UserController@store
         
       put:
         uses: UserController@update
