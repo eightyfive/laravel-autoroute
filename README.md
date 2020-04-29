@@ -1,7 +1,7 @@
 # laravel-autoroute
 Autoroute helps you register Laravel routes as an `array` (think YAML).
 
-> "La route? Là où on va on a pas besoin.. De route."
+> "La route? Là où on va, on a pas besoin... De route."
 
 ## Install
 
