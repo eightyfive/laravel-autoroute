@@ -1,6 +1,6 @@
 {
     "name": "eyf/laravel-autoroute",
-    "description": "Laravel routes helper",
+    "description": "Laravel routes as array (think YAML)",
     "license": "MIT",
     "authors": [
         {
