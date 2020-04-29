@@ -20,7 +20,14 @@ class Autoroute
             if ($path === "group") {
                 $this->createGroup($route);
             } else {
-                $this->createRoute($path, $route);
+                if (isset($route['where'])) {
+                    $constraints = $route['where'];
+
+                    unset($route['where']);
+                } else {
+                    $constraints = [];
+                }
+                $this->createRoute($path, $route, $constraints);
             }
         }
     }
@@ -36,25 +43,18 @@ class Autoroute
         });
     }
 
-    protected function createRoute(string $path, array $verbs)
-    {
+    protected function createRoute(
+        string $path,
+        array $verbs,
+        array $constraints = []
+    ) {
         foreach ($verbs as $verb => $options) {
-            if (isset($options['where'])) {
-                $constraints = $options['where'];
-
-                unset($options['where']);
-            } else {
-                $constraints = null;
-            }
-
             // Create route
             $route = call_user_func([$this->router, $verb], $path, $options);
 
             // Add parameter constraints
-            if (!is_null($constraints)) {
-                foreach ($constraints as $param => $constraint) {
-                    $route->where($param, $constraint);
-                }
+            foreach ($constraints as $param => $constraint) {
+                $route->where($param, $constraint);
             }
 
             // Make default route name

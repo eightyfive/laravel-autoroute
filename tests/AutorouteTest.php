@@ -17,13 +17,16 @@ final class AutorouteTest extends TestCase
                 'get' => [
                     'uses' => 'UserController@get',
                 ],
-            ],
-            'users/{id}' => [
-                'get' => [
-                    'uses' => 'UserController@find',
-                ],
                 'post' => [
                     'uses' => 'UserController@store',
+                ],
+            ],
+            'users/{id}' => [
+                'where' => [
+                    'id' => '[0-9]+',
+                ],
+                'get' => [
+                    'uses' => 'UserController@find',
                 ],
                 'put' => [
                     'uses' => 'UserController@update',
@@ -57,7 +60,7 @@ final class AutorouteTest extends TestCase
 
     public function testCreatesGroup(): void
     {
-        $paths = [
+        $group = [
             'group' => [
                 'namespace' => 'App\\Http\\Controllers\\Api',
                 'paths' => [
@@ -73,7 +76,7 @@ final class AutorouteTest extends TestCase
         $router = new Router(new Dispatcher());
 
         $autoroute = new Autoroute($router, new Namer());
-        $autoroute->create($paths);
+        $autoroute->create($group);
 
         $routes = $router->getRoutes();
 
@@ -82,5 +85,33 @@ final class AutorouteTest extends TestCase
 
         $this->assertEquals($routes->getByName('user.get'), null);
         $this->assertNotEquals($routes->getByName('api.user.get'), null);
+    }
+
+    public function testAddsConstraints(): void
+    {
+        $paths = [
+            'users/{id}' => [
+                'where' => [
+                    'id' => '[0-9]+',
+                ],
+                'get' => [
+                    'uses' => 'UserController@get',
+                ],
+            ],
+        ];
+
+        $router = new Router(new Dispatcher());
+
+        $autoroute = new Autoroute($router, new Namer());
+        $autoroute->create($paths);
+
+        $routes = $router->getRoutes();
+
+        // Check names
+        $routes->refreshNameLookups();
+        $route = $routes->getByName('user.get');
+
+        $this->assertNotEquals($route, null);
+        $this->assertEquals($route->wheres['id'], '[0-9]+');
     }
 }
