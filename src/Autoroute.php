@@ -8,7 +8,7 @@ class Autoroute
     protected $namer;
     protected $router;
 
-    public function __construct(Router $router, NamerInterface $namer)
+    public function __construct(Router $router, RouteNamerInterface $namer)
     {
         $this->namer = $namer;
         $this->router = $router;

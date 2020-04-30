@@ -2,13 +2,13 @@
 
 use PHPUnit\Framework\TestCase;
 
-use Eyf\Autoroute\Namer;
+use Eyf\Autoroute\RouteNamer;
 
-final class NamerTest extends TestCase
+final class RouteNamerTest extends TestCase
 {
     public function testGeneratesName(): void
     {
-        $namer = new Namer();
+        $namer = new RouteNamer();
         $name = $namer->getRouteName('FooBarController@getUsers');
 
         $this->assertEquals($name, 'foo_bar.get_users');
@@ -16,16 +16,22 @@ final class NamerTest extends TestCase
 
     public function testGeneratesNameWithNamespace(): void
     {
-        $namer = new Namer();
-        $name = $namer->getRouteName('UserController@find', 'App\\Http\\Controllers\\Admin\\Api');
+        $namer = new RouteNamer();
+        $name = $namer->getRouteName(
+            'UserController@find',
+            'App\\Http\\Controllers\\Admin\\Api'
+        );
 
         $this->assertEquals($name, 'admin.api.user.find');
     }
 
     public function testGeneratesNameWithSubNamespace(): void
     {
-        $namer = new Namer();
-        $name = $namer->getRouteName('Api\\UserController@find', 'App\\Http\\Controllers\\Admin');
+        $namer = new RouteNamer();
+        $name = $namer->getRouteName(
+            'Api\\UserController@find',
+            'App\\Http\\Controllers\\Admin'
+        );
 
         $this->assertEquals($name, 'admin.api.user.find');
     }

@@ -17,12 +17,12 @@ class AutorouteServiceProvider extends ServiceProvider implements
     {
         $this->app->singleton(Autoroute::class, function ($app) {
             $router = $app->make(Router::class);
-            $namer = $app->make(NamerInterface::class);
+            $namer = $app->make(RouteNamerInterface::class);
 
             return new Autoroute($router, $namer);
         });
 
-        $this->app->bind(NamerInterface::class, Namer::class);
+        $this->app->bind(RouteNamerInterface::class, RouteNamer::class);
     }
 
     /**

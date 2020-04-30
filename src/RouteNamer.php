@@ -3,7 +3,7 @@ namespace Eyf\Autoroute;
 
 use Illuminate\Support\Str;
 
-class Namer implements NamerInterface
+class RouteNamer implements RouteNamerInterface
 {
     public function getRouteName(string $uses, string $group = '')
     {

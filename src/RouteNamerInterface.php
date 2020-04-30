@@ -1,7 +1,7 @@
 <?php
 namespace Eyf\Autoroute;
 
-interface NamerInterface
+interface RouteNamerInterface
 {
     public function getRouteName(string $controller, string $namespace);
 }

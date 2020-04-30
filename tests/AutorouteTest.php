@@ -6,7 +6,7 @@ use Illuminate\Routing\Router;
 use Illuminate\Events\Dispatcher;
 
 use Eyf\Autoroute\Autoroute;
-use Eyf\Autoroute\Namer;
+use Eyf\Autoroute\RouteNamer;
 
 final class AutorouteTest extends TestCase
 {
@@ -36,7 +36,7 @@ final class AutorouteTest extends TestCase
 
         $router = new Router(new Dispatcher());
 
-        $autoroute = new Autoroute($router, new Namer());
+        $autoroute = new Autoroute($router, new RouteNamer());
         $autoroute->create($paths);
 
         $routes = $router->getRoutes();
@@ -75,7 +75,7 @@ final class AutorouteTest extends TestCase
 
         $router = new Router(new Dispatcher());
 
-        $autoroute = new Autoroute($router, new Namer());
+        $autoroute = new Autoroute($router, new RouteNamer());
         $autoroute->create($group);
 
         $routes = $router->getRoutes();
@@ -102,7 +102,7 @@ final class AutorouteTest extends TestCase
 
         $router = new Router(new Dispatcher());
 
-        $autoroute = new Autoroute($router, new Namer());
+        $autoroute = new Autoroute($router, new RouteNamer());
         $autoroute->create($paths);
 
         $routes = $router->getRoutes();
