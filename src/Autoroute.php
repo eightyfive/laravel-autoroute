@@ -2,16 +2,38 @@
 namespace Eyf\Autoroute;
 
 use Illuminate\Routing\Router;
+use Noodlehaus\Config;
 
 class Autoroute
 {
     protected $namer;
     protected $router;
 
-    public function __construct(Router $router, RouteNamerInterface $namer)
-    {
+    public function __construct(
+        Router $router,
+        RouteNamerInterface $namer,
+        string $dir = null
+    ) {
         $this->namer = $namer;
         $this->router = $router;
+        $this->dir = $dir;
+    }
+
+    public function load()
+    {
+        $filepaths = func_get_args();
+
+        if ($this->dir) {
+            $filepaths = array_map(function ($filename) {
+                return "{$this->dir}/{$filename}";
+            }, $filepaths);
+        }
+
+        foreach ($filepaths as $filepath) {
+            $routes = Config::load($filepath);
+
+            $this->create($routes->all());
+        }
     }
 
     public function create(array $routes)
@@ -27,6 +49,7 @@ class Autoroute
                 } else {
                     $constraints = [];
                 }
+
                 $this->createRoute($path, $route, $constraints);
             }
         }
@@ -57,7 +80,7 @@ class Autoroute
                 $route->where($param, $constraint);
             }
 
-            // Make default route name
+            // Default route name
             if (!isset($options['as'])) {
                 $group = last($this->router->getGroupStack());
 

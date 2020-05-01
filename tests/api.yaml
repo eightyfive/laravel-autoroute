@@ -1,0 +1,5 @@
+users:
+    get:
+        uses: UserController@get
+    post:
+        uses: UserController@store

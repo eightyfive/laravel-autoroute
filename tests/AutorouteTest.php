@@ -114,4 +114,34 @@ final class AutorouteTest extends TestCase
         $this->assertNotEquals($route, null);
         $this->assertEquals($route->wheres['id'], '[0-9]+');
     }
+
+    public function testLoadsFile(): void
+    {
+        $router = new Router(new Dispatcher());
+        $autoroute = new Autoroute($router, new RouteNamer());
+        $autoroute->load(__DIR__ . '/web.yaml');
+
+        $routes = $router->getRoutes();
+
+        // Check names
+        $routes->refreshNameLookups();
+
+        $this->assertNotEquals($routes->getByName('post.store'), null);
+    }
+
+    public function testLoadsFiles(): void
+    {
+        $router = new Router(new Dispatcher());
+        $autoroute = new Autoroute($router, new RouteNamer(), __DIR__);
+        $autoroute->load('api.yaml', 'web.yaml');
+
+        $routes = $router->getRoutes();
+
+        // Check names
+        $routes->refreshNameLookups();
+
+        $this->assertNotEquals($routes->getByName('user.get'), null);
+        $this->assertNotEquals($routes->getByName('user.store'), null);
+        $this->assertNotEquals($routes->getByName('post.store'), null);
+    }
 }

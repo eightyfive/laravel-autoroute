@@ -4,8 +4,67 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "edd0efd53362af90492a55e73e902928",
-    "packages": [],
+    "content-hash": "e94efa1cd5cb6048deacab272028aacf",
+    "packages": [
+        {
+            "name": "hassankhan/config",
+            "version": "v2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hassankhan/config.git",
+                "reference": "16fa4d3320ac9bb611dda0c8ea980edb58d227c9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hassankhan/config/zipball/16fa4d3320ac9bb611dda0c8ea980edb58d227c9",
+                "reference": "16fa4d3320ac9bb611dda0c8ea980edb58d227c9",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.9"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.8 || ~5.7 || ~6.5 || ~7.5",
+                "scrutinizer/ocular": "~1.1",
+                "squizlabs/php_codesniffer": "~2.2",
+                "symfony/yaml": "~3.4"
+            },
+            "suggest": {
+                "symfony/yaml": "~3.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Noodlehaus\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hassan Khan",
+                    "homepage": "http://hassankhan.me/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Lightweight configuration file loader that supports PHP, INI, XML, JSON, and YAML files",
+            "homepage": "http://hassankhan.me/config/",
+            "keywords": [
+                "config",
+                "configuration",
+                "ini",
+                "json",
+                "microphp",
+                "unframework",
+                "xml",
+                "yaml",
+                "yml"
+            ],
+            "time": "2019-09-01T15:51:42+00:00"
+        }
+    ],
     "packages-dev": [
         {
             "name": "brick/math",
@@ -4403,6 +4462,79 @@
                 }
             ],
             "time": "2020-04-12T16:45:47+00:00"
+        },
+        {
+            "name": "symfony/yaml",
+            "version": "v5.0.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/yaml.git",
+                "reference": "482fb4e710e5af3e0e78015f19aa716ad953392f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/482fb4e710e5af3e0e78015f19aa716ad953392f",
+                "reference": "482fb4e710e5af3e0e78015f19aa716ad953392f",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2.5",
+                "symfony/polyfill-ctype": "~1.8"
+            },
+            "conflict": {
+                "symfony/console": "<4.4"
+            },
+            "require-dev": {
+                "symfony/console": "^4.4|^5.0"
+            },
+            "suggest": {
+                "symfony/console": "For validating YAML files using the lint command"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Yaml\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Yaml Component",
+            "homepage": "https://symfony.com",
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-04-28T17:58:55+00:00"
         },
         {
             "name": "theseer/tokenizer",
