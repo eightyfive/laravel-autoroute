@@ -117,6 +117,19 @@ final class AutorouteTest extends TestCase
         $this->assertRoutes(['user.get', 'user.store', 'post.store']);
     }
 
+    public function testCompact(): void
+    {
+        $autoroute = $this->getAutoroute();
+        $autoroute->create([
+            'users' => [
+                'get' => 'user.get',
+                'post' => 'api.user.store',
+            ],
+        ]);
+
+        $this->assertRoutes(['user.get', 'api.user.store']);
+    }
+
     protected function getRoutes()
     {
         $routes = $this->router->getRoutes();

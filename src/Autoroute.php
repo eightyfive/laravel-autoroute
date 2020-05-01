@@ -72,6 +72,13 @@ class Autoroute
         array $constraints = []
     ) {
         foreach ($verbs as $verb => $options) {
+            if (is_string($options)) {
+                $uses = $this->namer->getUses($options);
+                $options = [];
+            } else {
+                $uses = $options['uses'];
+            }
+
             // Create route
             $route = call_user_func([$this->router, $verb], $path, $options);
 
@@ -85,7 +92,7 @@ class Autoroute
                 $group = last($this->router->getGroupStack());
 
                 $name = $this->namer->getRouteName(
-                    $options['uses'],
+                    $uses,
                     $group ? $group['namespace'] : ''
                 );
 

@@ -32,4 +32,28 @@ class RouteNamer implements RouteNamerInterface
 
         return implode('.', $route);
     }
+
+    public function getUses(string $compact)
+    {
+        $namespace = explode('.', $compact);
+
+        // Action
+        $action = array_pop($namespace);
+
+        // Controller
+        $controller = array_pop($namespace);
+        $controller = ucfirst($controller) . 'Controller';
+
+        // Namespace
+        $namespace = array_map(function ($name) {
+            return ucfirst($name);
+        }, $namespace);
+
+        // "uses" Laravel name
+        array_push($namespace, $controller);
+
+        $controller = implode('\\', $namespace);
+
+        return "{$controller}@{$action}";
+    }
 }
