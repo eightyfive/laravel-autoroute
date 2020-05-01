@@ -14,19 +14,44 @@ composer require eyf/laravel-autoroute
 ```php
 // app/Providers/RouteServiceProvider.php
 
-use Symfony\Component\Yaml\Yaml;
 use Eyf\Autoroute\Autoroute;
 
 class RouteServiceProvider extends ServiceProvider
 {
     public function map(Autoroute $autoroute)
     {
-        $routes = Yaml::parseFile(base_path('routes/api.yaml'));
-
-        $autoroute->create($routes);
+        $autoroute->create([
+            'users/{id}' => [
+                'where' => [
+                    'id' => '[0-9]+',
+                ],
+                'get' => [
+                    'uses' => 'UserController@get',
+                ],
+            ],
+        ]);
     }
 }
 ```
+
+### Loading files (yaml, json, php...)
+
+Obviously you will want to put your routes in some kind of files. Use the `load` method for that.
+
+```php
+class RouteServiceProvider extends ServiceProvider
+{
+    public function map(Autoroute $autoroute)
+    {
+        $autoroute->load('api.yaml', 'web.yaml');
+    }
+}
+```
+
+__Notes__:
+- It will look for the files inside the Laravel `routes/` folder.
+- Supports all file types supported by [hassankhan/config](https://github.com/hassankhan/config).
+- You need to `composer require symfony/yaml` if you choose to use YAML files.
 
 ### Sample `api.yaml`
 
