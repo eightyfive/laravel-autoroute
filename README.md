@@ -49,7 +49,7 @@ class RouteServiceProvider extends ServiceProvider
 ```
 
 __Notes__:
-- It will look for the files inside the Laravel `routes/` folder.
+- It will look for files inside the Laravel `routes/` folder.
 - Supports all file types supported by [hassankhan/config](https://github.com/hassankhan/config).
 - You need to `composer require symfony/yaml` if you choose to use YAML files.
 
@@ -108,3 +108,21 @@ class AppServiceProvider extends ServiceProvider
     }
 }
 ```
+
+## `uses` compact syntax
+
+If you're not using any route options (`as`, etc...), you can use a "compact" syntax to specify your controllers:
+
+```yaml
+    "users":
+      get: user.index
+      post: user.store
+
+    "users/{id}":
+      get: user.find
+      put: user.update
+```
+
+### Custom compact syntax
+
+You can customize your own shorthand syntax in your own `MyRouteNamer::getUses(string $compact)` implementation.
