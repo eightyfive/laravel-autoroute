@@ -6,7 +6,7 @@ use Eyf\Autoroute\RouteNamer;
 
 final class RouteNamerTest extends TestCase
 {
-    public function testGeneratesName(): void
+    public function testName(): void
     {
         $namer = new RouteNamer();
         $name = $namer->getRouteName('FooBarController@getUsers');
@@ -14,7 +14,7 @@ final class RouteNamerTest extends TestCase
         $this->assertEquals($name, 'foo_bar.get_users');
     }
 
-    public function testGeneratesNameWithNamespace(): void
+    public function testNamespace(): void
     {
         $namer = new RouteNamer();
         $name = $namer->getRouteName(
@@ -25,7 +25,7 @@ final class RouteNamerTest extends TestCase
         $this->assertEquals($name, 'admin.api.user.find');
     }
 
-    public function testGeneratesNameWithSubNamespace(): void
+    public function testSubNamespace(): void
     {
         $namer = new RouteNamer();
         $name = $namer->getRouteName(
@@ -34,5 +34,13 @@ final class RouteNamerTest extends TestCase
         );
 
         $this->assertEquals($name, 'admin.api.user.find');
+    }
+
+    public function testUses(): void
+    {
+        $namer = new RouteNamer();
+        $uses = $namer->getUses('api.foo.bar.user.find');
+
+        $this->assertEquals($uses, 'Api\\Foo\\Bar\\UserController@find');
     }
 }
