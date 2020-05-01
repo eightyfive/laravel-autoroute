@@ -49,7 +49,7 @@ class RouteServiceProvider extends ServiceProvider
 ```
 
 __Notes__:
-- It will look for the files inside the Laravel `routes/` folder.
+- It will look for files inside the Laravel `routes/` folder.
 - Supports all file types supported by [hassankhan/config](https://github.com/hassankhan/config).
 - You need to `composer require symfony/yaml` if you choose to use YAML files.
 
@@ -92,19 +92,37 @@ Autoroute will generate a default route name based on the current namespace, con
 
 ### Custom default route name
 
-If you're not happy with the default route name format, you can implement your own `Eyf\Autoroute\NamerInterface` and bind it accordingly in your Laravel app service provider:
+If you're not happy with the default route name format, you can implement your own `Eyf\Autoroute\RouteNamerInterface` and bind it accordingly in your Laravel app service provider:
 
 ```php
 // app/Providers/AppServiceProvider.php
 
-use Eyf\Autoroute\NamerInterface;
+use Eyf\Autoroute\RouteNamerInterface;
 use App\Services\MyRouteNamer;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->app->bind(NamerInterface::class, MyRouteNamer::class);
+        $this->app->bind(RouteNamerInterface::class, MyRouteNamer::class);
     }
 }
 ```
+
+## `uses` compact syntax
+
+If you're not using any route options (`as`, etc...), you can use a "compact" syntax to specify your controllers:
+
+```yaml
+    "users":
+      get: user.index
+      post: user.store
+
+    "users/{id}":
+      get: user.find
+      put: user.update
+```
+
+### Custom compact syntax
+
+You can customize the shorthand syntax by implementing `RouteNamerInterface::getUses(string $compact)`.
