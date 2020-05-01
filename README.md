@@ -59,7 +59,7 @@ __Notes__:
 group:
   prefix: api/v1
   middleware:
-    - "api"
+    - api
   namespace: App\Http\Controllers\Api
   paths:
     "users":
@@ -114,6 +114,12 @@ class AppServiceProvider extends ServiceProvider
 If you're not using any route options (`as`, etc...), you can use a "compact" syntax to specify your controllers:
 
 ```yaml
+group:
+  prefix: api/v1
+  middleware:
+    - api
+  namespace: App\Http\Controllers\Api
+  paths:
     "users":
       get: user.index
       post: user.store
