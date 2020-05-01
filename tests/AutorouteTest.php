@@ -10,9 +10,21 @@ use Eyf\Autoroute\RouteNamer;
 
 final class AutorouteTest extends TestCase
 {
+    protected $router;
+
+    protected function getAutoroute($dir = null)
+    {
+        $this->router = new Router(new Dispatcher());
+
+        $autoroute = new Autoroute($this->router, new RouteNamer(), $dir);
+
+        return $autoroute;
+    }
+
     public function testCreatesRoutes(): void
     {
-        $paths = [
+        $autoroute = $this->getAutoroute();
+        $autoroute->create([
             'users' => [
                 'get' => [
                     'uses' => 'UserController@get',
@@ -32,35 +44,27 @@ final class AutorouteTest extends TestCase
                     'uses' => 'UserController@update',
                 ],
             ],
-        ];
+        ]);
 
-        $router = new Router(new Dispatcher());
+        $this->assertRoutes([
+            'user.get',
+            'user.store',
+            'user.find',
+            'user.update',
+        ]);
 
-        $autoroute = new Autoroute($router, new RouteNamer());
-        $autoroute->create($paths);
-
-        $routes = $router->getRoutes();
-
-        // Check names
-        $routes->refreshNameLookups();
-
-        $this->assertNotEquals($routes->getByName('user.get'), null);
-        $this->assertNotEquals($routes->getByName('user.find'), null);
-        $this->assertNotEquals($routes->getByName('user.store'), null);
-        $this->assertNotEquals($routes->getByName('user.update'), null);
-
-        // Check methods
-        $methods = $routes->getRoutesByMethod();
-
-        $this->assertEquals(count($methods['GET']), 2);
-        $this->assertEquals(count($methods['HEAD']), 2);
-        $this->assertEquals(count($methods['POST']), 1);
-        $this->assertEquals(count($methods['PUT']), 1);
+        $this->assertMethods([
+            'GET' => 2,
+            'HEAD' => 2,
+            'POST' => 1,
+            'PUT' => 1,
+        ]);
     }
 
     public function testCreatesGroup(): void
     {
-        $group = [
+        $autoroute = $this->getAutoroute();
+        $autoroute->create([
             'group' => [
                 'namespace' => 'App\\Http\\Controllers\\Api',
                 'paths' => [
@@ -71,25 +75,16 @@ final class AutorouteTest extends TestCase
                     ],
                 ],
             ],
-        ];
+        ]);
 
-        $router = new Router(new Dispatcher());
-
-        $autoroute = new Autoroute($router, new RouteNamer());
-        $autoroute->create($group);
-
-        $routes = $router->getRoutes();
-
-        // Check names
-        $routes->refreshNameLookups();
-
-        $this->assertEquals($routes->getByName('user.get'), null);
-        $this->assertNotEquals($routes->getByName('api.user.get'), null);
+        $this->assertEquals($this->getRoute('user.get'), null);
+        $this->assertNotEquals($this->getRoute('api.user.get'), null);
     }
 
     public function testAddsConstraints(): void
     {
-        $paths = [
+        $autoroute = $this->getAutoroute();
+        $autoroute->create([
             'users/{id}' => [
                 'where' => [
                     'id' => '[0-9]+',
@@ -98,18 +93,9 @@ final class AutorouteTest extends TestCase
                     'uses' => 'UserController@get',
                 ],
             ],
-        ];
+        ]);
 
-        $router = new Router(new Dispatcher());
-
-        $autoroute = new Autoroute($router, new RouteNamer());
-        $autoroute->create($paths);
-
-        $routes = $router->getRoutes();
-
-        // Check names
-        $routes->refreshNameLookups();
-        $route = $routes->getByName('user.get');
+        $route = $this->getRoute('user.get');
 
         $this->assertNotEquals($route, null);
         $this->assertEquals($route->wheres['id'], '[0-9]+');
@@ -117,31 +103,51 @@ final class AutorouteTest extends TestCase
 
     public function testLoadsFile(): void
     {
-        $router = new Router(new Dispatcher());
-        $autoroute = new Autoroute($router, new RouteNamer());
+        $autoroute = $this->getAutoroute();
         $autoroute->load(__DIR__ . '/web.yaml');
 
-        $routes = $router->getRoutes();
-
-        // Check names
-        $routes->refreshNameLookups();
-
-        $this->assertNotEquals($routes->getByName('post.store'), null);
+        $this->assertRoutes(['post.store']);
     }
 
     public function testLoadsFiles(): void
     {
-        $router = new Router(new Dispatcher());
-        $autoroute = new Autoroute($router, new RouteNamer(), __DIR__);
+        $autoroute = $this->getAutoroute(__DIR__);
         $autoroute->load('api.yaml', 'web.yaml');
 
-        $routes = $router->getRoutes();
+        $this->assertRoutes(['user.get', 'user.store', 'post.store']);
+    }
 
-        // Check names
+    protected function getRoutes()
+    {
+        $routes = $this->router->getRoutes();
         $routes->refreshNameLookups();
 
-        $this->assertNotEquals($routes->getByName('user.get'), null);
-        $this->assertNotEquals($routes->getByName('user.store'), null);
-        $this->assertNotEquals($routes->getByName('post.store'), null);
+        return $routes;
+    }
+
+    protected function getRoute($name)
+    {
+        $routes = $this->getRoutes();
+
+        return $routes->getByName($name);
+    }
+
+    protected function assertRoutes(array $names)
+    {
+        $routes = $this->getRoutes();
+
+        foreach ($names as $name) {
+            $this->assertNotEquals($routes->getByName($name), null);
+        }
+    }
+
+    protected function assertMethods(array $verbs)
+    {
+        $routes = $this->router->getRoutes();
+        $methods = $routes->getRoutesByMethod();
+
+        foreach ($verbs as $verb => $count) {
+            $this->assertEquals(count($methods[$verb]), $count);
+        }
     }
 }
