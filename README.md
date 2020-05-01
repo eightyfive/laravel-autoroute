@@ -92,19 +92,19 @@ Autoroute will generate a default route name based on the current namespace, con
 
 ### Custom default route name
 
-If you're not happy with the default route name format, you can implement your own `Eyf\Autoroute\NamerInterface` and bind it accordingly in your Laravel app service provider:
+If you're not happy with the default route name format, you can implement your own `Eyf\Autoroute\RouteNamerInterface` and bind it accordingly in your Laravel app service provider:
 
 ```php
 // app/Providers/AppServiceProvider.php
 
-use Eyf\Autoroute\NamerInterface;
+use Eyf\Autoroute\RouteNamerInterface;
 use App\Services\MyRouteNamer;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->app->bind(NamerInterface::class, MyRouteNamer::class);
+        $this->app->bind(RouteNamerInterface::class, MyRouteNamer::class);
     }
 }
 ```
@@ -125,4 +125,4 @@ If you're not using any route options (`as`, etc...), you can use a "compact" sy
 
 ### Custom compact syntax
 
-You can customize your own shorthand syntax in your own `MyRouteNamer::getUses(string $compact)` implementation.
+You can customize the shorthand syntax by implementing `RouteNamerInterface::getUses(string $compact)`.
