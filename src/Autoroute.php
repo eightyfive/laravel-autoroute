@@ -74,7 +74,7 @@ class Autoroute
         foreach ($verbs as $verb => $options) {
             if (is_string($options)) {
                 $uses = $this->namer->getUses($options);
-                $options = [];
+                $options = compact('uses');
             } else {
                 $uses = $options['uses'];
             }
