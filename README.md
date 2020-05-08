@@ -88,7 +88,14 @@ If you don't provide an `as` option in your route definition:
         as: my_user_find_route_name
 ```
 
-Autoroute will generate a default route name based on the current namespace, controller and action names: `api.user.find`.
+Autoroute will generate a default route name based on the current namespace, controller and action names:
+
+```yaml
+    "users/{id}":
+      get:
+        uses: UserController@find
+        # as: api.user.find (Generated)
+```
 
 ### Custom default route name
 
