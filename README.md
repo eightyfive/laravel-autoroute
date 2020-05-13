@@ -12,6 +12,7 @@ composer require eyf/laravel-autoroute
 ## Usage
 
 ```php
+<?php
 // app/Providers/RouteServiceProvider.php
 
 use Eyf\Autoroute\Autoroute;
@@ -39,6 +40,8 @@ class RouteServiceProvider extends ServiceProvider
 Obviously you will want to put your routes in some kind of files. Use the `load` method for that.
 
 ```php
+<?php
+
 class RouteServiceProvider extends ServiceProvider
 {
     public function map(Autoroute $autoroute)
@@ -102,6 +105,7 @@ Autoroute will generate a default route name based on the current namespace, con
 If you're not happy with the default route name format, you can implement your own `Eyf\Autoroute\RouteNamerInterface` and bind it accordingly in your Laravel app service provider:
 
 ```php
+<?php
 // app/Providers/AppServiceProvider.php
 
 use Eyf\Autoroute\RouteNamerInterface;
