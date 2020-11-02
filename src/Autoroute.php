@@ -76,7 +76,11 @@ class Autoroute
                 $uses = $this->namer->getUses($options);
                 $options = compact('uses');
             } else {
-                $uses = $options['uses'];
+                $uses = $options['uses'] ?? null;
+            }
+            
+            if (!$uses) {
+                continue;
             }
 
             // Create route
