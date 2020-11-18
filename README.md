@@ -53,6 +53,46 @@ group:
         uses: UserController@update
 ```
 
+### Template parameters
+
+Autoroute supports light parameters in YAML files. The format is `%<parameter_name>%`.
+
+For instance let's say you need to work with a local API subdomain:
+
+```php
+<?php
+// app/Providers/RouteServiceProvider.php
+
+use Eyf\Autoroute\Autoroute;
+
+class RouteServiceProvider extends ServiceProvider
+{
+    public function map(Autoroute $autoroute)
+    {
+        $parameters = [
+            'api_domain' => env('API_DOMAIN', 'api.example.org'),
+        ];
+        
+        $autoroute->load(['api.yaml'], $parameters);
+    }
+}
+```
+
+And in your local `.env` file:
+
+```env
+API_DOMAIN='api.example.local'
+```
+
+And in your `api.yaml` file:
+
+```yaml
+group:
+  domain: %api_domain%
+  prefix: v1
+  # ...
+```
+
 ## Default route names
 
 If you don't provide an `as` option in your route definition:
