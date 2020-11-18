@@ -1,7 +1,12 @@
 {
     "name": "eyf/laravel-autoroute",
-    "description": "Laravel routes as array (think YAML)",
+    "description": "Laravel YAML routes",
     "license": "MIT",
+    "keywords": [
+        "laravel",
+        "yaml",
+        "routing"
+    ],
     "authors": [
         {
             "name": "Benoit Sagols",
@@ -9,8 +14,8 @@
         }
     ],
     "require": {
-        "php": ">=7.0",
-        "hassankhan/config": "^2.1"
+        "php": ">=7.2.5",
+        "symfony/yaml": "^5.1"
     },
     "autoload": {
         "psr-4": {
@@ -28,7 +33,6 @@
     },
     "require-dev": {
         "laravel/framework": "^7.9",
-        "phpunit/phpunit": "^9",
-        "symfony/yaml": "^5.0"
+        "phpunit/phpunit": "^8.5"
     }
 }

@@ -2,7 +2,7 @@
 namespace Eyf\Autoroute;
 
 use Illuminate\Routing\Router;
-use Noodlehaus\Config;
+use Symfony\Component\Yaml\Yaml;
 
 class Autoroute
 {
@@ -19,20 +19,24 @@ class Autoroute
         $this->dir = $dir;
     }
 
-    public function load()
+    public function load(array $files, array $parameters = [])
     {
-        $filepaths = func_get_args();
-
         if ($this->dir) {
-            $filepaths = array_map(function ($filename) {
+            $files = array_map(function ($filename) {
                 return "{$this->dir}/{$filename}";
-            }, $filepaths);
+            }, $files);
         }
 
-        foreach ($filepaths as $filepath) {
-            $routes = Config::load($filepath);
+        foreach ($files as $file) {
+            $contents = file_get_contents($file);
 
-            $this->create($routes->all());
+            foreach ($parameters as $key => $val) {
+                $contents = \str_replace('%' . $key . '%', $val, $contents);
+            }
+
+            $routes = Yaml::parse($contents);
+
+            $this->create($routes);
         }
     }
 
