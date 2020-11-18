@@ -1,5 +1,5 @@
 # laravel-autoroute
-Autoroute helps you register Laravel routes as an `array` (think YAML).
+Autoroute helps you register Laravel routes as YAML.
 
 > "La route? Là où on va, on a pas besoin... De route."
 
@@ -21,46 +21,19 @@ class RouteServiceProvider extends ServiceProvider
 {
     public function map(Autoroute $autoroute)
     {
-        $autoroute->create([
-            'users/{id}' => [
-                'where' => [
-                    'id' => '[0-9]+',
-                ],
-                'get' => [
-                    'uses' => 'UserController@get',
-                ],
-            ],
-        ]);
+        $autoroute->load(['api.yaml']);
     }
 }
 ```
 
-### Loading files (yaml, json, php...)
-
-Obviously you will want to put your routes in some kind of files. Use the `load` method for that.
-
-```php
-<?php
-
-class RouteServiceProvider extends ServiceProvider
-{
-    public function map(Autoroute $autoroute)
-    {
-        $autoroute->load('api.yaml', 'web.yaml');
-    }
-}
-```
-
-__Notes__:
-- It will look for files inside the Laravel `routes/` folder.
-- Supports all file types supported by [hassankhan/config](https://github.com/hassankhan/config).
-- You need to `composer require symfony/yaml` if you choose to use YAML files.
+__Note__: It will automatically look for files inside the Laravel `routes/` folder.
 
 ### Sample `api.yaml`
 
 ```yaml
 group:
-  prefix: api/v1
+  domain: api.example.org
+  prefix: v1
   middleware:
     - api
   namespace: App\Http\Controllers\Api
@@ -126,7 +99,8 @@ If you're not using any route options (`as`, etc...), you can use a "compact" sy
 
 ```yaml
 group:
-  prefix: api/v1
+  domain: api.example.org
+  prefix: v1
   middleware:
     - api
   namespace: App\Http\Controllers\Api
