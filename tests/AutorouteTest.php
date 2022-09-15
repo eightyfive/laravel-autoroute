@@ -25,39 +25,39 @@ final class AutorouteTest extends TestCase
     {
         $autoroute = $this->getAutoroute();
         $autoroute->create([
-            'users' => [
-                'get' => [
-                    'uses' => 'UserController@get',
+            "users" => [
+                "get" => [
+                    "uses" => "UserController@get",
                 ],
-                'post' => [
-                    'uses' => 'UserController@store',
+                "post" => [
+                    "uses" => "UserController@store",
                 ],
             ],
-            'users/{id}' => [
-                'where' => [
-                    'id' => '[0-9]+',
+            "users/{id}" => [
+                "where" => [
+                    "id" => "[0-9]+",
                 ],
-                'get' => [
-                    'uses' => 'UserController@find',
+                "get" => [
+                    "uses" => "UserController@find",
                 ],
-                'put' => [
-                    'uses' => 'UserController@update',
+                "put" => [
+                    "uses" => "UserController@update",
                 ],
             ],
         ]);
 
         $this->assertRoutes([
-            'user.get',
-            'user.store',
-            'user.find',
-            'user.update',
+            "user.get",
+            "user.store",
+            "user.find",
+            "user.update",
         ]);
 
         $this->assertMethods([
-            'GET' => 2,
-            'HEAD' => 2,
-            'POST' => 1,
-            'PUT' => 1,
+            "GET" => 2,
+            "HEAD" => 2,
+            "POST" => 1,
+            "PUT" => 1,
         ]);
     }
 
@@ -65,69 +65,69 @@ final class AutorouteTest extends TestCase
     {
         $autoroute = $this->getAutoroute();
         $autoroute->create([
-            'group' => [
-                'namespace' => 'App\\Http\\Controllers\\Api',
-                'paths' => [
-                    'users' => [
-                        'get' => [
-                            'uses' => 'UserController@get',
+            "group" => [
+                "namespace" => "App\\Http\\Controllers\\Api",
+                "paths" => [
+                    "users" => [
+                        "get" => [
+                            "uses" => "UserController@get",
                         ],
                     ],
                 ],
             ],
         ]);
 
-        $this->assertEquals($this->getRoute('user.get'), null);
-        $this->assertNotEquals($this->getRoute('api.user.get'), null);
+        $this->assertEquals($this->getRoute("user.get"), null);
+        $this->assertNotEquals($this->getRoute("api.user.get"), null);
     }
 
     public function testAddsConstraints(): void
     {
         $autoroute = $this->getAutoroute();
         $autoroute->create([
-            'users/{id}' => [
-                'where' => [
-                    'id' => '[0-9]+',
+            "users/{id}" => [
+                "where" => [
+                    "id" => "[0-9]+",
                 ],
-                'get' => [
-                    'uses' => 'UserController@get',
+                "get" => [
+                    "uses" => "UserController@get",
                 ],
             ],
         ]);
 
-        $route = $this->getRoute('user.get');
+        $route = $this->getRoute("user.get");
 
         $this->assertNotEquals($route, null);
-        $this->assertEquals($route->wheres['id'], '[0-9]+');
+        $this->assertEquals($route->wheres["id"], "[0-9]+");
     }
 
     public function testLoadsFile(): void
     {
         $autoroute = $this->getAutoroute();
-        $autoroute->load(__DIR__ . '/web.yaml');
+        $autoroute->load(__DIR__ . "/web.yaml");
 
-        $this->assertRoutes(['post.store']);
+        $this->assertRoutes(["post.store"]);
     }
 
     public function testLoadsFiles(): void
     {
         $autoroute = $this->getAutoroute(__DIR__);
-        $autoroute->load('api.yaml', 'web.yaml');
+        $autoroute->load("api.yaml", "web.yaml");
 
-        $this->assertRoutes(['user.get', 'user.store', 'post.store']);
+        $this->assertRoutes(["user.get", "user.store", "post.store"]);
     }
 
     public function testCompact(): void
     {
         $autoroute = $this->getAutoroute();
         $autoroute->create([
-            'users' => [
-                'get' => 'user.get',
-                'post' => 'api.user.store',
+            "users" => [
+                "get" => "user.get",
+                "post" => "api.user.store",
             ],
         ]);
 
-        $this->assertRoutes(['user.get', 'api.user.store']);
+        $this->assertRoutes(["user.get", "api.user.store"]);
     }
 
     protected function getRoutes()
