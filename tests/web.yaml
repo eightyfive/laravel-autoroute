@@ -1,3 +1,5 @@
-posts:
-    post:
-        uses: PostController@store
+namespace: App\Http\Controllers
+paths:
+    posts:
+        post:
+            uses: PostController@store

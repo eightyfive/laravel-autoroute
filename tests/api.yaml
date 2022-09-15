@@ -1,5 +1,8 @@
-users:
-    get:
-        uses: UserController@get
-    post:
-        uses: UserController@store
+prefix: v1
+namespace: App\Http\Controllers
+paths:
+    users:
+        get:
+            uses: UserController@get
+        post:
+            uses: UserController@store
