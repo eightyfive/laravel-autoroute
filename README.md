@@ -1,4 +1,5 @@
 # laravel-autoroute
+
 Autoroute helps you register Laravel routes as YAML.
 
 > "La route? Là où on va, on a pas besoin... De route."
@@ -21,36 +22,53 @@ class RouteServiceProvider extends ServiceProvider
 {
     public function map(Autoroute $autoroute)
     {
-        $autoroute->load(['api.yaml']);
+        $autoroute->load(["api.yaml"]);
     }
 }
 ```
 
-__Note__: It will automatically look for files inside the Laravel `routes/` folder.
+**Note**: It will automatically look for files inside the Laravel `routes/` folder.
 
 ### Sample `api.yaml`
 
 ```yaml
-group:
-  domain: api.example.org
-  prefix: v1
-  middleware:
+domain: api.example.org
+prefix: v1
+middleware:
     - api
-  namespace: App\Http\Controllers\Api
-  paths:
+namespace: App\Http\Controllers\Api
+paths:
     "users":
-      get:
-        uses: UserController@index
-        
-      post:
-        uses: UserController@store
-        
+        get:
+            uses: UserController@index
+
+        post:
+            uses: UserController@store
+
     "users/{id}":
-      get:
-        uses: UserController@find
-        
-      put:
-        uses: UserController@update
+        get:
+            uses: UserController@find
+
+        put:
+            uses: UserController@update
+```
+
+Or using the [compact syntax](#uses-compact-syntax):
+
+```yaml
+domain: api.example.org
+prefix: v1
+middleware:
+    - api
+namespace: App\Http\Controllers\Api
+paths:
+    "users":
+        get: user.index
+        post: user.store
+
+    "users/{id}":
+        get: user.find
+        put: user.update
 ```
 
 ### Template parameters
@@ -70,10 +88,10 @@ class RouteServiceProvider extends ServiceProvider
     public function map(Autoroute $autoroute)
     {
         $parameters = [
-            'api_domain' => env('API_DOMAIN', 'api.example.org'),
+            "app_domain" => env("APP_DOMAIN", "example.org"),
         ];
-        
-        $autoroute->load(['api.yaml'], $parameters);
+
+        $autoroute->load(["api.yaml"], $parameters);
     }
 }
 ```
@@ -81,16 +99,16 @@ class RouteServiceProvider extends ServiceProvider
 And in your local `.env` file:
 
 ```env
-API_DOMAIN='api.example.local'
+APP_DOMAIN=localhost:8000
+# APP_DOMAIN=example.org # PROD
 ```
 
 And in your `api.yaml` file:
 
 ```yaml
-group:
-  domain: %api_domain%
-  prefix: v1
-  # ...
+domain: api.%app_domain%
+prefix: v1
+# ...
 ```
 
 ## Default route names
@@ -98,19 +116,19 @@ group:
 If you don't provide an `as` option in your route definition:
 
 ```yaml
-    "users/{id}":
-      get:
-        uses: UserController@find
+"users/{id}":
+    get:
+      uses: UserController@find
         as: my_user_find_route_name
 ```
 
 Autoroute will generate a default route name based on the current namespace, controller and action names:
 
 ```yaml
-    "users/{id}":
-      get:
+"users/{id}":
+    get:
         uses: UserController@find
-        # as: api.user.find (Generated)
+        # as: api.user.find (generated)
 ```
 
 ### Custom default route name
@@ -138,20 +156,19 @@ class AppServiceProvider extends ServiceProvider
 If you're not using any route options (`as`, etc...), you can use a "compact" syntax to specify your controllers:
 
 ```yaml
-group:
-  domain: api.example.org
-  prefix: v1
-  middleware:
+domain: api.%app_domain%
+prefix: v1
+middleware:
     - api
-  namespace: App\Http\Controllers\Api
-  paths:
+namespace: App\Http\Controllers\Api
+paths:
     "users":
-      get: user.index
-      post: user.store
+        get: user.index
+        post: user.store
 
     "users/{id}":
-      get: user.find
-      put: user.update
+        get: user.find
+        put: user.update
 ```
 
 ### Custom compact syntax

@@ -36,7 +36,7 @@ class Autoroute
 
             $routes = Yaml::parse($contents);
 
-            $this->create($routes);
+            $this->createGroup($routes);
         }
     }
 
