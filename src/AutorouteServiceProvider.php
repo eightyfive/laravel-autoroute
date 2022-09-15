@@ -19,7 +19,7 @@ class AutorouteServiceProvider extends ServiceProvider implements
             $router = $app->make(Router::class);
             $namer = $app->make(RouteNamerInterface::class);
 
-            return new Autoroute($router, $namer, $app->basePath() . '/routes');
+            return new Autoroute($router, $namer, $app->basePath() . "/routes");
         });
 
         $this->app->bind(RouteNamerInterface::class, RouteNamer::class);

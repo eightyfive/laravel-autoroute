@@ -31,7 +31,7 @@ class Autoroute
             $contents = file_get_contents($file);
 
             foreach ($parameters as $key => $val) {
-                $contents = \str_replace('%' . $key . '%', $val, $contents);
+                $contents = \str_replace("%" . $key . "%", $val, $contents);
             }
 
             $routes = Yaml::parse($contents);
@@ -46,10 +46,10 @@ class Autoroute
             if ($path === "group") {
                 $this->createGroup($route);
             } else {
-                if (isset($route['where'])) {
-                    $constraints = $route['where'];
+                if (isset($route["where"])) {
+                    $constraints = $route["where"];
 
-                    unset($route['where']);
+                    unset($route["where"]);
                 } else {
                     $constraints = [];
                 }
@@ -61,9 +61,9 @@ class Autoroute
 
     protected function createGroup(array $group)
     {
-        $routes = $group['paths'];
+        $routes = $group["paths"];
 
-        unset($group['paths']);
+        unset($group["paths"]);
 
         $this->router->group($group, function () use ($routes) {
             $this->create($routes);
@@ -78,9 +78,9 @@ class Autoroute
         foreach ($verbs as $verb => $options) {
             if (is_string($options)) {
                 $uses = $this->namer->getUses($options);
-                $options = compact('uses');
+                $options = compact("uses");
             } else {
-                $uses = $options['uses'];
+                $uses = $options["uses"];
             }
 
             // Create route
@@ -92,12 +92,12 @@ class Autoroute
             }
 
             // Default route name
-            if (!isset($options['as'])) {
+            if (!isset($options["as"])) {
                 $group = last($this->router->getGroupStack());
 
                 $name = $this->namer->getRouteName(
                     $uses,
-                    $group ? $group['namespace'] : ''
+                    $group ? $group["namespace"] : ""
                 );
 
                 $route->name($name);

@@ -5,22 +5,22 @@ use Illuminate\Support\Str;
 
 class RouteNamer implements RouteNamerInterface
 {
-    public function getRouteName(string $uses, string $group = '')
+    public function getRouteName(string $uses, string $group = "")
     {
-        list($rest, $action) = explode('@', $uses);
+        list($rest, $action) = explode("@", $uses);
 
         // Controller
-        $namespace = explode('\\', $rest);
+        $namespace = explode("\\", $rest);
 
         $controller = array_pop($namespace);
-        $controller = str_replace('Controller', '', $controller);
+        $controller = str_replace("Controller", "", $controller);
 
         // Controller namespace
-        $group = str_replace('App\\Http\\Controllers', '', $group);
+        $group = str_replace("App\\Http\\Controllers", "", $group);
 
         if (!empty($group)) {
-            $group = trim($group, '\\');
-            $group = explode('\\', $group);
+            $group = trim($group, "\\");
+            $group = explode("\\", $group);
 
             $namespace = array_merge($group, $namespace);
         }
@@ -30,19 +30,19 @@ class RouteNamer implements RouteNamerInterface
             return Str::snake($name);
         }, $route);
 
-        return implode('.', $route);
+        return implode(".", $route);
     }
 
     public function getUses(string $compact)
     {
-        $namespace = explode('.', $compact);
+        $namespace = explode(".", $compact);
 
         // Action
         $action = array_pop($namespace);
 
         // Controller
         $controller = array_pop($namespace);
-        $controller = ucfirst($controller) . 'Controller';
+        $controller = ucfirst($controller) . "Controller";
 
         // Namespace
         $namespace = array_map(function ($name) {
@@ -52,7 +52,7 @@ class RouteNamer implements RouteNamerInterface
         // "uses" Laravel name
         array_push($namespace, $controller);
 
-        $controller = implode('\\', $namespace);
+        $controller = implode("\\", $namespace);
 
         return "{$controller}@{$action}";
     }
