@@ -58,25 +58,21 @@ class Autoroute
 
     public function createRoutes(OpenApi $spec)
     {
-        foreach ($spec->paths as $pathName => $path) {
-            $this->createRoute($pathName, $path, $spec);
+        foreach ($spec->paths as $uri => $path) {
+            $this->createRoute($uri, $path, $spec);
         }
     }
 
-    protected function createRoute(
-        string $pathName,
-        PathItem $path,
-        OpenApi $spec
-    ) {
+    protected function createRoute(string $uri, PathItem $path, OpenApi $spec)
+    {
         foreach ($path->getOperations() as $method => $operation) {
             $uses =
-                $operation->operationId ??
-                $this->getOperationId($pathName, $method);
+                $operation->operationId ?? $this->getOperationId($uri, $method);
 
             // Create route
             $route = call_user_func(
                 [$this->router, $method],
-                $pathName,
+                $uri,
                 compact("uses")
             );
 
@@ -90,9 +86,9 @@ class Autoroute
         }
     }
 
-    protected function getOperationId(string $pathName, string $method)
+    protected function getOperationId(string $uri, string $method)
     {
-        $segments = explode("/", ltrim($pathName, "/"));
+        $segments = explode("/", ltrim($uri, "/"));
 
         if ($method === static::METHOD_READ) {
             $action =
