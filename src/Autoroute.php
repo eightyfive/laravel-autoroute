@@ -66,6 +66,19 @@ class Autoroute
         }
     }
 
+    public function createGroup(array $group, string $fileName)
+    {
+        if ($this->dir) {
+            $fileName = "{$this->dir}/{$fileName}";
+        }
+
+        $spec = Reader::readFromYamlFile(realpath($fileName));
+
+        $this->router->group($group, function () use ($spec) {
+            $this->createRoutes($spec);
+        });
+    }
+
     public function createRoutes(OpenApi $spec)
     {
         foreach ($spec->paths as $pathName => $path) {
