@@ -43,29 +43,6 @@ class Autoroute
         $this->dir = $dir;
     }
 
-    public function load(array $files, array $parameters = [])
-    {
-        if ($this->dir) {
-            $files = array_map(function ($filename) {
-                return "{$this->dir}/{$filename}";
-            }, $files);
-        }
-
-        foreach ($files as $file) {
-            $spec = Reader::readFromYamlFile(realpath($file));
-
-            $this->router->group(
-                [
-                    "prefix" => "api",
-                    "namespace" => "App\\Http\\Controllers\\Api",
-                ],
-                function () use ($spec) {
-                    $this->createRoutes($spec);
-                }
-            );
-        }
-    }
-
     public function createGroup(array $group, string $fileName)
     {
         if ($this->dir) {
