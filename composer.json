@@ -1,38 +1,44 @@
 {
-    "name": "eyf/laravel-autoroute",
-    "description": "Laravel YAML routes",
-    "license": "MIT",
-    "keywords": [
-        "laravel",
-        "yaml",
-        "routing"
-    ],
-    "authors": [
-        {
-            "name": "0x55",
-            "email": "0xfiftyfive@gmail.com"
-        }
-    ],
-    "require": {
-        "php": ">=7.2.5",
-        "symfony/yaml": "^5.1"
-    },
-    "autoload": {
-        "psr-4": {
-            "Eyf\\Autoroute\\": "src/"
-        }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Eyf\\Autoroute\\AutorouteServiceProvider"
-            ]
-        }
-    },
-    "require-dev": {
-        "laravel/framework": "^7.9",
-        "phpunit/phpunit": "^8.5"
+  "name": "eyf/laravel-autoroute",
+  "description": "Laravel YAML routes",
+  "license": "MIT",
+  "keywords": [
+    "laravel",
+    "yaml",
+    "routing"
+  ],
+  "scripts": {
+    "test": [
+      "phpunit tests/*.php"
+    ]
+  },
+  "authors": [
+    {
+      "name": "0x55",
+      "email": "0xfiftyfive@gmail.com"
     }
+  ],
+  "require": {
+    "php": ">=7.2.5",
+    "symfony/yaml": "^5.1",
+    "cebe/php-openapi": "^1.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "Eyf\\Autoroute\\": "src/"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Eyf\\Autoroute\\AutorouteServiceProvider"
+      ]
+    }
+  },
+  "require-dev": {
+    "laravel/framework": "^7.9",
+    "phpunit/phpunit": "^8.5"
+  }
 }
