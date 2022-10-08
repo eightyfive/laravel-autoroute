@@ -76,14 +76,14 @@ class Autoroute
         PathItem $path,
         OpenApi $spec
     ) {
-        foreach ($path->getOperations() as $verb => $operation) {
+        foreach ($path->getOperations() as $method => $operation) {
             $uses =
                 $operation->operationId ??
-                $this->getOperationId($pathName, $verb);
+                $this->getOperationId($pathName, $method);
 
             // Create route
             $route = call_user_func(
-                [$this->router, $verb],
+                [$this->router, $method],
                 $pathName,
                 compact("uses")
             );
@@ -141,7 +141,7 @@ class Autoroute
         array $verbs,
         array $constraints = []
     ) {
-        foreach ($verbs as $verb => $options) {
+        foreach ($verbs as $method => $options) {
             if (is_string($options)) {
                 $uses = $this->namer->getUses($options);
                 $options = compact("uses");
@@ -150,7 +150,7 @@ class Autoroute
             }
 
             // Create route
-            $route = call_user_func([$this->router, $verb], $path, $options);
+            $route = call_user_func([$this->router, $method], $path, $options);
 
             // Add parameter constraints
             foreach ($constraints as $param => $constraint) {
