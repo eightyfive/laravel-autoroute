@@ -60,14 +60,6 @@ class Autoroute
     {
         foreach ($spec->paths as $pathName => $path) {
             $this->createRoute($pathName, $path, $spec);
-
-            // if (isset($route["where"])) {
-            //     $constraints = $route["where"];
-
-            //     unset($route["where"]);
-            // } else {
-            //     $constraints = [];
-            // }
         }
     }
 
