@@ -16,6 +16,17 @@ use cebe\openapi\spec\OpenApi;
 
 class Autoroute
 {
+    const METHOD_CREATE = "post";
+    const METHOD_READ = "get";
+    const METHOD_UPDATE = "put";
+    const METHOD_DELETE = "delete";
+
+    const ACTION_CREATE = "create";
+    const ACTION_READ = "read";
+    const ACTION_UPDATE = "update";
+    const ACTION_DELETE = "delete";
+    const ACTION_LIST = "list";
+
     protected $gate;
     protected $namer;
     protected $router;
@@ -43,27 +54,22 @@ class Autoroute
         foreach ($files as $file) {
             $spec = Reader::readFromYamlFile(realpath($file));
 
-            $this->createGroup(
+            $this->router->group(
                 [
                     "prefix" => "api",
                     "namespace" => "App\\Http\\Controllers\\Api",
                 ],
-                $spec
+                function () use ($spec) {
+                    $this->createRoutes($spec);
+                }
             );
         }
     }
 
-    protected function createGroup(array $group, OpenApi $spec)
+    public function createRoutes(OpenApi $spec)
     {
-        $this->router->group($group, function () use ($group, $spec) {
-            $this->createRoutes($group, $spec->paths, $spec);
-        });
-    }
-
-    public function createRoutes(array $group, Paths $paths, OpenApi $spec)
-    {
-        foreach ($paths as $pathName => $path) {
-            $this->createRouteFromPath($group, $pathName, $path, $spec);
+        foreach ($spec->paths as $pathName => $path) {
+            $this->createRoute($pathName, $path, $spec);
 
             // if (isset($route["where"])) {
             //     $constraints = $route["where"];
@@ -75,8 +81,7 @@ class Autoroute
         }
     }
 
-    protected function createRouteFromPath(
-        array $group,
+    protected function createRoute(
         string $pathName,
         PathItem $path,
         OpenApi $spec
@@ -103,18 +108,21 @@ class Autoroute
         }
     }
 
-    protected function getOperationId(string $pathName, string $verb)
+    protected function getOperationId(string $pathName, string $method)
     {
         $segments = explode("/", ltrim($pathName, "/"));
 
-        if ($verb === "get") {
-            $action = count($segments) % 2 === 0 ? "read" : "list";
-        } elseif ($verb === "post") {
-            $action = "create";
-        } elseif ($verb === "put") {
-            $action = "update";
-        } elseif ($verb === "delete") {
-            $action = "delete";
+        if ($method === static::METHOD_READ) {
+            $action =
+                count($segments) % 2 === 0
+                    ? static::ACTION_READ
+                    : static::ACTION_LIST;
+        } elseif ($method === static::METHOD_CREATE) {
+            $action = static::ACTION_CREATE;
+        } elseif ($method === static::METHOD_UPDATE) {
+            $action = static::ACTION_UPDATE;
+        } elseif ($method === static::METHOD_DELETE) {
+            $action = static::ACTION_DELETE;
         } else {
             throw new \Exception("Autoroute: Method not supported (PATCH)");
         }
@@ -126,23 +134,19 @@ class Autoroute
     public function create(array $routes)
     {
         foreach ($routes as $path => $route) {
-            if ($path === "group") {
-                // $this->createGroup($route);
+            if (isset($route["where"])) {
+                $constraints = $route["where"];
+
+                unset($route["where"]);
             } else {
-                if (isset($route["where"])) {
-                    $constraints = $route["where"];
-
-                    unset($route["where"]);
-                } else {
-                    $constraints = [];
-                }
-
-                $this->createRoute($path, $route, $constraints);
+                $constraints = [];
             }
+
+            $this->__createRoute($path, $route, $constraints);
         }
     }
 
-    protected function createRoute(
+    protected function __createRoute(
         string $path,
         array $verbs,
         array $constraints = []
@@ -213,6 +217,9 @@ class Autoroute
 
         $abilityName = $this->getAbilityName($action, $modelBaseNames);
 
+        // TODO: Run authorization only when:
+        // `$gate->policies[$modelName . "Policy"]` is set?
+        // Or keep strong "Unauthorized" by default?
         $this->gate->authorize($abilityName, $abilityArgs);
 
         return $models;
@@ -225,6 +232,9 @@ class Autoroute
 
     public function getModels(string $modelName)
     {
+        // TODO: Filter by relationship
+        // Ex: /users/123/comments
+        // Comments of User 123 only...
         return call_user_func([$modelName, "all"]);
     }
 
