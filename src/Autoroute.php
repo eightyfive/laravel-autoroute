@@ -277,8 +277,13 @@ class Autoroute
     protected function getModelNames(array $modelBaseNames)
     {
         return array_map(function ($modelBaseName) {
-            // TODO: return $this->autoroute->getModelsNamespace() . '\\' ...;
-            return "App\\Models\\" . $modelBaseName;
+            return $this->getModelsNamespace() . "\\" . $modelBaseName;
         }, $modelBaseNames);
+    }
+
+    protected function getModelsNamespace()
+    {
+        // TODO
+        return "App\\Models";
     }
 }
