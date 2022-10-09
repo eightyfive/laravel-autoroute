@@ -76,10 +76,7 @@ class Autoroute
         }
 
         if ($schema->type !== "object") {
-            // TODO: `AutorouteException`
-            throw new \Exception(
-                "Autoroute: only `object` type request body supported"
-            );
+            throw new AutorouteException("Request body type not supported");
         }
 
         foreach ($schema->properties as $name => $property) {
@@ -90,14 +87,14 @@ class Autoroute
             // https://swagger.io/docs/specification/data-models/data-types/
 
             if ($property->type === "array") {
-                throw new \Exception(
-                    "Autoroute: Unsupported validation type: array"
+                throw new AutorouteException(
+                    "Validation type not supported: array"
                 );
             }
 
             if ($property->type === "object") {
-                throw new \Exception(
-                    "Autoroute: Unsupported validation type: object"
+                throw new AutorouteException(
+                    "Validation type not supported: object"
                 );
             }
 
@@ -120,7 +117,7 @@ class Autoroute
         string $prefix,
         string $method,
         string $uri
-    ): RequestBody|null {
+    ): RequestBody {
         $group = $this->getGroup($prefix);
 
         $operation = $this->findOperation($group["spec"], $method, $uri);
@@ -129,24 +126,34 @@ class Autoroute
             return $operation->requestBody;
         }
 
-        return null;
+        throw new AutorouteException(
+            "RequestBody not found: " .
+                $prefix .
+                "/" .
+                $uri .
+                "(" .
+                $method .
+                ")"
+        );
     }
 
     protected function findOperation(
         OpenApi $spec,
         string $method,
         string $uri
-    ): Operation|null {
+    ): Operation {
         $pathItem = $this->findPathItem($spec, $uri);
 
         if ($pathItem && isset($pathItem->{$method})) {
             return $pathItem->{$method};
         }
 
-        return null;
+        throw new AutorouteException(
+            "Operation not found: " . $uri . "(" . $method . ")"
+        );
     }
 
-    protected function findPathItem(OpenApi $spec, string $uri): PathItem|null
+    protected function findPathItem(OpenApi $spec, string $uri): PathItem
     {
         foreach ($spec->paths as $pathUri => $pathItem) {
             if ($pathUri === $uri) {
@@ -154,7 +161,7 @@ class Autoroute
             }
         }
 
-        return null;
+        throw new AutorouteException("PathItem not found: " . $uri);
     }
 
     protected function getPrefixFromFileName(string $fileName)
@@ -218,7 +225,7 @@ class Autoroute
         } elseif ($method === static::METHOD_DELETE) {
             $action = static::ACTION_DELETE;
         } else {
-            throw new \Exception("Autoroute: Method not supported (PATCH)");
+            throw new AutorouteException("Method not supported: PATCH");
         }
 
         return "\\Eyf\\Autoroute\\Http\Controllers\\ResourceController@" .
