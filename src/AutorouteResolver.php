@@ -165,9 +165,12 @@ class AutorouteResolver implements AutorouteResolverInterface
         $uri = ltrim($uri, "/");
 
         $segments = explode("/", $uri);
+
+        // Filter non-parameter segments
         $segments = array_filter($segments, function ($segment) {
-            // https://www.php.net/manual/en/function.preg-match.php
-            return preg_match("/\{[a-z_-]+\}/i", $segment) === 0;
+            $isParam = strpos($segment, "{") === 0;
+
+            return !$isParam;
         });
 
         $modelBaseNames = array_map(function ($segment) {
@@ -184,7 +187,7 @@ class AutorouteResolver implements AutorouteResolverInterface
 
     protected function getModelsNamespace()
     {
-        // TODO
+        // TODO: Pull from config('autoroute')
         return "App\\Models";
     }
 }
