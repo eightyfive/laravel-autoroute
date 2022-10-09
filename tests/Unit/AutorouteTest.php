@@ -1,12 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 
 use Illuminate\Routing\Router;
 use Illuminate\Events\Dispatcher;
 
-use Eyf\Autoroute\Autoroute;
-use Eyf\Autoroute\RouteNamer;
+use Tests\Autoroute;
 
 final class AutorouteTest extends TestCase
 {
@@ -16,7 +16,7 @@ final class AutorouteTest extends TestCase
     {
         $this->router = new Router(new Dispatcher());
 
-        $autoroute = new Autoroute($this->router, new RouteNamer(), $dir);
+        $autoroute = new Autoroute($this->router, $dir);
 
         return $autoroute;
     }
@@ -101,7 +101,7 @@ final class AutorouteTest extends TestCase
         $this->assertEquals($route->wheres["id"], "[0-9]+");
     }
 
-    public function testLoadsFile(): void
+    public function testCreateGroup(): void
     {
         // $autoroute = $this->getAutoroute();
         // $autoroute->load([__DIR__ . "/web.yaml"]);
@@ -109,7 +109,13 @@ final class AutorouteTest extends TestCase
         // $this->assertRoutes(["post.store"]);
 
         $autoroute = $this->getAutoroute(__DIR__);
-        $autoroute->load(["api.yaml"]);
+        $autoroute->createGroup(
+            [
+                "prefix" => "api",
+                "namespace" => "App\\Http\\Controllers\\Api",
+            ],
+            "api.yaml"
+        );
 
         $this->assertRoutes(["user.get"]);
     }
@@ -134,6 +140,104 @@ final class AutorouteTest extends TestCase
 
         $this->assertRoutes(["user.get", "api.user.store"]);
     }
+
+    public function testGetAbilityName(): void
+    {
+        $autoroute = $this->getAutoroute();
+
+        $this->assertEquals(
+            $autoroute->getAbilityName("/users/123", "read"),
+            "read"
+        );
+
+        $this->assertEquals(
+            $autoroute->getAbilityName("/users/123/comments", "list"),
+            "listUser"
+        );
+
+        $this->assertEquals(
+            $autoroute->getAbilityName(
+                "/users/123/profiles/456/comments",
+                "list"
+            ),
+            "listProfile"
+        );
+    }
+
+    public function testGetAuthorizeArgs(): void
+    {
+        $autoroute = $this->getAutoroute();
+
+        $this->assertEquals(
+            $autoroute->getAuthorizeArgs("/users/{id}", ["123"], "read"),
+            ["read", "User"]
+        );
+
+        $this->assertEquals(
+            $autoroute->getAuthorizeArgs(
+                "/users/{id}/comments",
+                ["123"],
+                "list"
+            ),
+            ["listUser", "Comment", "user"]
+        );
+
+        $this->assertEquals(
+            $autoroute->getAuthorizeArgs(
+                "/users/{user}/profiles/{profile}/comments",
+                ["123", "456"],
+                "list"
+            ),
+            ["listProfile", "Comment", "profile", "user"]
+        );
+    }
+
+    public function testGetModelBaseNames(): void
+    {
+        $autoroute = $this->getAutoroute();
+
+        $this->assertEquals(
+            $autoroute->getModelBaseNames("users/{id}/comments"),
+            ["User", "Comment"]
+        );
+
+        $this->assertEquals(
+            $autoroute->getModelBaseNames("user/{user}/comment/{comment}"),
+            ["User", "Comment"]
+        );
+    }
+
+    public function testGetModelBaseName(): void
+    {
+        $autoroute = $this->getAutoroute();
+
+        $this->assertEquals($autoroute->getModelBaseName("user"), "User");
+        $this->assertEquals(
+            $autoroute->getModelBaseName("comments"),
+            "Comment"
+        );
+    }
+
+    public function testGetModelNames(): void
+    {
+        $autoroute = $this->getAutoroute();
+
+        $this->assertEquals($autoroute->getModelNames("users/{id}/comments"), [
+            "App\\Models\\User",
+            "App\\Models\\Comment",
+        ]);
+    }
+
+    public function testGetModelsNamespace(): void
+    {
+        $autoroute = $this->getAutoroute();
+
+        $this->assertEquals($autoroute->getModelsNamespace(), "App\\Models");
+    }
+
+    //
+    // PROTECTED
+    //
 
     protected function getRoutes()
     {

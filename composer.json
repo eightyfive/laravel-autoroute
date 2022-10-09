@@ -1,6 +1,7 @@
 {
   "name": "eyf/laravel-autoroute",
   "description": "Laravel YAML routes",
+  "type": "library",
   "license": "MIT",
   "keywords": [
     "laravel",
@@ -8,8 +9,10 @@
     "routing"
   ],
   "scripts": {
-    "test": [
-      "phpunit tests/*.php"
+    "test": "vendor/bin/phpunit",
+    "test-f": "vendor/bin/phpunit --filter",
+    "post-autoload-dump": [
+      "@php ./vendor/bin/testbench package:discover --ansi"
     ]
   },
   "authors": [
@@ -20,12 +23,18 @@
   ],
   "require": {
     "php": ">=7.2.5",
-    "symfony/yaml": "^5.1",
     "cebe/php-openapi": "^1.7"
   },
   "autoload": {
     "psr-4": {
       "Eyf\\Autoroute\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "App\\": "app/",
+      "Tests\\": "tests/",
+      "Database\\Factories\\": "database/factories/"
     }
   },
   "minimum-stability": "dev",
@@ -38,7 +47,8 @@
     }
   },
   "require-dev": {
-    "laravel/framework": "^7.9",
-    "phpunit/phpunit": "^8.5"
+    "orchestra/testbench": "^7.9",
+    "phpunit/phpunit": "^9.5",
+    "laravel/framework": "^9.34"
   }
 }

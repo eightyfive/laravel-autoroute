@@ -16,6 +16,11 @@ class AutorouteServiceProvider extends ServiceProvider implements
      */
     public function register()
     {
+        $this->mergeConfigFrom(
+            __DIR__ . "/../config/autoroute.php",
+            "autoroute"
+        );
+
         $this->app->singleton(Autoroute::class, function ($app) {
             $router = $app->make(Router::class);
             $gate = $app->make(Gate::class);
@@ -30,6 +35,20 @@ class AutorouteServiceProvider extends ServiceProvider implements
         });
 
         $this->app->bind(RouteNamerInterface::class, RouteNamer::class);
+    }
+
+    public function boot()
+    {
+        if ($this->app->runningInConsole()) {
+            $this->publishes(
+                [
+                    __DIR__ . "/../config/autoroute.php" => config_path(
+                        "autoroute.php"
+                    ),
+                ],
+                "config"
+            );
+        }
     }
 
     /**
