@@ -1,6 +1,7 @@
 <?php
 namespace Tests;
 
+use Eyf\Autoroute\Autoroute;
 use Eyf\Autoroute\AutorouteServiceProvider;
 use Orchestra\Testbench\TestCase as Test;
 
@@ -24,5 +25,11 @@ class TestCase extends Test
 
         (new \CreateUsersTable())->up();
         (new \CreatePostsTable())->up();
+
+        $autoroute = $app->make(Autoroute::class);
+
+        // Test "app path" is:
+        // vendor/orchestra/testbench-core/laravel/
+        $autoroute->createGroup("../../../../../routes/api.yaml");
     }
 }
