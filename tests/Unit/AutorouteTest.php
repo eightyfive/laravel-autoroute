@@ -47,9 +47,20 @@ final class AutorouteTest extends TestCase
     {
         $autoroute = $this->createAutoroute();
 
-        $autoroute->createGroup("api.yaml");
+        $autoroute->createGroup("api.yaml", [
+            "namespace" => "App\\Http\\Controllers\\Api",
+        ]);
 
-        $this->assertNotEquals($autoroute->getGroup("api"), null);
+        $group = $autoroute->getGroup("api");
+
+        $this->assertNotEquals($group, null);
+
+        $this->assertTrue(isset($group["options"]["namespace"]));
+
+        $this->assertEquals(
+            $group["options"]["namespace"],
+            "App\\Http\\Controllers\\Api"
+        );
     }
 
     /** @test */
