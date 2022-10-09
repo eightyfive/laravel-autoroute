@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class AutorouteResolver implements AutorouteResolverInterface
 {
+    protected $modelBaseNames;
+    protected $modelNames;
+
     //
     // Routing
     //
@@ -134,12 +137,14 @@ class AutorouteResolver implements AutorouteResolverInterface
             return $action;
         }
 
-        // Ex: /users/{user}/posts
+        // Ex: /users/{user}/posts ("list")
         // ['User', 'Post'];
 
-        array_pop($modelBaseNames); // pop 'Post'
+        array_pop($modelBaseNames); // remove 'Post'
 
-        return $action . array_pop($modelBaseNames); // -> `listUser` (Posts !)
+        $parentBaseName = array_pop($modelBaseNames);
+
+        return $action . $parentBaseName; // -> "listUser" (list user Posts !)
     }
 
     //
@@ -153,31 +158,39 @@ class AutorouteResolver implements AutorouteResolverInterface
 
     protected function getModelNames(string $uri)
     {
-        $modelBaseNames = $this->getModelBaseNames($uri);
+        if (!isset($this->modelNames)) {
+            $modelBaseNames = $this->getModelBaseNames($uri);
 
-        return array_map(function ($modelBaseName) {
-            return $this->getModelsNamespace() . "\\" . $modelBaseName;
-        }, $modelBaseNames);
+            $this->modelNames = array_map(function ($modelBaseName) {
+                return $this->getModelsNamespace() . "\\" . $modelBaseName;
+            }, $modelBaseNames);
+        }
+
+        return $this->modelNames;
     }
 
     protected function getModelBaseNames(string $uri)
     {
-        $uri = ltrim($uri, "/");
+        if (!isset($this->modelBaseNames)) {
+            $uri = ltrim($uri, "/");
 
-        $segments = explode("/", $uri);
+            $segments = explode("/", $uri);
 
-        // Filter non-parameter segments
-        $segments = array_filter($segments, function ($segment) {
-            $isParam = strpos($segment, "{") === 0;
+            // Filter non-parameter segments
+            $segments = array_filter($segments, function ($segment) {
+                $isParam = strpos($segment, "{") === 0;
 
-            return !$isParam;
-        });
+                return !$isParam;
+            });
 
-        $modelBaseNames = array_map(function ($segment) {
-            return $this->getModelBaseName($segment);
-        }, $segments);
+            $modelBaseNames = array_map(function ($segment) {
+                return $this->getModelBaseName($segment);
+            }, $segments);
 
-        return array_values($modelBaseNames);
+            $this->modelBaseNames = array_values($modelBaseNames);
+        }
+
+        return $this->modelBaseNames;
     }
 
     protected function getModelBaseName(string $segment)
