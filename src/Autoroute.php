@@ -26,15 +26,10 @@ class Autoroute
     const ACTION_LIST = "list";
 
     protected $groups;
-    protected $namer;
     protected $router;
 
-    public function __construct(
-        Router $router,
-        RouteNamerInterface $namer,
-        string $dir = null
-    ) {
-        $this->namer = $namer;
+    public function __construct(Router $router, string $dir = null)
+    {
         $this->router = $router;
         $this->dir = $dir;
     }
@@ -228,56 +223,6 @@ class Autoroute
 
         return "\\Eyf\\Autoroute\\Http\Controllers\\ResourceController@" .
             $action;
-    }
-
-    public function create(array $routes)
-    {
-        foreach ($routes as $path => $route) {
-            if (isset($route["where"])) {
-                $constraints = $route["where"];
-
-                unset($route["where"]);
-            } else {
-                $constraints = [];
-            }
-
-            $this->__createRoute($path, $route, $constraints);
-        }
-    }
-
-    protected function __createRoute(
-        string $path,
-        array $verbs,
-        array $constraints = []
-    ) {
-        foreach ($verbs as $method => $options) {
-            if (is_string($options)) {
-                $uses = $this->namer->getUses($options);
-                $options = compact("uses");
-            } else {
-                $uses = $options["uses"];
-            }
-
-            // Create route
-            $route = call_user_func([$this->router, $method], $path, $options);
-
-            // Add parameter constraints
-            foreach ($constraints as $param => $constraint) {
-                $route->where($param, $constraint);
-            }
-
-            // Default route name
-            if (!isset($options["as"])) {
-                $group = last($this->router->getGroupStack());
-
-                $name = $this->namer->getRouteName(
-                    $uses,
-                    $group ? $group["namespace"] : ""
-                );
-
-                $route->name($name);
-            }
-        }
     }
 
     public function authorizeRequest(string $action, Request $request)
