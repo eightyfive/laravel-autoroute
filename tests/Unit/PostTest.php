@@ -22,6 +22,7 @@ class PostTest extends TestCase
         ]);
 
         $this->assertEquals($post->title, "Lorem ipsum");
+        $this->assertEquals($post->description, null);
         $this->assertEquals($post->user_id, $user->id);
     }
 }
