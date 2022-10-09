@@ -12,103 +12,20 @@ final class AutorouteTest extends TestCase
 {
     protected $router;
 
-    protected function getAutoroute($dir = null)
+    protected function createAutoroute()
     {
         $this->router = new Router(new Dispatcher());
 
-        $autoroute = new Autoroute($this->router, $dir);
+        $autoroute = new Autoroute($this->router, __DIR__ . "/../../routes");
 
         return $autoroute;
     }
 
-    public function testCreatesRoutes(): void
+    /** @test */
+    public function creates_group(): void
     {
-        $autoroute = $this->getAutoroute();
-        $autoroute->create([
-            "users" => [
-                "get" => [
-                    "uses" => "UserController@get",
-                ],
-                "post" => [
-                    "uses" => "UserController@store",
-                ],
-            ],
-            "users/{id}" => [
-                "where" => [
-                    "id" => "[0-9]+",
-                ],
-                "get" => [
-                    "uses" => "UserController@find",
-                ],
-                "put" => [
-                    "uses" => "UserController@update",
-                ],
-            ],
-        ]);
+        $autoroute = $this->createAutoroute();
 
-        $this->assertRoutes([
-            "user.get",
-            "user.store",
-            "user.find",
-            "user.update",
-        ]);
-
-        $this->assertMethods([
-            "GET" => 2,
-            "HEAD" => 2,
-            "POST" => 1,
-            "PUT" => 1,
-        ]);
-    }
-
-    public function testCreatesGroup(): void
-    {
-        $autoroute = $this->getAutoroute();
-        $autoroute->create([
-            "group" => [
-                "namespace" => "App\\Http\\Controllers\\Api",
-                "paths" => [
-                    "users" => [
-                        "get" => [
-                            "uses" => "UserController@get",
-                        ],
-                    ],
-                ],
-            ],
-        ]);
-
-        $this->assertEquals($this->getRoute("user.get"), null);
-        $this->assertNotEquals($this->getRoute("api.user.get"), null);
-    }
-
-    public function testAddsConstraints(): void
-    {
-        $autoroute = $this->getAutoroute();
-        $autoroute->create([
-            "users/{id}" => [
-                "where" => [
-                    "id" => "[0-9]+",
-                ],
-                "get" => [
-                    "uses" => "UserController@get",
-                ],
-            ],
-        ]);
-
-        $route = $this->getRoute("user.get");
-
-        $this->assertNotEquals($route, null);
-        $this->assertEquals($route->wheres["id"], "[0-9]+");
-    }
-
-    public function testCreateGroup(): void
-    {
-        // $autoroute = $this->getAutoroute();
-        // $autoroute->load([__DIR__ . "/web.yaml"]);
-
-        // $this->assertRoutes(["post.store"]);
-
-        $autoroute = $this->getAutoroute(__DIR__);
         $autoroute->createGroup(
             [
                 "prefix" => "api",
@@ -117,56 +34,44 @@ final class AutorouteTest extends TestCase
             "api.yaml"
         );
 
-        $this->assertRoutes(["user.get"]);
+        $this->assertNotEquals($this->getRoute("GET", "api/users"), null);
+        $this->assertNotEquals(
+            $this->getRoute("GET", "api/users/{user}"),
+            null
+        );
+        $this->assertNotEquals(
+            $this->getRoute("GET", "api/users/{user}/posts"),
+            null
+        );
     }
 
-    // public function testLoadsFiles(): void
-    // {
-    //     $autoroute = $this->getAutoroute(__DIR__);
-    //     $autoroute->load(["api.yaml", "web.yaml"]);
-
-    //     $this->assertRoutes(["user.get", "user.store", "post.store"]);
-    // }
-
-    public function testCompact(): void
+    /** @test */
+    public function get_ability_name(): void
     {
-        $autoroute = $this->getAutoroute();
-        $autoroute->create([
-            "users" => [
-                "get" => "user.get",
-                "post" => "api.user.store",
-            ],
-        ]);
-
-        $this->assertRoutes(["user.get", "api.user.store"]);
-    }
-
-    public function testGetAbilityName(): void
-    {
-        $autoroute = $this->getAutoroute();
+        $autoroute = $this->createAutoroute();
 
         $this->assertEquals(
-            $autoroute->getAbilityName("/users/123", "read"),
+            $autoroute->getAbilityName("/users/{user}", "read"),
             "read"
         );
 
         $this->assertEquals(
-            $autoroute->getAbilityName("/users/123/comments", "list"),
+            $autoroute->getAbilityName("/users/{user}/comments", "list"),
             "listUser"
         );
 
         $this->assertEquals(
             $autoroute->getAbilityName(
-                "/users/123/profiles/456/comments",
+                "/users/{user}/profiles/{profile}/comments",
                 "list"
             ),
             "listProfile"
         );
     }
 
-    public function testGetAuthorizeArgs(): void
+    public function get_authorize_args(): void
     {
-        $autoroute = $this->getAutoroute();
+        $autoroute = $this->createAutoroute();
 
         $this->assertEquals(
             $autoroute->getAuthorizeArgs("/users/{id}", ["123"], "read"),
@@ -192,24 +97,26 @@ final class AutorouteTest extends TestCase
         );
     }
 
-    public function testGetModelBaseNames(): void
+    /** @test */
+    public function get_model_base_names(): void
     {
-        $autoroute = $this->getAutoroute();
+        $autoroute = $this->createAutoroute();
 
         $this->assertEquals(
-            $autoroute->getModelBaseNames("users/{id}/comments"),
+            $autoroute->getModelBaseNames("/users/{id}/comments"),
             ["User", "Comment"]
         );
 
         $this->assertEquals(
-            $autoroute->getModelBaseNames("user/{user}/comment/{comment}"),
+            $autoroute->getModelBaseNames("/user/{user}/comment/{comment}"),
             ["User", "Comment"]
         );
     }
 
-    public function testGetModelBaseName(): void
+    /** @test */
+    public function get_model_base_name(): void
     {
-        $autoroute = $this->getAutoroute();
+        $autoroute = $this->createAutoroute();
 
         $this->assertEquals($autoroute->getModelBaseName("user"), "User");
         $this->assertEquals(
@@ -218,9 +125,10 @@ final class AutorouteTest extends TestCase
         );
     }
 
-    public function testGetModelNames(): void
+    /** @test */
+    public function get_model_names(): void
     {
-        $autoroute = $this->getAutoroute();
+        $autoroute = $this->createAutoroute();
 
         $this->assertEquals($autoroute->getModelNames("users/{id}/comments"), [
             "App\\Models\\User",
@@ -228,9 +136,10 @@ final class AutorouteTest extends TestCase
         ]);
     }
 
-    public function testGetModelsNamespace(): void
+    /** @test */
+    public function get_models_namespace(): void
     {
-        $autoroute = $this->getAutoroute();
+        $autoroute = $this->createAutoroute();
 
         $this->assertEquals($autoroute->getModelsNamespace(), "App\\Models");
     }
@@ -242,25 +151,16 @@ final class AutorouteTest extends TestCase
     protected function getRoutes()
     {
         $routes = $this->router->getRoutes();
-        $routes->refreshNameLookups();
+        // $routes->refreshNameLookups();
 
         return $routes;
     }
 
-    protected function getRoute($name)
+    protected function getRoute(string $method, string $uri)
     {
-        $routes = $this->getRoutes();
+        $routes = $this->getRoutes()->getRoutesByMethod();
 
-        return $routes->getByName($name);
-    }
-
-    protected function assertRoutes(array $names)
-    {
-        $routes = $this->getRoutes();
-
-        foreach ($names as $name) {
-            $this->assertNotEquals($routes->getByName($name), null);
-        }
+        return $routes[$method][$uri] ?? null;
     }
 
     protected function assertMethods(array $verbs)

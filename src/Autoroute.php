@@ -6,13 +6,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Str;
-use Illuminate\Contracts\Auth\Access\Gate;
-// use Symfony\Component\Yaml\Yaml;
 use cebe\openapi\Reader;
 use cebe\openapi\spec\PathItem;
-use cebe\openapi\spec\Paths;
 use cebe\openapi\spec\OpenApi;
-// use cebe\openapi\spec\Operation;
 
 class Autoroute
 {
@@ -27,17 +23,14 @@ class Autoroute
     const ACTION_DELETE = "delete";
     const ACTION_LIST = "list";
 
-    protected $gate;
     protected $namer;
     protected $router;
 
     public function __construct(
         Router $router,
-        Gate $gate,
         RouteNamerInterface $namer,
         string $dir = null
     ) {
-        $this->gate = $gate;
         $this->namer = $namer;
         $this->router = $router;
         $this->dir = $dir;
@@ -197,7 +190,7 @@ class Autoroute
         // TODO: Run authorization only when:
         // `$gate->policies[$modelName . "Policy"]` is set?
         // Or keep strong "Unauthorized" by default?
-        $this->gate->authorize($abilityName, $abilityArgs);
+        // $this->gate->authorize($abilityName, $abilityArgs);
 
         return $models;
     }
@@ -223,7 +216,7 @@ class Autoroute
     protected function getModelBaseNames(string $routeUri)
     {
         // TODO: api/
-        $uri = str_replace("api/", "", $routeUri);
+        $uri = str_replace("api/", "", ltrim($routeUri, "/"));
 
         $segments = explode("/", $uri);
         $segments = array_filter($segments, function ($segment) {
@@ -251,9 +244,12 @@ class Autoroute
             return $action;
         }
 
-        array_pop($modelBaseNames);
+        // Ex: /users/{user}/posts
+        // ['User', 'Post'];
 
-        return $action . implode("", $modelBaseNames);
+        array_pop($modelBaseNames); // pop 'Post'
+
+        return $action . array_pop($modelBaseNames); // -> `listUser` (Posts !)
     }
 
     public function getAbilityArgs(string $uri, array $parameters)

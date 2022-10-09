@@ -1,0 +1,105 @@
+openapi: 3.0.0
+info:
+  title: Autoroute
+  version: 0.1.0
+
+# security:
+#   - "auth:sanctum": []
+
+paths:
+  /users:
+    post:
+      responses:
+        "200":
+          $ref: "#/components/responses/204"
+
+    get:
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  - $ref: "#/components/schemas/User"
+
+  /users/{user}:
+    parameters:
+      - $ref: "#/components/parameters/user"
+    get:
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{user}/posts:
+    parameters:
+      - $ref: "#/components/parameters/user"
+    get:
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  - $ref: "#/components/schemas/Post"
+components:
+  schemas:
+    id:
+      type: integer
+      minimum: 1
+
+    User:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/id"
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+
+    Post:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/id"
+        title:
+          type: string
+        description:
+          type: string
+
+  parameters:
+    user:
+      in: path
+      name: user
+      schema:
+        $ref: "#/components/schemas/id"
+      required: true
+      description: User ID
+
+  responses:
+    "401":
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+
+    "204":
+      description: No Content
+
+  securitySchemes:
+    "auth:sanctum":
+      type: http
+      scheme: bearer

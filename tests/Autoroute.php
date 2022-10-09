@@ -2,7 +2,6 @@
 namespace Tests;
 
 use Illuminate\Routing\Router;
-use Illuminate\Contracts\Auth\Access\Gate;
 
 use Eyf\Autoroute\Autoroute as Service;
 use Eyf\Autoroute\RouteNamer;
@@ -11,7 +10,7 @@ class Autoroute extends Service
 {
     public function __construct(Router $router, string $dir = null)
     {
-        parent::__construct($router, new Gate(), new RouteNamer(), $dir);
+        parent::__construct($router, new RouteNamer(), $dir);
     }
 
     public function getOperationId(string $uri, string $method)
