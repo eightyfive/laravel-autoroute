@@ -20,14 +20,18 @@ class AutorouteServiceProvider extends ServiceProvider implements
             "autoroute"
         );
 
+        $this->app->bind(
+            AutorouteResolverInterface::class,
+            AutorouteResolver::class
+        );
+
         $this->app->singleton(Autoroute::class, function ($app) {
-            $router = $app->make(Router::class);
-            $namer = $app->make(RouteNamerInterface::class);
-
-            return new Autoroute($router, $namer, $app->basePath() . "/routes");
+            return new Autoroute(
+                $app->make(Router::class),
+                $app->make(AutorouteResolverInterface::class),
+                $app->basePath() . "/routes"
+            );
         });
-
-        $this->app->bind(RouteNamerInterface::class, RouteNamer::class);
     }
 
     public function boot()

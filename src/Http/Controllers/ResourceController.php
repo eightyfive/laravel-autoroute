@@ -9,8 +9,6 @@ use Eyf\Autoroute\Autoroute;
 
 class ResourceController extends Controller
 {
-    protected $segments;
-
     protected $autoroute;
 
     public function __construct(Autoroute $autoroute)
@@ -20,57 +18,159 @@ class ResourceController extends Controller
 
     public function create(Request $request)
     {
-        $models = $this->autoroute->authorizeRequest("create", $request);
+        $route = $request->route();
+        $parameters = $route->parameters();
 
-        $modelName = end($models);
+        $secured = $this->autoroute->isSecured(
+            $route->uri,
+            Autoroute::METHOD_CREATE
+        );
 
-        $model = $this->autoroute->createModel($modelName, $request->all());
+        if ($secured) {
+            [$ability, $args] = $this->autoroute->authorize(
+                Autoroute::ACTION_CREATE,
+                $route->uri,
+                $parameters
+            );
 
+            $this->authorize($ability, $args);
+        }
+
+        $model = $this->autoroute->mutateByRoute(
+            Autoroute::ACTION_CREATE,
+            $route->uri,
+            $parameters,
+            $request->all()
+        );
+
+        // TODO: Filter response by OpenAPI 3.0 definition response schema
         return response()->json($model);
     }
 
     public function read(Request $request)
     {
-        $models = $this->autoroute->authorizeRequest("read", $request);
+        $route = $request->route();
+        $parameters = $route->parameters();
 
-        $model = end($models);
+        $secured = $this->autoroute->isSecured(
+            $route->uri,
+            Autoroute::METHOD_READ
+        );
 
+        if ($secured) {
+            [$ability, $arguments] = $this->autoroute->authorize(
+                Autoroute::ACTION_READ,
+                $route->uri,
+                $parameters
+            );
+
+            $this->authorize($ability, $arguments);
+        }
+
+        $model = $this->autoroute->queryByRoute(
+            Autoroute::ACTION_READ,
+            $route->uri,
+            $parameters
+        );
+
+        // TODO
         return response()->json($model);
     }
 
-    public function update(Request $request, Model $model)
+    public function update(Request $request)
     {
-        $models = $this->autoroute->authorizeRequest("update", $request);
+        $route = $request->route();
+        $parameters = $route->parameters();
 
-        // TODO: $request->validate($this->autoroute->getValidationRules( ... ));
+        $secured = $this->autoroute->isSecured(
+            $route->uri,
+            Autoroute::METHOD_UPDATE
+        );
 
-        $model = end($models);
-        $model->fill($request->all());
-        $model->save();
+        if ($secured) {
+            [$ability, $arguments] = $this->autoroute->authorize(
+                Autoroute::ACTION_UPDATE,
+                $route->uri,
+                $parameters
+            );
 
-        // TODO: Http Model Resource
+            $this->authorize($ability, $arguments);
+        }
+
+        // TODO: Validation
+        // $rules = $this->autoroute->getRequest( ... )
+        // $request->validate($rules);
+
+        $model = $this->autoroute->mutateByRoute(
+            Autoroute::ACTION_UPDATE,
+            $route->uri,
+            $parameters,
+            $request->all()
+        );
+
+        // TODO
         return response()->json($model);
         // TODO: return new VoidResponse();
     }
 
     public function delete(Request $request, Model $model)
     {
-        $models = $this->autoroute->authorizeRequest("delete", $request);
+        $route = $request->route();
+        $parameters = $route->parameters();
 
-        $model = end($models);
-        $model->delete();
+        $secured = $this->autoroute->isSecured(
+            $route->uri,
+            Autoroute::METHOD_DELETE
+        );
 
+        if ($secured) {
+            [$ability, $arguments] = $this->autoroute->authorize(
+                Autoroute::ACTION_DELETE,
+                $route->uri,
+                $parameters
+            );
+
+            $this->authorize($ability, $arguments);
+        }
+
+        $this->autoroute->mutateByRoute(
+            Autoroute::ACTION_DELETE,
+            $route->uri,
+            $parameters,
+            []
+        );
+
+        // TODO: Change according to OpenAPi 3.0 definition
         return new VoidResponse();
     }
 
     public function list(Request $request)
     {
-        $models = $this->autoroute->authorizeRequest("list", $request);
+        $route = $request->route();
+        $parameters = $route->parameters();
 
-        $modelName = end($models);
+        $secured = $this->autoroute->isSecured(
+            $route->uri,
+            Autoroute::METHOD_LIST
+        );
 
-        $models = $this->autoroute->getModels($modelName);
+        if ($secured) {
+            [$ability, $arguments] = $this->autoroute->authorize(
+                Autoroute::ACTION_LIST,
+                $route->uri,
+                $parameters
+            );
 
+            $this->authorize($ability, $arguments);
+        }
+
+        $models = $this->autoroute->queryByRoute(
+            Autoroute::ACTION_LIST,
+            $route->uri,
+            $parameters
+        );
+
+        // TODO
         return response()->json($models);
     }
 }

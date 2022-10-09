@@ -1,11 +1,10 @@
 <?php
 namespace Eyf\Autoroute;
 
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-
-use Illuminate\Http\Request;
+// TODO
+// use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Collection;
 use cebe\openapi\Reader;
 use cebe\openapi\spec\PathItem;
 use cebe\openapi\spec\OpenApi;
@@ -18,6 +17,7 @@ class Autoroute
     const METHOD_READ = "get";
     const METHOD_UPDATE = "put";
     const METHOD_DELETE = "delete";
+    const METHOD_LIST = "list";
 
     const ACTION_CREATE = "create";
     const ACTION_READ = "read";
@@ -25,12 +25,19 @@ class Autoroute
     const ACTION_DELETE = "delete";
     const ACTION_LIST = "list";
 
-    protected $groups;
+    protected $groups = [];
     protected $router;
+    protected $resolver;
 
-    public function __construct(Router $router, string $dir = null)
-    {
+    public function __construct(
+        Router $router,
+        AutorouteResolverInterface $resolver,
+        string $dir = null
+    ) {
         $this->router = $router;
+        $this->resolver = $resolver;
+
+        // TODO: Default `dir` = "./public/api.yaml"
         $this->dir = $dir;
     }
 
@@ -190,7 +197,8 @@ class Autoroute
     {
         foreach ($path->getOperations() as $method => $operation) {
             $uses =
-                $operation->operationId ?? $this->getOperationId($uri, $method);
+                $operation->operationId ??
+                $this->resolver->getOperationId($uri, $method);
 
             // Create route
             $route = call_user_func(
@@ -209,196 +217,76 @@ class Autoroute
         }
     }
 
-    protected function getOperationId(string $uri, string $method)
+    public function isSecured(string $uri, string $method): bool
     {
-        $segments = explode("/", ltrim($uri, "/"));
-
-        if ($method === static::METHOD_READ) {
-            $action =
-                count($segments) % 2 === 0
-                    ? static::ACTION_READ
-                    : static::ACTION_LIST;
-        } elseif ($method === static::METHOD_CREATE) {
-            $action = static::ACTION_CREATE;
-        } elseif ($method === static::METHOD_UPDATE) {
-            $action = static::ACTION_UPDATE;
-        } elseif ($method === static::METHOD_DELETE) {
-            $action = static::ACTION_DELETE;
-        } else {
-            throw new AutorouteException("Method not supported: PATCH");
-        }
-
-        return "\\Eyf\\Autoroute\\Http\Controllers\\ResourceController@" .
-            $action;
+        throw new AutorouteException("TODO");
     }
 
-    public function authorizeRequest(string $action, Request $request)
+    // TODO: Run authorization only when:
+    // `$gate->policies[$modelName . "Policy"]` is set?
+    // Or keep strong "Unauthorized" by default?
+
+    public function authorize(string $action, string $uri, array $parameters)
     {
-        $modelNames = $this->getModelNames($request->route()->uri);
-        $parameters = $request->route()->parameters();
+        $models = $this->resolver->getRouteModels($uri, $parameters);
 
-        $models = [];
-        $index = 0;
+        $name = $this->resolver->getAbilityName($uri, $action);
+        $args = $this->getAbilityArgs($models, $uri, $parameters);
 
-        foreach ($parameters as $modelId) {
-            $model = $this->findModel($modelNames[$index], $modelId);
+        return [$name, $args];
+    }
 
-            if ($model === null) {
-                throw new NotFoundHttpException("Not Found");
-            }
+    protected function getAbilityArgs(
+        Collection $models,
+        string $uri,
+        array $parameters
+    ) {
+        $args = $models->all(); // Array
 
-            array_push($models, $model);
-            $index++;
-        }
-
-        $abilityArgs = $models;
-
-        if (count($parameters) < count($modelNames)) {
-            $modelName = end($modelNames);
-
+        if (count($parameters) < count($models)) {
             // Ex: `/users/123/comments`
+            // $this->authorize('list', App\Models\Comment::class, $user);
 
-            // $this->authorize($ability, Comment::class, $user);
-            array_unshift($abilityArgs, $modelName);
-
-            // [$user, Comment::class];
-            array_push($models, $modelName);
-        }
-
-        $abilityName = $this->getAbilityName($request->route()->uri, $action);
-
-        // TODO: Run authorization only when:
-        // `$gate->policies[$modelName . "Policy"]` is set?
-        // Or keep strong "Unauthorized" by default?
-        // $this->gate->authorize($abilityName, $abilityArgs);
-
-        return $models;
-    }
-
-    public function createModel(string $modelName, array $data)
-    {
-        return call_user_func([$modelName, "create"], $data);
-    }
-
-    public function getModels(string $modelName)
-    {
-        // TODO: Filter by relationship
-        // Ex: /users/123/comments
-        // Comments of User 123 only...
-        return call_user_func([$modelName, "all"]);
-    }
-
-    protected function findModel(string $modelName, string $id)
-    {
-        return call_user_func([$modelName, "find"], $id);
-    }
-
-    protected function getModelBaseNames(string $routeUri)
-    {
-        // TODO: api/
-        $uri = str_replace("api/", "", ltrim($routeUri, "/"));
-
-        $segments = explode("/", $uri);
-        $segments = array_filter($segments, function ($segment) {
-            // https://www.php.net/manual/en/function.preg-match.php
-            return preg_match("/\{[a-z_-]+\}/i", $segment) === 0;
-        });
-
-        $modelBaseNames = array_map(function ($segment) {
-            return $this->getModelBaseName($segment);
-        }, $segments);
-
-        return array_values($modelBaseNames);
-    }
-
-    protected function getModelBaseName(string $segment)
-    {
-        return Str::ucfirst(Str::singular($segment));
-    }
-
-    protected function getAbilityName(string $uri, string $action)
-    {
-        $modelBaseNames = $this->getModelBaseNames($uri);
-
-        if (count($modelBaseNames) === 1) {
-            return $action;
-        }
-
-        // Ex: /users/{user}/posts
-        // ['User', 'Post'];
-
-        array_pop($modelBaseNames); // pop 'Post'
-
-        return $action . array_pop($modelBaseNames); // -> `listUser` (Posts !)
-    }
-
-    public function getAbilityArgs(string $uri, array $parameters)
-    {
-        $modelNames = $this->getModelNames($uri);
-
-        $args = $this->getRouteModels($uri, $parameters);
-
-        if (count($parameters) < count($modelNames)) {
-            // Ex: `/users/123/comments`
-
-            // $this->authorize($ability, Comment::class, $user);
-            array_unshift($args, end($modelNames));
+            array_unshift(
+                $args,
+                $this->resolver->getRouteModelName($uri, $parameters)
+            );
         }
 
         return $args;
     }
 
-    public function getAuthorizeArgs(
+    public function queryByRoute(string $action, string $uri, array $parameters)
+    {
+        if ($action === static::ACTION_READ) {
+            return $this->resolver->readByRoute($uri, $parameters);
+        }
+
+        if ($action === static::ACTION_LIST) {
+            return $this->resolver->listByRoute($uri, $parameters);
+        }
+
+        throw new AutorouteException("Unsupported query action: " . $action);
+    }
+
+    public function mutateByRoute(
+        string $action,
         string $uri,
         array $parameters,
-        string $action
+        array $data
     ) {
-        $name = $this->getAbilityName($uri, $action);
-        $args = $this->getAbilityArgs($uri, $parameters);
-
-        return [$name, $args];
-    }
-
-    public function getRouteModels(string $uri, array $parameters)
-    {
-        $modelNames = $this->getModelNames($uri);
-
-        $models = [];
-        $index = 0;
-
-        foreach ($parameters as $modelId) {
-            $model = $this->findModel($modelNames[$index], $modelId);
-
-            if ($model === null) {
-                throw new NotFoundHttpException("Not Found");
-            }
-
-            array_push($models, $model);
-            $index++;
+        if ($action === static::ACTION_CREATE) {
+            return $this->resolver->createByRoute($uri, $parameters, $data);
         }
 
-        if (count($parameters) < count($modelNames)) {
-            // Ex: `/users/123/comments`
-
-            // [$user, Comment::class];
-            array_push($models, end($modelNames));
+        if ($action === static::ACTION_UPDATE) {
+            return $this->resolver->updateByRoute($uri, $parameters, $data);
         }
 
-        return $models;
-    }
+        if ($action === static::ACTION_DELETE) {
+            return $this->resolver->deleteByRoute($uri, $parameters);
+        }
 
-    protected function getModelNames(string $uri)
-    {
-        $modelBaseNames = $this->getModelBaseNames($uri);
-
-        return array_map(function ($modelBaseName) {
-            return $this->getModelsNamespace() . "\\" . $modelBaseName;
-        }, $modelBaseNames);
-    }
-
-    protected function getModelsNamespace()
-    {
-        // TODO
-        return "App\\Models";
+        throw new AutorouteException("Unsupported mutate action: " . $action);
     }
 }

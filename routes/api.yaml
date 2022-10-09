@@ -103,6 +103,10 @@ components:
         application/json:
           schema:
             type: object
+            required:
+              - name
+              - email
+              - password
             properties:
               name:
                 type: string
@@ -115,11 +119,6 @@ components:
               device_name:
                 type: string
                 format: "between:5,10"
-
-            required:
-              - name
-              - email
-              - password
 
   responses:
     "401":
