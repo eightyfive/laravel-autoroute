@@ -22,17 +22,57 @@ final class AutorouteTest extends TestCase
     }
 
     /** @test */
+    public function get_prefix_from_file_name(): void
+    {
+        $autoroute = $this->createAutoroute();
+
+        $this->assertEquals(
+            $autoroute->getPrefixFromFileName("api.yaml"),
+            "api"
+        );
+
+        $this->assertEquals(
+            $autoroute->getPrefixFromFileName("routes/web_api.yaml"),
+            "web_api"
+        );
+
+        $this->assertEquals(
+            $autoroute->getPrefixFromFileName("./routes/internal.yaml"),
+            "internal"
+        );
+    }
+
+    /** @test */
     public function creates_group(): void
     {
         $autoroute = $this->createAutoroute();
 
-        $autoroute->createGroup(
-            [
-                "prefix" => "api",
-                "namespace" => "App\\Http\\Controllers\\Api",
-            ],
-            "api.yaml"
-        );
+        $autoroute->createGroup("api.yaml");
+
+        $this->assertNotEquals($autoroute->getGroup("api"), null);
+    }
+
+    /** @test */
+    public function creates_group_custom_prefix(): void
+    {
+        $autoroute = $this->createAutoroute();
+
+        $autoroute->createGroup("api.yaml", [
+            "prefix" => "external",
+        ]);
+
+        $this->assertEquals($autoroute->getGroup("api"), null);
+        $this->assertNotEquals($autoroute->getGroup("external"), null);
+    }
+
+    /** @test */
+    public function creates_routes(): void
+    {
+        $autoroute = $this->createAutoroute();
+
+        $autoroute->createGroup("api.yaml", [
+            "namespace" => "App\\Http\\Controllers\\Api",
+        ]);
 
         $this->assertNotEquals($this->getRoute("GET", "api/users"), null);
         $this->assertNotEquals(

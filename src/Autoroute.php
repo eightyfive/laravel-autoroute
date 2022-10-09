@@ -23,6 +23,7 @@ class Autoroute
     const ACTION_DELETE = "delete";
     const ACTION_LIST = "list";
 
+    protected $groups;
     protected $namer;
     protected $router;
 
@@ -36,17 +37,38 @@ class Autoroute
         $this->dir = $dir;
     }
 
-    public function createGroup(array $group, string $fileName)
+    public function createGroup(string $fileName, array $options = [])
     {
         if ($this->dir) {
             $fileName = "{$this->dir}/{$fileName}";
         }
 
+        if (!isset($options["prefix"])) {
+            $options["prefix"] = $this->getPrefixFromFileName($fileName);
+        }
+
         $spec = Reader::readFromYamlFile(realpath($fileName));
 
-        $this->router->group($group, function () use ($spec) {
+        $this->addGroup($options["prefix"], $spec, $options);
+
+        $this->router->group($options, function () use ($spec) {
             $this->createRoutes($spec);
         });
+    }
+
+    protected function getPrefixFromFileName(string $fileName)
+    {
+        return pathinfo($fileName, PATHINFO_FILENAME);
+    }
+
+    protected function addGroup(string $prefix, OpenApi $spec, array $options)
+    {
+        $this->groups[$prefix] = compact("spec", "options");
+    }
+
+    public function getGroup(string $prefix)
+    {
+        return $this->groups[$prefix] ?? null;
     }
 
     public function createRoutes(OpenApi $spec)
