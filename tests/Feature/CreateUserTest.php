@@ -12,7 +12,7 @@ class CreateUserTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    function anybody_can_create_users()
+    function can_create_users()
     {
         $this->assertCount(0, User::all());
 
@@ -31,5 +31,17 @@ class CreateUserTest extends TestCase
             $this->assertEquals("0x55", $user->name);
             $this->assertEquals("0xfiftyfive@gmail.com", $user->email);
         });
+    }
+
+    /** @test */
+    function cannot_create_users()
+    {
+        $response = $this->post("/api/users", [
+            "name" => "0x55",
+            // "email" => "0xfiftyfive@gmail.com", // Missing email --> 422
+            "password" => "password",
+        ]);
+
+        $response->assertStatus(422);
     }
 }

@@ -10,8 +10,8 @@ use Tests\Autoroute;
 
 final class AutorouteTest extends TestCase
 {
-    protected $autoroute;
-    protected $router;
+    protected Autoroute $autoroute;
+    protected Router $router;
 
     protected function setUp(): void
     {
@@ -61,7 +61,7 @@ final class AutorouteTest extends TestCase
     }
 
     /** @test */
-    public function creates_routes(): void
+    public function registers_routes(): void
     {
         $this->autoroute->createGroup("api.yaml");
 
@@ -79,6 +79,28 @@ final class AutorouteTest extends TestCase
         $route = $this->getRoute("POST", "api/login");
 
         $this->assertEquals($route->getActionName(), "SessionController@login");
+    }
+
+    /** @test */
+    public function creates_validation_rules(): void
+    {
+        $this->autoroute->createGroup("api.yaml");
+
+        $rules = $this->autoroute->getValidationRules("api", "post", "/users");
+
+        $this->assertTrue(isset($rules["name"]));
+        $this->assertTrue(isset($rules["email"]));
+        $this->assertTrue(isset($rules["password"]));
+        $this->assertTrue(isset($rules["device_name"]));
+
+        $this->assertEquals($rules["name"], ["required", "string"]);
+        $this->assertEquals($rules["email"], ["required", "string", "email"]);
+        $this->assertEquals($rules["password"], [
+            "required",
+            "string",
+            "min:8",
+        ]);
+        $this->assertEquals($rules["device_name"], ["string", "between:5,10"]);
     }
 
     /** @test */

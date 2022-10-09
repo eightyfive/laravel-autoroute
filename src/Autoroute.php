@@ -9,6 +9,8 @@ use Illuminate\Support\Str;
 use cebe\openapi\Reader;
 use cebe\openapi\spec\PathItem;
 use cebe\openapi\spec\OpenApi;
+use cebe\openapi\spec\Operation;
+use cebe\openapi\spec\RequestBody;
 
 class Autoroute
 {
@@ -54,6 +56,110 @@ class Autoroute
         $this->router->group($options, function () use ($spec) {
             $this->createRoutes($spec);
         });
+    }
+
+    public function getValidationRules(
+        string $prefix,
+        string $method,
+        string $uri
+    ) {
+        $requestBody = $this->findRequestBody($prefix, $method, $uri);
+        $mediaType = $requestBody->content["application/json"];
+
+        $rules = [];
+
+        if (!$mediaType) {
+            return $rules;
+        }
+
+        $schema = $mediaType->schema;
+
+        $requiredPropertyNames = $schema->required ?? [];
+
+        foreach ($requiredPropertyNames as $name) {
+            $rules[$name] = ["required"];
+        }
+
+        if ($schema->type !== "object") {
+            // TODO: `AutorouteException`
+            throw new \Exception(
+                "Autoroute: only `object` type request body supported"
+            );
+        }
+
+        foreach ($schema->properties as $name => $property) {
+            if (!isset($rules[$name])) {
+                $rules[$name] = [];
+            }
+
+            // https://swagger.io/docs/specification/data-models/data-types/
+
+            if ($property->type === "array") {
+                throw new \Exception(
+                    "Autoroute: Unsupported validation type: array"
+                );
+            }
+
+            if ($property->type === "object") {
+                throw new \Exception(
+                    "Autoroute: Unsupported validation type: object"
+                );
+            }
+
+            array_push(
+                $rules[$name],
+                $property->type === "number" ? "numeric" : $property->type
+            );
+
+            if (isset($property->format)) {
+                $formatRules = explode("|", $property->format);
+
+                array_push($rules[$name], ...$formatRules);
+            }
+        }
+
+        return $rules;
+    }
+
+    protected function findRequestBody(
+        string $prefix,
+        string $method,
+        string $uri
+    ): RequestBody|null {
+        $group = $this->getGroup($prefix);
+
+        $operation = $this->findOperation($group["spec"], $method, $uri);
+
+        if ($operation) {
+            return $operation->requestBody;
+        }
+
+        return null;
+    }
+
+    protected function findOperation(
+        OpenApi $spec,
+        string $method,
+        string $uri
+    ): Operation|null {
+        $pathItem = $this->findPathItem($spec, $uri);
+
+        if ($pathItem && isset($pathItem->{$method})) {
+            return $pathItem->{$method};
+        }
+
+        return null;
+    }
+
+    protected function findPathItem(OpenApi $spec, string $uri): PathItem|null
+    {
+        foreach ($spec->paths as $pathUri => $pathItem) {
+            if ($pathUri === $uri) {
+                return $pathItem;
+            }
+        }
+
+        return null;
     }
 
     protected function getPrefixFromFileName(string $fileName)

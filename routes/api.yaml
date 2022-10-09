@@ -16,6 +16,9 @@ paths:
 
   /users:
     post:
+      requestBody:
+        $ref: "#/components/requestBodies/User"
+
       responses:
         "200":
           $ref: "#/components/responses/204"
@@ -91,6 +94,32 @@ components:
         $ref: "#/components/schemas/id"
       required: true
       description: User ID
+
+  requestBodies:
+    User:
+      description: Create user request body
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              email:
+                type: string
+                format: email
+              password:
+                type: string
+                format: min:8
+              device_name:
+                type: string
+                format: "between:5,10"
+
+            required:
+              - name
+              - email
+              - password
 
   responses:
     "401":
