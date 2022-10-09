@@ -161,14 +161,13 @@ class Autoroute
 
     public function authorizeRequest(string $action, Request $request)
     {
-        $modelBaseNames = $this->getModelBaseNames($request);
-        $modelNames = $this->getModelNames($modelBaseNames);
-        $modelIds = $request->route()->parameters();
+        $modelNames = $this->getModelNames($request->route()->uri);
+        $parameters = $request->route()->parameters();
 
         $models = [];
         $index = 0;
 
-        foreach ($modelIds as $modelId) {
+        foreach ($parameters as $modelId) {
             $model = $this->findModel($modelNames[$index], $modelId);
 
             if ($model === null) {
@@ -181,7 +180,7 @@ class Autoroute
 
         $abilityArgs = $models;
 
-        if (count($modelIds) < count($modelNames)) {
+        if (count($parameters) < count($modelNames)) {
             $modelName = end($modelNames);
 
             // Ex: `/users/123/comments`
@@ -193,7 +192,7 @@ class Autoroute
             array_push($models, $modelName);
         }
 
-        $abilityName = $this->getAbilityName($action, $modelBaseNames);
+        $abilityName = $this->getAbilityName($request->route()->uri, $action);
 
         // TODO: Run authorization only when:
         // `$gate->policies[$modelName . "Policy"]` is set?
@@ -221,10 +220,10 @@ class Autoroute
         return call_user_func([$modelName, "find"], $id);
     }
 
-    protected function getModelBaseNames(Request $request)
+    protected function getModelBaseNames(string $routeUri)
     {
         // TODO: api/
-        $uri = str_replace("api/", "", $request->route()->uri);
+        $uri = str_replace("api/", "", $routeUri);
 
         $segments = explode("/", $uri);
         $segments = array_filter($segments, function ($segment) {
@@ -244,15 +243,10 @@ class Autoroute
         return Str::ucfirst(Str::singular($segment));
     }
 
-    protected function getModelIds(Request $request)
+    protected function getAbilityName(string $uri, string $action)
     {
-        $parameters = $request->route()->parameters();
+        $modelBaseNames = $this->getModelBaseNames($uri);
 
-        return array_values($parameters);
-    }
-
-    protected function getAbilityName(string $action, array $modelBaseNames)
-    {
         if (count($modelBaseNames) === 1) {
             return $action;
         }
@@ -262,8 +256,65 @@ class Autoroute
         return $action . implode("", $modelBaseNames);
     }
 
-    protected function getModelNames(array $modelBaseNames)
+    public function getAbilityArgs(string $uri, array $parameters)
     {
+        $modelNames = $this->getModelNames($uri);
+
+        $args = $this->getRouteModels($uri, $parameters);
+
+        if (count($parameters) < count($modelNames)) {
+            // Ex: `/users/123/comments`
+
+            // $this->authorize($ability, Comment::class, $user);
+            array_unshift($args, end($modelNames));
+        }
+
+        return $args;
+    }
+
+    public function getAuthorizeArgs(
+        string $uri,
+        array $parameters,
+        string $action
+    ) {
+        $name = $this->getAbilityName($uri, $action);
+        $args = $this->getAbilityArgs($uri, $parameters);
+
+        return [$name, $args];
+    }
+
+    public function getRouteModels(string $uri, array $parameters)
+    {
+        $modelNames = $this->getModelNames($uri);
+
+        $models = [];
+        $index = 0;
+
+        foreach ($parameters as $modelId) {
+            $model = $this->findModel($modelNames[$index], $modelId);
+
+            if ($model === null) {
+                throw new NotFoundHttpException("Not Found");
+            }
+
+            array_push($models, $model);
+            $index++;
+        }
+
+        if (count($parameters) < count($modelNames)) {
+            // Ex: `/users/123/comments`
+
+            // [$user, Comment::class];
+            array_push($models, end($modelNames));
+        }
+
+        return $models;
+    }
+
+    protected function getModelNames(string $uri)
+    {
+        $modelBaseNames = $this->getModelBaseNames($uri);
+
         return array_map(function ($modelBaseName) {
             return $this->getModelsNamespace() . "\\" . $modelBaseName;
         }, $modelBaseNames);
