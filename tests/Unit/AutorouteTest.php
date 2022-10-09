@@ -10,34 +10,33 @@ use Tests\Autoroute;
 
 final class AutorouteTest extends TestCase
 {
+    protected $autoroute;
     protected $router;
 
-    protected function createAutoroute()
+    protected function setUp(): void
     {
         $this->router = new Router(new Dispatcher());
-
-        $autoroute = new Autoroute($this->router, __DIR__ . "/../../routes");
-
-        return $autoroute;
+        $this->autoroute = new Autoroute(
+            $this->router,
+            __DIR__ . "/../../routes"
+        );
     }
 
     /** @test */
     public function get_prefix_from_file_name(): void
     {
-        $autoroute = $this->createAutoroute();
-
         $this->assertEquals(
-            $autoroute->getPrefixFromFileName("api.yaml"),
+            $this->autoroute->getPrefixFromFileName("api.yaml"),
             "api"
         );
 
         $this->assertEquals(
-            $autoroute->getPrefixFromFileName("routes/web_api.yaml"),
+            $this->autoroute->getPrefixFromFileName("routes/web_api.yaml"),
             "web_api"
         );
 
         $this->assertEquals(
-            $autoroute->getPrefixFromFileName("./routes/internal.yaml"),
+            $this->autoroute->getPrefixFromFileName("./routes/internal.yaml"),
             "internal"
         );
     }
@@ -45,43 +44,26 @@ final class AutorouteTest extends TestCase
     /** @test */
     public function creates_group(): void
     {
-        $autoroute = $this->createAutoroute();
+        $this->autoroute->createGroup("api.yaml");
 
-        $autoroute->createGroup("api.yaml", [
-            "namespace" => "App\\Http\\Controllers\\Api",
-        ]);
-
-        $group = $autoroute->getGroup("api");
-
-        $this->assertNotEquals($group, null);
-
-        $this->assertTrue(isset($group["options"]["namespace"]));
-
-        $this->assertEquals(
-            $group["options"]["namespace"],
-            "App\\Http\\Controllers\\Api"
-        );
+        $this->assertNotEquals($this->autoroute->getGroup("api"), null);
     }
 
     /** @test */
     public function creates_group_custom_prefix(): void
     {
-        $autoroute = $this->createAutoroute();
-
-        $autoroute->createGroup("api.yaml", [
+        $this->autoroute->createGroup("api.yaml", [
             "prefix" => "external",
         ]);
 
-        $this->assertEquals($autoroute->getGroup("api"), null);
-        $this->assertNotEquals($autoroute->getGroup("external"), null);
+        $this->assertEquals($this->autoroute->getGroup("api"), null);
+        $this->assertNotEquals($this->autoroute->getGroup("external"), null);
     }
 
     /** @test */
     public function creates_routes(): void
     {
-        $autoroute = $this->createAutoroute();
-
-        $autoroute->createGroup("api.yaml", [
+        $this->autoroute->createGroup("api.yaml", [
             "namespace" => "App\\Http\\Controllers\\Api",
         ]);
 
@@ -99,20 +81,18 @@ final class AutorouteTest extends TestCase
     /** @test */
     public function get_ability_name(): void
     {
-        $autoroute = $this->createAutoroute();
-
         $this->assertEquals(
-            $autoroute->getAbilityName("/users/{user}", "read"),
+            $this->autoroute->getAbilityName("/users/{user}", "read"),
             "read"
         );
 
         $this->assertEquals(
-            $autoroute->getAbilityName("/users/{user}/comments", "list"),
+            $this->autoroute->getAbilityName("/users/{user}/comments", "list"),
             "listUser"
         );
 
         $this->assertEquals(
-            $autoroute->getAbilityName(
+            $this->autoroute->getAbilityName(
                 "/users/{user}/profiles/{profile}/comments",
                 "list"
             ),
@@ -122,15 +102,13 @@ final class AutorouteTest extends TestCase
 
     public function get_authorize_args(): void
     {
-        $autoroute = $this->createAutoroute();
-
         $this->assertEquals(
-            $autoroute->getAuthorizeArgs("/users/{id}", ["123"], "read"),
+            $this->autoroute->getAuthorizeArgs("/users/{id}", ["123"], "read"),
             ["read", "User"]
         );
 
         $this->assertEquals(
-            $autoroute->getAuthorizeArgs(
+            $this->autoroute->getAuthorizeArgs(
                 "/users/{id}/comments",
                 ["123"],
                 "list"
@@ -139,7 +117,7 @@ final class AutorouteTest extends TestCase
         );
 
         $this->assertEquals(
-            $autoroute->getAuthorizeArgs(
+            $this->autoroute->getAuthorizeArgs(
                 "/users/{user}/profiles/{profile}/comments",
                 ["123", "456"],
                 "list"
@@ -151,15 +129,15 @@ final class AutorouteTest extends TestCase
     /** @test */
     public function get_model_base_names(): void
     {
-        $autoroute = $this->createAutoroute();
-
         $this->assertEquals(
-            $autoroute->getModelBaseNames("/users/{id}/comments"),
+            $this->autoroute->getModelBaseNames("/users/{id}/comments"),
             ["User", "Comment"]
         );
 
         $this->assertEquals(
-            $autoroute->getModelBaseNames("/user/{user}/comment/{comment}"),
+            $this->autoroute->getModelBaseNames(
+                "/user/{user}/comment/{comment}"
+            ),
             ["User", "Comment"]
         );
     }
@@ -167,11 +145,9 @@ final class AutorouteTest extends TestCase
     /** @test */
     public function get_model_base_name(): void
     {
-        $autoroute = $this->createAutoroute();
-
-        $this->assertEquals($autoroute->getModelBaseName("user"), "User");
+        $this->assertEquals($this->autoroute->getModelBaseName("user"), "User");
         $this->assertEquals(
-            $autoroute->getModelBaseName("comments"),
+            $this->autoroute->getModelBaseName("comments"),
             "Comment"
         );
     }
@@ -179,20 +155,19 @@ final class AutorouteTest extends TestCase
     /** @test */
     public function get_model_names(): void
     {
-        $autoroute = $this->createAutoroute();
-
-        $this->assertEquals($autoroute->getModelNames("users/{id}/comments"), [
-            "App\\Models\\User",
-            "App\\Models\\Comment",
-        ]);
+        $this->assertEquals(
+            $this->autoroute->getModelNames("users/{id}/comments"),
+            ["App\\Models\\User", "App\\Models\\Comment"]
+        );
     }
 
     /** @test */
     public function get_models_namespace(): void
     {
-        $autoroute = $this->createAutoroute();
-
-        $this->assertEquals($autoroute->getModelsNamespace(), "App\\Models");
+        $this->assertEquals(
+            $this->autoroute->getModelsNamespace(),
+            "App\\Models"
+        );
     }
 
     //
