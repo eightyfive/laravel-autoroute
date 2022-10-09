@@ -7,6 +7,13 @@ info:
 #   - "auth:sanctum": []
 
 paths:
+  /login:
+    post:
+      operationId: SessionController@login
+      responses:
+        "200":
+          $ref: "#/components/responses/204"
+
   /users:
     post:
       responses:

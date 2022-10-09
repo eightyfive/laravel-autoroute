@@ -63,10 +63,9 @@ final class AutorouteTest extends TestCase
     /** @test */
     public function creates_routes(): void
     {
-        $this->autoroute->createGroup("api.yaml", [
-            "namespace" => "App\\Http\\Controllers\\Api",
-        ]);
+        $this->autoroute->createGroup("api.yaml");
 
+        $this->assertNotEquals($this->getRoute("POST", "api/users"), null);
         $this->assertNotEquals($this->getRoute("GET", "api/users"), null);
         $this->assertNotEquals(
             $this->getRoute("GET", "api/users/{user}"),
@@ -76,6 +75,10 @@ final class AutorouteTest extends TestCase
             $this->getRoute("GET", "api/users/{user}/posts"),
             null
         );
+
+        $route = $this->getRoute("POST", "api/login");
+
+        $this->assertEquals($route->getActionName(), "SessionController@login");
     }
 
     /** @test */
