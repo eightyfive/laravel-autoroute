@@ -1,23 +1,20 @@
 <?php
 namespace Eyf\Autoroute;
 
-// TODO
-// use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Illuminate\Routing\Router;
 use Illuminate\Database\Eloquent\Collection;
 use cebe\openapi\Reader;
 use cebe\openapi\spec\PathItem;
 use cebe\openapi\spec\OpenApi;
 use cebe\openapi\spec\Operation;
-use cebe\openapi\spec\RequestBody;
 
 class Autoroute
 {
-    const METHOD_CREATE = "post";
-    const METHOD_READ = "get";
-    const METHOD_UPDATE = "put";
-    const METHOD_DELETE = "delete";
-    const METHOD_LIST = "list";
+    const METHOD_CREATE = "POST";
+    const METHOD_READ = "GET";
+    const METHOD_UPDATE = "PUT";
+    const METHOD_DELETE = "DELETE";
+    const METHOD_LIST = "GET";
 
     const ACTION_CREATE = "create";
     const ACTION_READ = "read";
@@ -60,30 +57,38 @@ class Autoroute
         });
     }
 
-    public function getValidationRules(
-        string $prefix,
-        string $method,
-        string $uri
-    ) {
-        $requestBody = $this->findRequestBody($prefix, $method, $uri);
-        $mediaType = $requestBody->content["application/json"];
+    public function getRequest(string $routeId, string $method)
+    {
+        [$spec, $uri] = $this->parseRouteId($routeId);
 
-        $rules = [];
+        $operation = $this->findOperation($spec, $uri, $method);
 
-        if (!$mediaType) {
-            return $rules;
+        if ($operation->requestBody === null) {
+            return [];
         }
 
+        if ($operation->requestBody->content === null) {
+            return [];
+        }
+
+        $mediaType = $operation->requestBody->content["application/json"];
+
+        if (!$mediaType) {
+            return [];
+        }
+
+        $rules = [];
         $schema = $mediaType->schema;
+        $requiredNames = $schema->required ?? [];
 
-        $requiredPropertyNames = $schema->required ?? [];
-
-        foreach ($requiredPropertyNames as $name) {
+        foreach ($requiredNames as $name) {
             $rules[$name] = ["required"];
         }
 
         if ($schema->type !== "object") {
-            throw new AutorouteException("Request body type not supported");
+            throw new AutorouteException(
+                "Request body type not supported: " . $schema->type
+            );
         }
 
         foreach ($schema->properties as $name => $property) {
@@ -120,43 +125,21 @@ class Autoroute
         return $rules;
     }
 
-    protected function findRequestBody(
-        string $prefix,
-        string $method,
-        string $uri
-    ): RequestBody {
-        $group = $this->getGroup($prefix);
-
-        $operation = $this->findOperation($group["spec"], $method, $uri);
-
-        if ($operation) {
-            return $operation->requestBody;
-        }
-
-        throw new AutorouteException(
-            "RequestBody not found: " .
-                $prefix .
-                "/" .
-                $uri .
-                "(" .
-                $method .
-                ")"
-        );
-    }
-
     protected function findOperation(
         OpenApi $spec,
-        string $method,
-        string $uri
+        string $uri,
+        string $method
     ): Operation {
+        $verb = strtolower($method);
+
         $pathItem = $this->findPathItem($spec, $uri);
 
-        if ($pathItem && isset($pathItem->{$method})) {
-            return $pathItem->{$method};
+        if ($pathItem && isset($pathItem->{$verb})) {
+            return $pathItem->{$verb};
         }
 
         throw new AutorouteException(
-            "Operation not found: " . $uri . "(" . $method . ")"
+            "Operation not found: " . $uri . " (" . $verb . ")"
         );
     }
 
@@ -171,6 +154,17 @@ class Autoroute
         throw new AutorouteException("PathItem not found: " . $uri);
     }
 
+    protected function parseRouteId(string $routeId)
+    {
+        $segments = explode("/", $routeId);
+
+        $prefix = array_shift($segments);
+
+        $group = $this->getGroup($prefix);
+
+        return [$group["spec"], "/" . implode("/", $segments)];
+    }
+
     protected function getPrefixFromFileName(string $fileName)
     {
         return pathinfo($fileName, PATHINFO_FILENAME);
@@ -181,7 +175,7 @@ class Autoroute
         $this->groups[$prefix] = compact("spec", "options");
     }
 
-    public function getGroup(string $prefix)
+    protected function getGroup(string $prefix)
     {
         return $this->groups[$prefix] ?? null;
     }
@@ -217,17 +211,28 @@ class Autoroute
         }
     }
 
-    public function isSecured(string $uri, string $method): bool
+    public function isSecured(string $routeId, string $method): bool
     {
-        throw new AutorouteException("TODO");
+        [$spec, $uri] = $this->parseRouteId($routeId);
+
+        $operation = $this->findOperation($spec, $uri, $method);
+
+        $isSecured = $spec->security !== null && count($spec->security) > 0;
+
+        if ($operation->security !== null) {
+            $isSecured = count($operation->security) > 0;
+        }
+
+        return $isSecured;
     }
 
-    // TODO: Run authorization only when:
-    // `$gate->policies[$modelName . "Policy"]` is set?
-    // Or keep strong "Unauthorized" by default?
+    public function authorize(
+        string $action,
+        string $routeId,
+        array $parameters
+    ) {
+        [, $uri] = $this->parseRouteId($routeId);
 
-    public function authorize(string $action, string $uri, array $parameters)
-    {
         $models = $this->resolver->getRouteModels($uri, $parameters);
 
         $name = $this->resolver->getAbilityName($uri, $action);
@@ -255,8 +260,13 @@ class Autoroute
         return $args;
     }
 
-    public function queryByRoute(string $action, string $uri, array $parameters)
-    {
+    public function queryByRoute(
+        string $action,
+        string $routeId,
+        array $parameters
+    ) {
+        [, $uri] = $this->parseRouteId($routeId);
+
         if ($action === static::ACTION_READ) {
             return $this->resolver->readByRoute($uri, $parameters);
         }
@@ -270,10 +280,12 @@ class Autoroute
 
     public function mutateByRoute(
         string $action,
-        string $uri,
+        string $routeId,
         array $parameters,
         array $data
     ) {
+        [, $uri] = $this->parseRouteId($routeId);
+
         if ($action === static::ACTION_CREATE) {
             return $this->resolver->createByRoute($uri, $parameters, $data);
         }

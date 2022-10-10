@@ -68,8 +68,10 @@ class AutorouteResolver implements AutorouteResolverInterface
         return null;
     }
 
-    public function getOperationId(string $uri, string $method): string
+    public function getOperationId(string $uri, string $verb): string
     {
+        $method = strtoupper($verb);
+
         $segments = explode("/", ltrim($uri, "/"));
 
         if ($method === Autoroute::METHOD_READ) {

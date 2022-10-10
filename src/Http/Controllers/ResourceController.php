@@ -36,6 +36,10 @@ class ResourceController extends Controller
             $this->authorize($ability, $args);
         }
 
+        $request->validate(
+            $this->autoroute->getRequest($route->uri, $request->method())
+        );
+
         $model = $this->autoroute->mutateByRoute(
             Autoroute::ACTION_CREATE,
             $route->uri,
@@ -44,7 +48,7 @@ class ResourceController extends Controller
         );
 
         // TODO: Filter response by OpenAPI 3.0 definition response schema
-        return response()->json($model);
+        return response()->json($model, 201);
     }
 
     public function read(Request $request)
@@ -96,10 +100,6 @@ class ResourceController extends Controller
 
             $this->authorize($ability, $arguments);
         }
-
-        // TODO: Validation
-        // $rules = $this->autoroute->getRequest( ... )
-        // $request->validate($rules);
 
         $model = $this->autoroute->mutateByRoute(
             Autoroute::ACTION_UPDATE,

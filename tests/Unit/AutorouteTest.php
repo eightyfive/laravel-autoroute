@@ -87,7 +87,7 @@ final class AutorouteTest extends TestCase
     {
         $this->autoroute->createGroup("api.yaml");
 
-        $rules = $this->autoroute->getValidationRules("api", "post", "/users");
+        $rules = $this->autoroute->getRequest("api/users", "post");
 
         $this->assertTrue(isset($rules["name"]));
         $this->assertTrue(isset($rules["email"]));
@@ -102,6 +102,23 @@ final class AutorouteTest extends TestCase
             "min:8",
         ]);
         $this->assertEquals($rules["device_name"], ["string", "between:5,10"]);
+    }
+
+    /** @test */
+    public function is_secured(): void
+    {
+        $this->autoroute->createGroup("api.yaml");
+
+        $this->assertFalse(
+            $this->autoroute->isSecured("api/login", Autoroute::METHOD_CREATE)
+        );
+
+        $this->assertTrue(
+            $this->autoroute->isSecured(
+                "api/users/{user_id}",
+                Autoroute::METHOD_READ
+            )
+        );
     }
 
     //

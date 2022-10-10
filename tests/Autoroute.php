@@ -13,6 +13,11 @@ class Autoroute extends Service
         parent::__construct($router, new AutorouteResolver(), $dir);
     }
 
+    public function getGroup(string $prefix)
+    {
+        return parent::getGroup($prefix);
+    }
+
     public function getPrefixFromFileName(string $fileName)
     {
         return parent::getPrefixFromFileName($fileName);

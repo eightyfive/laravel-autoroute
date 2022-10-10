@@ -3,24 +3,26 @@ info:
   title: Autoroute
   version: 0.1.0
 
-# security:
-#   - "auth:sanctum": []
+security:
+  - "auth:sanctum": []
 
 paths:
   /login:
     post:
       operationId: SessionController@login
+      security: []
       responses:
         "200":
           $ref: "#/components/responses/204"
 
   /users:
     post:
+      security: []
       requestBody:
         $ref: "#/components/requestBodies/User"
 
       responses:
-        "200":
+        "201":
           $ref: "#/components/responses/204"
 
     get:
@@ -34,9 +36,9 @@ paths:
                 items:
                   - $ref: "#/components/schemas/User"
 
-  /users/{user}:
+  /users/{user_id}:
     parameters:
-      - $ref: "#/components/parameters/user"
+      - $ref: "#/components/parameters/user_id"
     get:
       responses:
         "200":
@@ -46,9 +48,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
 
-  /users/{user}/posts:
+  /users/{user_id}/posts:
     parameters:
-      - $ref: "#/components/parameters/user"
+      - $ref: "#/components/parameters/user_id"
     get:
       responses:
         "200":
@@ -59,6 +61,15 @@ paths:
                 type: array
                 items:
                   - $ref: "#/components/schemas/Post"
+    post:
+      responses:
+        "201":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+
 components:
   schemas:
     id:
@@ -87,9 +98,9 @@ components:
           type: string
 
   parameters:
-    user:
+    user_id:
       in: path
-      name: user
+      name: user_id
       schema:
         $ref: "#/components/schemas/id"
       required: true
