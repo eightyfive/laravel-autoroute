@@ -7,10 +7,9 @@ use Orchestra\Testbench\TestCase as Test;
 
 class TestCase extends Test
 {
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
-        // additional setup
     }
 
     protected function getPackageProviders($app)

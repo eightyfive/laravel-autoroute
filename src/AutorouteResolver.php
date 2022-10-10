@@ -42,7 +42,15 @@ class AutorouteResolver implements AutorouteResolverInterface
 
     public function getRouteModel(string $uri, array $parameters): Model
     {
-        return $this->getRouteModels($uri, $parameters)->last();
+        $model = $this->getRouteModels($uri, $parameters)->last();
+
+        if ($model instanceof Model) {
+            return $model;
+        }
+
+        throw new AutorouteException(
+            "Invalid model type: " . get_class($model)
+        );
     }
 
     public function getRouteModelName(string $uri, array $parameters): string

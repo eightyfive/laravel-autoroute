@@ -1,17 +1,36 @@
 <?php
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
+use Tests\TestCase;
 use Tests\AutorouteResolver;
+use App\Models\Post;
 
 final class AutorouteResolverTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected AutorouteResolver $resolver;
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->resolver = new AutorouteResolver();
+    }
+
+    /** @test */
+    public function create_by_route(): void
+    {
+        $model = $this->resolver->createByRoute(
+            "/users/{user}/posts",
+            ["user" => "123"],
+            ["title" => "Create", "user_id" => 123]
+        );
+
+        $this->assertInstanceOf(Post::class, $model);
+        $this->assertEquals("Create", $model->title);
     }
 
     /** @test */

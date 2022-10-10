@@ -1,11 +1,10 @@
 <?php
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
-
 use Illuminate\Routing\Router;
 use Illuminate\Events\Dispatcher;
 
+use Tests\TestCase;
 use Tests\Autoroute;
 
 final class AutorouteTest extends TestCase
@@ -15,6 +14,8 @@ final class AutorouteTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->router = new Router(new Dispatcher());
         $this->autoroute = new Autoroute(
             $this->router,
