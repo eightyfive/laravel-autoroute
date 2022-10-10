@@ -30,4 +30,9 @@ class PostPolicy
     {
         return $user->is($authenticated) && $post->user_id == $user->id;
     }
+
+    public function listUser(User $authenticated, User $user)
+    {
+        return $user->is($authenticated);
+    }
 }

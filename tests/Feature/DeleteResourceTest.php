@@ -2,7 +2,6 @@
 namespace Tests\Feature;
 
 use App\Models\Post;
-use App\Models\User;
 
 class DeleteResourceTest extends FeatureTestCase
 {
