@@ -1,16 +1,11 @@
 <?php
 namespace Tests\Unit;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
 use Tests\TestCase;
 use Tests\AutorouteResolver;
-use App\Models\Post;
 
 final class AutorouteResolverTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected AutorouteResolver $resolver;
 
     protected function setUp(): void
@@ -18,19 +13,6 @@ final class AutorouteResolverTest extends TestCase
         parent::setUp();
 
         $this->resolver = new AutorouteResolver();
-    }
-
-    /** @test */
-    public function create_by_route(): void
-    {
-        $model = $this->resolver->createByRoute(
-            "/users/{user}/posts",
-            ["user" => "123"],
-            ["title" => "Create", "user_id" => 123]
-        );
-
-        $this->assertInstanceOf(Post::class, $model);
-        $this->assertEquals("Create", $model->title);
     }
 
     /** @test */
@@ -156,6 +138,84 @@ final class AutorouteResolverTest extends TestCase
         $this->assertEquals(
             $this->resolver->getModelsNamespace(),
             "App\\Models"
+        );
+    }
+
+    /** @test */
+    public function parameter_names_0(): void
+    {
+        $this->assertEquals([], $this->resolver->getParameterNames("/users"));
+
+        $this->assertEquals(
+            null,
+            $this->resolver->getParentParameterName("/users")
+        );
+    }
+
+    /** @test */
+    public function parameter_names_1_1(): void
+    {
+        $uri = "/users/{user_id}";
+
+        $this->assertEquals(
+            ["user_id"],
+            $this->resolver->getParameterNames($uri)
+        );
+
+        $this->assertEquals(
+            null,
+            $this->resolver->getParentParameterName($uri)
+        );
+    }
+
+    /** @test */
+    public function parameter_names_1_2(): void
+    {
+        $uri = "/users/{user_id}/posts";
+
+        $this->assertEquals(
+            ["user_id"],
+            $this->resolver->getParameterNames($uri)
+        );
+
+        $this->assertEquals(
+            "user_id",
+            $this->resolver->getParentParameterName($uri)
+        );
+    }
+
+    /** @test */
+    public function parameter_names_2_2(): void
+    {
+        $uri = "/users/{user_id}/posts/{post_id}";
+
+        $this->assertEquals(
+            ["user_id", "post_id"],
+            $this->resolver->getParameterNames($uri)
+        );
+
+        $this->assertEquals(
+            null,
+            $this->resolver->getParentParameterName($uri)
+        );
+    }
+
+    /** @test */
+    public function parameter_names_2_3(): void
+    {
+        $uri = "/users/{user_id}/posts/{post_id}/comments";
+
+        $this->assertEquals(
+            ["user_id", "post_id"],
+            $this->resolver->getParameterNames($uri)
+        );
+
+        $this->assertEquals(
+            "post_id",
+            $this->resolver->getParentParameterName($uri, [
+                "user_id" => "123",
+                "post_id" => "456",
+            ])
         );
     }
 }

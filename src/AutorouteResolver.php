@@ -11,6 +11,7 @@ class AutorouteResolver implements AutorouteResolverInterface
 {
     protected $modelBaseNames;
     protected $modelNames;
+    protected $parameterNames;
 
     //
     // Routing
@@ -94,6 +95,11 @@ class AutorouteResolver implements AutorouteResolverInterface
         array $data
     ): Model {
         $modelName = $this->getRouteModelName($uri, $parameters);
+        $parameterName = $this->getParentParameterName($uri, $parameters);
+
+        if ($parameterName) {
+            $data[$parameterName] = $parameters[$parameterName];
+        }
 
         return call_user_func([$modelName, "create"], $data);
     }
@@ -210,5 +216,47 @@ class AutorouteResolver implements AutorouteResolverInterface
     {
         // TODO: Pull from config('autoroute')
         return "App\\Models";
+    }
+
+    protected function getParameterNames(string $uri)
+    {
+        if (!isset($this->parameterNames)) {
+            $uri = ltrim($uri, "/");
+
+            $segments = explode("/", $uri);
+
+            // Filter parameter segments
+            $segments = array_filter($segments, function ($segment) {
+                $isParam = strpos($segment, "{") === 0;
+
+                return $isParam;
+            });
+
+            $names = array_map(function ($segment) {
+                $name = str_replace("{", "", $segment);
+                $name = str_replace("}", "", $name);
+
+                return $name;
+            }, $segments);
+
+            $this->parameterNames = array_values($names);
+        }
+
+        return $this->parameterNames;
+    }
+
+    protected function getParentParameterName(string $uri): string|null
+    {
+        $modelBaseNames = $this->getModelBaseNames($uri);
+        $parameterNames = $this->getParameterNames($uri);
+
+        if (
+            count($parameterNames) &&
+            count($parameterNames) < count($modelBaseNames)
+        ) {
+            return end($parameterNames);
+        }
+
+        return null;
     }
 }

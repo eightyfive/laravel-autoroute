@@ -35,7 +35,17 @@ class AutorouteResolver extends Resolver
         return parent::getModelsNamespace();
     }
 
-    protected function findModelByParameter(string $modelName, string $id)
+    public function getParameterNames(string $uri)
+    {
+        return parent::getParameterNames($uri);
+    }
+
+    public function getParentParameterName(string $uri): string|null
+    {
+        return parent::getParentParameterName($uri);
+    }
+
+    public function findModelByParameter(string $modelName, string $id)
     {
         return parent::findModelByParameter($modelName, $id);
     }
