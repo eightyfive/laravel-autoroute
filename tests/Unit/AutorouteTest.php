@@ -16,11 +16,23 @@ final class AutorouteTest extends TestCase
     {
         parent::setUp();
 
+        $this->createAutoroute();
+        $this->autoroute->createGroup("api.yaml");
+    }
+
+    protected function createAutoroute()
+    {
         $this->router = new Router(new Dispatcher());
         $this->autoroute = new Autoroute(
             $this->router,
             __DIR__ . "/../../routes"
         );
+    }
+
+    protected function resetAutoroute()
+    {
+        unset($this->autoroute);
+        $this->createAutoroute();
     }
 
     /** @test */
@@ -45,14 +57,14 @@ final class AutorouteTest extends TestCase
     /** @test */
     public function creates_group(): void
     {
-        $this->autoroute->createGroup("api.yaml");
-
         $this->assertNotEquals($this->autoroute->getGroup("api"), null);
     }
 
     /** @test */
     public function creates_group_custom_prefix(): void
     {
+        $this->resetAutoroute();
+
         $this->autoroute->createGroup("api.yaml", [
             "prefix" => "external",
         ]);
@@ -64,16 +76,14 @@ final class AutorouteTest extends TestCase
     /** @test */
     public function registers_routes(): void
     {
-        $this->autoroute->createGroup("api.yaml");
-
         $this->assertNotEquals($this->getRoute("POST", "api/users"), null);
         $this->assertNotEquals($this->getRoute("GET", "api/users"), null);
         $this->assertNotEquals(
-            $this->getRoute("GET", "api/users/{user}"),
+            $this->getRoute("GET", "api/users/{user_id}"),
             null
         );
         $this->assertNotEquals(
-            $this->getRoute("GET", "api/users/{user}/posts"),
+            $this->getRoute("GET", "api/users/{user_id}/posts"),
             null
         );
 
@@ -85,8 +95,6 @@ final class AutorouteTest extends TestCase
     /** @test */
     public function creates_validation_rules(): void
     {
-        $this->autoroute->createGroup("api.yaml");
-
         $rules = $this->autoroute->getRequest("api/users", "post");
 
         $this->assertTrue(isset($rules["name"]));
@@ -107,15 +115,13 @@ final class AutorouteTest extends TestCase
     /** @test */
     public function is_secured(): void
     {
-        $this->autoroute->createGroup("api.yaml");
-
         $this->assertFalse(
             $this->autoroute->isSecured("api/login", Autoroute::METHOD_CREATE)
         );
 
         $this->assertTrue(
             $this->autoroute->isSecured(
-                "api/users/{user_id}",
+                "api/users/{user_id}/posts/{post_id}",
                 Autoroute::METHOD_READ
             )
         );

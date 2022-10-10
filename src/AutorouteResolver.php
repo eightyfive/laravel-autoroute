@@ -172,7 +172,7 @@ class AutorouteResolver implements AutorouteResolverInterface
             return $action;
         }
 
-        // Ex: /users/{user}/posts ("list")
+        // Ex: /users/{user_id}/posts ("list")
         // ['User', 'Post'];
 
         array_pop($modelBaseNames); // remove 'Post'

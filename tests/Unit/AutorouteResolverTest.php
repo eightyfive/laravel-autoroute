@@ -38,7 +38,7 @@ final class AutorouteResolverTest extends TestCase
     {
         $this->assertEquals(
             "listUser",
-            $this->resolver->getAbilityName("/users/{user}/posts", "list")
+            $this->resolver->getAbilityName("/users/{user_id}/posts", "list")
         );
     }
 
@@ -48,7 +48,7 @@ final class AutorouteResolverTest extends TestCase
         $this->assertEquals(
             "listPost",
             $this->resolver->getAbilityName(
-                "/users/{user}/posts/{post}/comments",
+                "/users/{user_id}/posts/{post_id}/posts",
                 "list"
             )
         );
@@ -77,7 +77,7 @@ final class AutorouteResolverTest extends TestCase
     {
         $this->assertEquals(
             ["Post"],
-            $this->resolver->getModelBaseNames("/posts/{id}")
+            $this->resolver->getModelBaseNames("/posts/{post_id}")
         );
     }
 
@@ -86,7 +86,7 @@ final class AutorouteResolverTest extends TestCase
     {
         $this->assertEquals(
             ["Post"],
-            $this->resolver->getModelBaseNames("/post/{id}")
+            $this->resolver->getModelBaseNames("/post/{post_id}")
         );
     }
 
@@ -95,7 +95,7 @@ final class AutorouteResolverTest extends TestCase
     {
         $this->assertEquals(
             ["User", "Post"],
-            $this->resolver->getModelBaseNames("/users/{id}/posts")
+            $this->resolver->getModelBaseNames("/users/{user_id}/posts")
         );
     }
 
@@ -104,7 +104,9 @@ final class AutorouteResolverTest extends TestCase
     {
         $this->assertEquals(
             ["User", "Post"],
-            $this->resolver->getModelBaseNames("/user/{user}/posts/{post}")
+            $this->resolver->getModelBaseNames(
+                "/user/{user_id}/posts/{post_id}"
+            )
         );
     }
 
@@ -117,18 +119,15 @@ final class AutorouteResolverTest extends TestCase
     /** @test */
     public function plural_segment_to_base_name(): void
     {
-        $this->assertEquals(
-            $this->resolver->getModelBaseName("comments"),
-            "Comment"
-        );
+        $this->assertEquals($this->resolver->getModelBaseName("posts"), "Post");
     }
 
     /** @test */
     public function get_model_names(): void
     {
         $this->assertEquals(
-            $this->resolver->getModelNames("users/{id}/comments"),
-            ["App\\Models\\User", "App\\Models\\Comment"]
+            $this->resolver->getModelNames("users/{user_id}/posts"),
+            ["App\\Models\\User", "App\\Models\\Post"]
         );
     }
 
@@ -203,7 +202,7 @@ final class AutorouteResolverTest extends TestCase
     /** @test */
     public function parameter_names_2_3(): void
     {
-        $uri = "/users/{user_id}/posts/{post_id}/comments";
+        $uri = "/users/{user_id}/posts/{post_id}/posts";
 
         $this->assertEquals(
             ["user_id", "post_id"],

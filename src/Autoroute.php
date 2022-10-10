@@ -255,8 +255,8 @@ class Autoroute
             // Ex: `/users`
             // $this->authorize('list', App\Models\User::class);
 
-            // Ex: `/users/123/comments`
-            // $this->authorize('listUser', App\Models\Comment::class, $user);
+            // Ex: `/users/123/posts`
+            // $this->authorize('listUser', App\Models\Post::class, $user);
 
             array_unshift($args, $modelName);
         }
