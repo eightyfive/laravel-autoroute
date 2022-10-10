@@ -130,13 +130,15 @@ class AutorouteResolver implements AutorouteResolverInterface
     public function listByRoute(string $uri, array $parameters): Collection
     {
         $modelName = $this->getRouteModelName($uri, $parameters);
+        $parameterName = $this->getParentParameterName($uri);
 
-        // TODO: Filter by relationship, by query params (?foo=bar)...
+        $query = call_user_func([$modelName, "query"]);
 
-        // Ex: /users/123/comments
-        // Comments of User `123` only...
+        if ($parameterName) {
+            $query->where($parameterName, $parameters[$parameterName]);
+        }
 
-        return call_user_func([$modelName, "all"]);
+        return $query->get();
     }
 
     //
