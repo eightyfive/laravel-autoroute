@@ -21,6 +21,7 @@ class ResourceController extends Controller
         $route = $request->route();
         $parameters = $route->parameters();
 
+        // Authorize
         $secured = $this->autoroute->isSecured(
             $route->uri,
             Autoroute::METHOD_CREATE
@@ -36,10 +37,12 @@ class ResourceController extends Controller
             $this->authorize($ability, $args);
         }
 
+        // Validate
         $request->validate(
             $this->autoroute->getRequest($route->uri, $request->method())
         );
 
+        // Mutate
         $model = $this->autoroute->mutateByRoute(
             Autoroute::ACTION_CREATE,
             $route->uri,
@@ -56,6 +59,7 @@ class ResourceController extends Controller
         $route = $request->route();
         $parameters = $route->parameters();
 
+        // Authorize
         $secured = $this->autoroute->isSecured(
             $route->uri,
             Autoroute::METHOD_READ
@@ -71,6 +75,7 @@ class ResourceController extends Controller
             $this->authorize($ability, $args);
         }
 
+        // Query
         $model = $this->autoroute->queryByRoute(
             Autoroute::ACTION_READ,
             $route->uri,
@@ -86,6 +91,7 @@ class ResourceController extends Controller
         $route = $request->route();
         $parameters = $route->parameters();
 
+        // Authorize
         $secured = $this->autoroute->isSecured(
             $route->uri,
             Autoroute::METHOD_UPDATE
@@ -101,6 +107,12 @@ class ResourceController extends Controller
             $this->authorize($ability, $args);
         }
 
+        // Validate
+        $request->validate(
+            $this->autoroute->getRequest($route->uri, $request->method())
+        );
+
+        // Mutate
         $model = $this->autoroute->mutateByRoute(
             Autoroute::ACTION_UPDATE,
             $route->uri,
@@ -113,11 +125,12 @@ class ResourceController extends Controller
         // TODO: return new VoidResponse();
     }
 
-    public function delete(Request $request, Model $model)
+    public function delete(Request $request)
     {
         $route = $request->route();
         $parameters = $route->parameters();
 
+        // Authorize
         $secured = $this->autoroute->isSecured(
             $route->uri,
             Autoroute::METHOD_DELETE
@@ -133,6 +146,7 @@ class ResourceController extends Controller
             $this->authorize($ability, $args);
         }
 
+        // Mutate
         $this->autoroute->mutateByRoute(
             Autoroute::ACTION_DELETE,
             $route->uri,
@@ -149,6 +163,7 @@ class ResourceController extends Controller
         $route = $request->route();
         $parameters = $route->parameters();
 
+        // Authorize
         $secured = $this->autoroute->isSecured(
             $route->uri,
             Autoroute::METHOD_LIST
@@ -164,6 +179,7 @@ class ResourceController extends Controller
             $this->authorize($ability, $args);
         }
 
+        // Query
         $models = $this->autoroute->queryByRoute(
             Autoroute::ACTION_LIST,
             $route->uri,

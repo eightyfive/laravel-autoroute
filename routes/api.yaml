@@ -43,7 +43,17 @@ paths:
     put:
       security: []
       requestBody:
-        $ref: "#/components/requestBodies/User"
+        description: User request body
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
 
       responses:
         "200":
@@ -73,6 +83,8 @@ paths:
                 items:
                   - $ref: "#/components/schemas/Post"
     post:
+      requestBody:
+        $ref: "#/components/requestBodies/Post"
       responses:
         "201":
           description: Success
@@ -85,6 +97,9 @@ paths:
     parameters:
       - $ref: "#/components/parameters/user_id"
       - $ref: "#/components/parameters/post_id"
+    put:
+      requestBody:
+        $ref: "#/components/requestBodies/Post"
     get:
       responses:
         "200":
@@ -140,8 +155,22 @@ components:
       description: Post ID
 
   requestBodies:
+    Post:
+      description: Post request body
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - title
+            properties:
+              title:
+                type: string
+                format: min:3
+
     User:
-      description: Create user request body
+      description: User request body
       required: true
       content:
         application/json:

@@ -10,14 +10,11 @@ class CreateResourceTest extends FeatureTestCase
     {
         $this->assertCount(2, User::all());
 
-        // $response = $this->actingAs($user)->post("/posts", [
-        $response = $this->postJson("/api/users", [
+        $this->postJson("/api/users", [
             "name" => "Dave",
             "email" => "dave@example.org",
             "password" => "password",
-        ]);
-
-        $response->assertStatus(201);
+        ])->assertStatus(201);
 
         $this->assertCount(3, User::all());
 

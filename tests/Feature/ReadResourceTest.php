@@ -16,12 +16,6 @@ class ReadResourceTest extends FeatureTestCase
     }
 
     /** @test */
-    function cannot_read_resource_404()
-    {
-        $this->getJson("/api/users/10000000/posts")->assertStatus(404);
-    }
-
-    /** @test */
     function cannot_read_resource_403()
     {
         // Post 1
