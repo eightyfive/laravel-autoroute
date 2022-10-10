@@ -104,37 +104,6 @@ final class AutorouteTest extends TestCase
         $this->assertEquals($rules["device_name"], ["string", "between:5,10"]);
     }
 
-    // TODO: TOTEST
-    public function get_authorize_args(): void
-    {
-        $this->assertEquals(
-            $this->autoroute->authorize(
-                Autoroute::ACTION_READ,
-                "/users/{user}",
-                ["123"]
-            ),
-            ["read", "User"]
-        );
-
-        $this->assertEquals(
-            $this->autoroute->authorize(
-                Autoroute::ACTION_LIST,
-                "/users/{user}/comments",
-                ["123"]
-            ),
-            ["listUser", "Comment", "user"]
-        );
-
-        $this->assertEquals(
-            $this->autoroute->authorize(
-                Autoroute::ACTION_LIST,
-                "/users/{user}/profiles/{profile}/comments",
-                ["123", "456"]
-            ),
-            ["listProfile", "Comment", "profile", "user"]
-        );
-    }
-
     //
     // PROTECTED
     //

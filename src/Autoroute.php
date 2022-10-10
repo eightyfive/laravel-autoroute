@@ -231,26 +231,25 @@ class Autoroute
         $models = $this->resolver->getRouteModels($uri, $parameters);
 
         $name = $this->resolver->getAbilityName($uri, $action);
-        $args = $this->getAbilityArgs($models, $uri, $parameters);
+        $args = $this->getAbilityArgs($models, $uri);
 
         return [$name, $args];
     }
 
-    protected function getAbilityArgs(
-        Collection $models,
-        string $uri,
-        array $parameters
-    ) {
+    protected function getAbilityArgs(Collection $models, string $uri)
+    {
         $args = $models->all(); // Array
 
-        if (count($parameters) < count($models)) {
-            // Ex: `/users/123/comments`
-            // $this->authorize('list', App\Models\Comment::class, $user);
+        $modelName = $this->resolver->getRouteModelName($uri);
 
-            array_unshift(
-                $args,
-                $this->resolver->getRouteModelName($uri, $parameters)
-            );
+        if ($modelName) {
+            // Ex: `/users`
+            // $this->authorize('list', App\Models\User::class);
+
+            // Ex: `/users/123/comments`
+            // $this->authorize('listUser', App\Models\Comment::class, $user);
+
+            array_unshift($args, $modelName);
         }
 
         return $args;

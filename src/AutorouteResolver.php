@@ -54,11 +54,18 @@ class AutorouteResolver implements AutorouteResolverInterface
         );
     }
 
-    public function getRouteModelName(string $uri, array $parameters): string
+    public function getRouteModelName(string $uri): string|null
     {
         $modelNames = $this->getModelNames($uri);
+        $parameterNames = $this->getParameterNames($uri);
 
-        return end($modelNames);
+        $isAnonymous = count($modelNames) > count($parameterNames);
+
+        if ($isAnonymous) {
+            return end($modelNames);
+        }
+
+        return null;
     }
 
     public function getOperationId(string $uri, string $method): string
@@ -94,7 +101,12 @@ class AutorouteResolver implements AutorouteResolverInterface
         array $parameters,
         array $data
     ): Model {
-        $modelName = $this->getRouteModelName($uri, $parameters);
+        $modelName = $this->getRouteModelName($uri);
+
+        if (!$modelName) {
+            throw new AutorouteException("Invalid create uri: " . $uri);
+        }
+
         $parameterName = $this->getParentParameterName($uri, $parameters);
 
         if ($parameterName) {
@@ -129,7 +141,12 @@ class AutorouteResolver implements AutorouteResolverInterface
 
     public function listByRoute(string $uri, array $parameters): Collection
     {
-        $modelName = $this->getRouteModelName($uri, $parameters);
+        $modelName = $this->getRouteModelName($uri);
+
+        if (!$modelName) {
+            throw new AutorouteException("Invalid list uri: " . $uri);
+        }
+
         $parameterName = $this->getParentParameterName($uri);
 
         $query = call_user_func([$modelName, "query"]);
