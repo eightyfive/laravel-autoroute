@@ -27,10 +27,10 @@ class CreateUserTest extends TestCase
 
         $this->assertCount(1, User::all());
 
-        tap(User::first(), function ($user) {
-            $this->assertEquals("0x55", $user->name);
-            $this->assertEquals("0xfiftyfive@gmail.com", $user->email);
-        });
+        $user = User::find(1);
+
+        $this->assertEquals("0x55", $user->name);
+        $this->assertEquals("0xfiftyfive@gmail.com", $user->email);
     }
 
     /** @test */
