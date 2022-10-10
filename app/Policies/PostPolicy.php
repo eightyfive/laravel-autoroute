@@ -25,4 +25,9 @@ class PostPolicy
     {
         return $user->is($authenticated) && $post->user_id == $user->id;
     }
+
+    public function deleteUser(User $authenticated, Post $post, User $user)
+    {
+        return $user->is($authenticated) && $post->user_id == $user->id;
+    }
 }
