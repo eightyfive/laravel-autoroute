@@ -7,12 +7,12 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\User;
 
-class CreateUserTest extends TestCase
+class CreateResourceTest extends TestCase
 {
     use RefreshDatabase;
 
     /** @test */
-    function can_create_users()
+    function can_create_resource()
     {
         $this->assertCount(0, User::all());
 
@@ -34,7 +34,7 @@ class CreateUserTest extends TestCase
     }
 
     /** @test */
-    function cannot_create_users()
+    function cannot_create_resource()
     {
         $response = $this->post("/api/users", [
             "name" => "0x55",
