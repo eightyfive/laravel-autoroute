@@ -103,28 +103,6 @@ final class AutorouteTest extends TestCase
         $this->assertEquals($rules["device_name"], ["string", "between:5,10"]);
     }
 
-    /** @test */
-    public function get_ability_name(): void
-    {
-        $this->assertEquals(
-            $this->autoroute->getAbilityName("/users/{user}", "read"),
-            "read"
-        );
-
-        $this->assertEquals(
-            $this->autoroute->getAbilityName("/users/{user}/comments", "list"),
-            "listUser"
-        );
-
-        $this->assertEquals(
-            $this->autoroute->getAbilityName(
-                "/users/{user}/profiles/{profile}/comments",
-                "list"
-            ),
-            "listProfile"
-        );
-    }
-
     // TODO: TOTEST
     public function get_authorize_args(): void
     {
@@ -156,50 +134,6 @@ final class AutorouteTest extends TestCase
         );
     }
 
-    /** @test */
-    public function get_model_base_names(): void
-    {
-        $this->assertEquals(
-            $this->autoroute->getModelBaseNames("/users/{id}/comments"),
-            ["User", "Comment"]
-        );
-
-        $this->assertEquals(
-            $this->autoroute->getModelBaseNames(
-                "/user/{user}/comment/{comment}"
-            ),
-            ["User", "Comment"]
-        );
-    }
-
-    /** @test */
-    public function get_model_base_name(): void
-    {
-        $this->assertEquals($this->autoroute->getModelBaseName("user"), "User");
-        $this->assertEquals(
-            $this->autoroute->getModelBaseName("comments"),
-            "Comment"
-        );
-    }
-
-    /** @test */
-    public function get_model_names(): void
-    {
-        $this->assertEquals(
-            $this->autoroute->getModelNames("users/{id}/comments"),
-            ["App\\Models\\User", "App\\Models\\Comment"]
-        );
-    }
-
-    /** @test */
-    public function get_models_namespace(): void
-    {
-        $this->assertEquals(
-            $this->autoroute->getModelsNamespace(),
-            "App\\Models"
-        );
-    }
-
     //
     // PROTECTED
     //
@@ -217,15 +151,5 @@ final class AutorouteTest extends TestCase
         $routes = $this->getRoutes()->getRoutesByMethod();
 
         return $routes[$method][$uri] ?? null;
-    }
-
-    protected function assertMethods(array $verbs)
-    {
-        $routes = $this->router->getRoutes();
-        $methods = $routes->getRoutesByMethod();
-
-        foreach ($verbs as $verb => $count) {
-            $this->assertEquals(count($methods[$verb]), $count);
-        }
     }
 }
