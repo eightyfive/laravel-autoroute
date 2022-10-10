@@ -1,39 +1,26 @@
 <?php
 namespace Tests\Feature;
 
-use Illuminate\Routing\Router;
-use Illuminate\Events\Dispatcher;
-
 use Tests\Autoroute;
 use App\Models\User;
 use App\Models\Post;
 
 final class AuthorizeTest extends FeatureTestCase
 {
-    protected Autoroute $autoroute;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->autoroute = new Autoroute(
-            new Router(new Dispatcher()),
-            __DIR__ . "/../../routes"
-        );
-    }
-
     /** @test */
     public function authorize_create(): void
     {
         [$ability, $args] = $this->autoroute->authorize(
             Autoroute::ACTION_CREATE,
-            "/users",
+            "api/users",
             []
         );
 
         $this->assertEquals("create", $ability);
 
-        $this->assertEquals(User::class, $args[0]);
+        [$modelName] = $args;
+
+        $this->assertEquals(User::class, $modelName);
     }
 
     /** @test */
@@ -44,7 +31,7 @@ final class AuthorizeTest extends FeatureTestCase
 
         [$ability, $args] = $this->autoroute->authorize(
             Autoroute::ACTION_READ,
-            "/users/{user_id}/posts/{post_id}",
+            "api/users/{user_id}/posts/{post_id}",
             [
                 "user_id" => "1",
                 "post_id" => "1",
@@ -53,7 +40,10 @@ final class AuthorizeTest extends FeatureTestCase
 
         $this->assertEquals("readUser", $ability);
 
-        $this->assertTrue($this->alice->is($args[0]));
+        [$post, $user] = $args;
+
+        $this->assertTrue($this->alice->is($user));
+        $this->assertEquals("Post 1", $post->title);
     }
 
     /** @test */
@@ -61,7 +51,7 @@ final class AuthorizeTest extends FeatureTestCase
     {
         [$ability, $args] = $this->autoroute->authorize(
             Autoroute::ACTION_UPDATE,
-            "/users/{user_id}",
+            "api/users/{user_id}",
             [
                 "user_id" => "1",
             ]
@@ -69,7 +59,9 @@ final class AuthorizeTest extends FeatureTestCase
 
         $this->assertEquals("update", $ability);
 
-        $this->assertTrue($this->alice->is($args[0]));
+        [$user] = $args;
+
+        $this->assertTrue($this->alice->is($user));
     }
 
     /** @test */
@@ -77,7 +69,7 @@ final class AuthorizeTest extends FeatureTestCase
     {
         [$ability, $args] = $this->autoroute->authorize(
             Autoroute::ACTION_LIST,
-            "/users/{user_id}/posts",
+            "api/users/{user_id}/posts",
             [
                 "user_id" => "1",
             ]
@@ -85,8 +77,10 @@ final class AuthorizeTest extends FeatureTestCase
 
         $this->assertEquals("listUser", $ability);
 
-        $this->assertEquals(Post::class, $args[0]);
-        $this->assertTrue($this->alice->is($args[1]));
+        [$modelName, $user] = $args;
+
+        $this->assertEquals(Post::class, $modelName);
+        $this->assertTrue($this->alice->is($user));
     }
 
     //

@@ -26,6 +26,7 @@ paths:
           $ref: "#/components/responses/204"
 
     get:
+      security: []
       responses:
         "200":
           description: Success
@@ -39,7 +40,17 @@ paths:
   /users/{user_id}:
     parameters:
       - $ref: "#/components/parameters/user_id"
+    put:
+      security: []
+      requestBody:
+        $ref: "#/components/requestBodies/User"
+
+      responses:
+        "200":
+          $ref: "#/components/responses/204"
+
     get:
+      security: []
       responses:
         "200":
           description: Success
@@ -70,6 +81,20 @@ paths:
               schema:
                 $ref: "#/components/schemas/Post"
 
+  /users/{user_id}/posts/{post_id}:
+    parameters:
+      - $ref: "#/components/parameters/user_id"
+      - $ref: "#/components/parameters/post_id"
+    get:
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  - $ref: "#/components/schemas/Post"
 components:
   schemas:
     id:
@@ -105,6 +130,14 @@ components:
         $ref: "#/components/schemas/id"
       required: true
       description: User ID
+
+    post_id:
+      in: path
+      name: post_id
+      schema:
+        $ref: "#/components/schemas/id"
+      required: true
+      description: Post ID
 
   requestBodies:
     User:

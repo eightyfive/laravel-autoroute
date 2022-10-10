@@ -62,13 +62,13 @@ class ResourceController extends Controller
         );
 
         if ($secured) {
-            [$ability, $arguments] = $this->autoroute->authorize(
+            [$ability, $args] = $this->autoroute->authorize(
                 Autoroute::ACTION_READ,
                 $route->uri,
                 $parameters
             );
 
-            $this->authorize($ability, $arguments);
+            $this->authorize($ability, $args);
         }
 
         $model = $this->autoroute->queryByRoute(
@@ -92,13 +92,13 @@ class ResourceController extends Controller
         );
 
         if ($secured) {
-            [$ability, $arguments] = $this->autoroute->authorize(
+            [$ability, $args] = $this->autoroute->authorize(
                 Autoroute::ACTION_UPDATE,
                 $route->uri,
                 $parameters
             );
 
-            $this->authorize($ability, $arguments);
+            $this->authorize($ability, $args);
         }
 
         $model = $this->autoroute->mutateByRoute(
@@ -124,13 +124,13 @@ class ResourceController extends Controller
         );
 
         if ($secured) {
-            [$ability, $arguments] = $this->autoroute->authorize(
+            [$ability, $args] = $this->autoroute->authorize(
                 Autoroute::ACTION_DELETE,
                 $route->uri,
                 $parameters
             );
 
-            $this->authorize($ability, $arguments);
+            $this->authorize($ability, $args);
         }
 
         $this->autoroute->mutateByRoute(
@@ -155,13 +155,13 @@ class ResourceController extends Controller
         );
 
         if ($secured) {
-            [$ability, $arguments] = $this->autoroute->authorize(
+            [$ability, $args] = $this->autoroute->authorize(
                 Autoroute::ACTION_LIST,
                 $route->uri,
                 $parameters
             );
 
-            $this->authorize($ability, $arguments);
+            $this->authorize($ability, $args);
         }
 
         $models = $this->autoroute->queryByRoute(

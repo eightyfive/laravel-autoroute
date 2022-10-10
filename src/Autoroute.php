@@ -219,6 +219,7 @@ class Autoroute
 
         $isSecured = $spec->security !== null && count($spec->security) > 0;
 
+        // TODO: Check if security applied/disabled at upper levels: PathItem, etc...
         if ($operation->security !== null) {
             $isSecured = count($operation->security) > 0;
         }
@@ -243,7 +244,10 @@ class Autoroute
 
     protected function getAbilityArgs(Collection $models, string $uri)
     {
-        $args = $models->all(); // Array
+        $args = $models
+            ->reverse()
+            ->values()
+            ->all(); // Array
 
         $modelName = $this->resolver->getRouteModelName($uri);
 
