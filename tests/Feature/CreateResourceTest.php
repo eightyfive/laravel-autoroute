@@ -11,6 +11,28 @@ class CreateResourceTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected User $alice;
+    protected User $bob;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Alice
+        $this->alice = User::create([
+            "name" => "Alice",
+            "email" => "alice@example.org",
+            "password" => "password",
+        ]);
+
+        // Bob
+        $this->bob = User::create([
+            "name" => "Bob",
+            "email" => "bob@example.org",
+            "password" => "password",
+        ]);
+    }
+
     /** @test */
     function can_create_resource()
     {
@@ -31,6 +53,42 @@ class CreateResourceTest extends TestCase
 
         $this->assertEquals("Alice", $user->name);
         $this->assertEquals("alice@example.org", $user->email);
+    }
+
+    /** @test */
+    function cannot_create_resource_404()
+    {
+        $this->postJson("/api/users/10000000/posts", [
+            "title" => "Post 1",
+        ])->assertStatus(404);
+    }
+
+    // TODO: Install auth:sanctum in Test env
+    function cannot_create_resource_401()
+    {
+        $this->postJson("/api/users/1/posts", [
+            "title" => "Post 1",
+        ])->assertStatus(401);
+    }
+
+    /** @test */
+    function cannot_create_resource_403()
+    {
+        $this->actingAs($this->alice)
+            ->postJson("/api/users/2/posts", [
+                "title" => "Post 1",
+            ])
+            ->assertStatus(403);
+    }
+
+    /** @test */
+    function can_create_resource_deep()
+    {
+        $this->actingAs($this->alice)
+            ->postJson("/api/users/1/posts", [
+                "title" => "Post 1",
+            ])
+            ->assertStatus(201);
     }
 
     /** @test */
