@@ -1,21 +1,16 @@
 <?php
-namespace Tests\Unit;
+namespace Tests\Feature;
 
 use Illuminate\Routing\Router;
 use Illuminate\Events\Dispatcher;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
-use Tests\TestCase;
 use Tests\Autoroute;
 use App\Models\User;
 use App\Models\Post;
 
-final class AuthorizeTest extends TestCase
+final class AuthorizeTest extends FeatureTestCase
 {
-    use RefreshDatabase;
-
     protected Autoroute $autoroute;
-    protected User $user;
 
     protected function setUp(): void
     {
@@ -25,9 +20,6 @@ final class AuthorizeTest extends TestCase
             new Router(new Dispatcher()),
             __DIR__ . "/../../routes"
         );
-
-        // User 1
-        $this->user = User::factory()->create();
     }
 
     /** @test */
@@ -61,7 +53,7 @@ final class AuthorizeTest extends TestCase
 
         $this->assertEquals("readUser", $ability);
 
-        $this->assertTrue($this->user->is($args[0]));
+        $this->assertTrue($this->alice->is($args[0]));
     }
 
     /** @test */
@@ -77,7 +69,7 @@ final class AuthorizeTest extends TestCase
 
         $this->assertEquals("update", $ability);
 
-        $this->assertTrue($this->user->is($args[0]));
+        $this->assertTrue($this->alice->is($args[0]));
     }
 
     /** @test */
@@ -94,7 +86,7 @@ final class AuthorizeTest extends TestCase
         $this->assertEquals("listUser", $ability);
 
         $this->assertEquals(Post::class, $args[0]);
-        $this->assertTrue($this->user->is($args[1]));
+        $this->assertTrue($this->alice->is($args[1]));
     }
 
     //

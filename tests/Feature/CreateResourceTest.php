@@ -1,58 +1,39 @@
 <?php
-
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-use Tests\TestCase;
 use App\Models\User;
 
-class CreateResourceTest extends TestCase
+class CreateResourceTest extends FeatureTestCase
 {
-    use RefreshDatabase;
-
-    protected User $alice;
-    protected User $bob;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Alice
-        $this->alice = User::create([
-            "name" => "Alice",
-            "email" => "alice@example.org",
-            "password" => "password",
-        ]);
-
-        // Bob
-        $this->bob = User::create([
-            "name" => "Bob",
-            "email" => "bob@example.org",
-            "password" => "password",
-        ]);
-    }
-
     /** @test */
     function can_create_resource()
     {
-        $this->assertCount(0, User::all());
+        $this->assertCount(2, User::all());
 
         // $response = $this->actingAs($user)->post("/posts", [
         $response = $this->postJson("/api/users", [
-            "name" => "Alice",
-            "email" => "alice@example.org",
+            "name" => "Dave",
+            "email" => "dave@example.org",
             "password" => "password",
         ]);
 
         $response->assertStatus(201);
 
-        $this->assertCount(1, User::all());
+        $this->assertCount(3, User::all());
 
-        $user = User::find(1);
+        $user = User::find(3);
 
-        $this->assertEquals("Alice", $user->name);
-        $this->assertEquals("alice@example.org", $user->email);
+        $this->assertEquals("Dave", $user->name);
+    }
+
+    /** @test */
+    function can_create_resource_deep()
+    {
+        $this->actingAs($this->alice)
+            ->postJson("/api/users/1/posts", [
+                "title" => "Post 1",
+            ])
+            ->assertStatus(201);
     }
 
     /** @test */
@@ -74,21 +55,11 @@ class CreateResourceTest extends TestCase
     /** @test */
     function cannot_create_resource_403()
     {
-        $this->actingAs($this->alice)
-            ->postJson("/api/users/2/posts", [
-                "title" => "Post 1",
-            ])
-            ->assertStatus(403);
-    }
-
-    /** @test */
-    function can_create_resource_deep()
-    {
-        $this->actingAs($this->alice)
+        $this->actingAs($this->bob)
             ->postJson("/api/users/1/posts", [
                 "title" => "Post 1",
             ])
-            ->assertStatus(201);
+            ->assertStatus(403);
     }
 
     /** @test */

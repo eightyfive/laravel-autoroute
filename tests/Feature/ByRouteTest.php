@@ -1,29 +1,20 @@
 <?php
-namespace Tests\Unit;
+namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-use Tests\TestCase;
 use Tests\AutorouteResolver;
 
 use App\Models\Post;
 use App\Models\User;
 
-final class ByRouteTest extends TestCase
+final class ByRouteTest extends FeatureTestCase
 {
-    use RefreshDatabase;
-
     protected AutorouteResolver $resolver;
-    protected User $user;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->resolver = new AutorouteResolver();
-
-        // User 1
-        $this->user = User::factory()->create();
     }
 
     /** @test */
