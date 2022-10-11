@@ -37,7 +37,7 @@
       "Database\\Factories\\": "database/factories/"
     }
   },
-  "minimum-stability": "dev",
+  "minimum-stability": "alpha",
   "prefer-stable": true,
   "extra": {
     "laravel": {
