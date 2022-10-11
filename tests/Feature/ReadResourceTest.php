@@ -8,11 +8,9 @@ class ReadResourceTest extends FeatureTestCase
     /** @test */
     function can_read_resource()
     {
-        $this->getJson("/api/users/1")
+        $res = $this->getJson("/api/users/1")
             ->assertStatus(200)
-            ->assertJson([
-                "name" => "Alice",
-            ]);
+            ->assertJsonPath("data.name", "Alice");
     }
 
     /** @test */
@@ -35,8 +33,6 @@ class ReadResourceTest extends FeatureTestCase
         $this->actingAs($this->alice)
             ->getJson("/api/users/1/posts/1")
             ->assertStatus(200)
-            ->assertJson([
-                "title" => "Post 1",
-            ]);
+            ->assertJsonPath("data.title", "Post 1");
     }
 }

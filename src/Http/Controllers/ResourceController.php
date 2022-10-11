@@ -3,7 +3,6 @@
 namespace Eyf\Autoroute\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Model;
 
 use Eyf\Autoroute\Autoroute;
 
@@ -50,8 +49,12 @@ class ResourceController extends Controller
             $request->all()
         );
 
-        // TODO: Filter response by OpenAPI 3.0 definition response schema
-        return response()->json($model, 201);
+        // Response
+        return $this->autoroute->toModelResponse(
+            $route->uri,
+            Autoroute::ACTION_CREATE,
+            $model
+        );
     }
 
     public function read(Request $request)
@@ -82,8 +85,12 @@ class ResourceController extends Controller
             $parameters
         );
 
-        // TODO
-        return response()->json($model);
+        // Response
+        return $this->autoroute->toModelResponse(
+            $route->uri,
+            Autoroute::ACTION_READ,
+            $model
+        );
     }
 
     public function update(Request $request)
@@ -120,9 +127,12 @@ class ResourceController extends Controller
             $request->all()
         );
 
-        // TODO
-        return response()->json($model);
-        // TODO: return new VoidResponse();
+        // Response
+        return $this->autoroute->toModelResponse(
+            $route->uri,
+            Autoroute::ACTION_UPDATE,
+            $model
+        );
     }
 
     public function delete(Request $request)
@@ -147,15 +157,19 @@ class ResourceController extends Controller
         }
 
         // Mutate
-        $this->autoroute->mutateByRoute(
+        $model = $this->autoroute->mutateByRoute(
             Autoroute::ACTION_DELETE,
             $route->uri,
             $parameters,
             []
         );
 
-        // TODO: Change according to OpenAPi 3.0 definition
-        return new VoidResponse();
+        // Response
+        return $this->autoroute->toModelResponse(
+            $route->uri,
+            Autoroute::ACTION_DELETE,
+            $model
+        );
     }
 
     public function list(Request $request)
@@ -186,7 +200,11 @@ class ResourceController extends Controller
             $parameters
         );
 
-        // TODO
-        return response()->json($models);
+        // Response
+        return $this->autoroute->toModelsResponse(
+            $route->uri,
+            Autoroute::ACTION_LIST,
+            $models
+        );
     }
 }

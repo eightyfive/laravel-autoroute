@@ -2,10 +2,14 @@
 namespace Eyf\Autoroute;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpFoundation\Response;
 
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+
+use Eyf\Autoroute\Http\Controllers\VoidResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class AutorouteResolver implements AutorouteResolverInterface
 {
@@ -135,10 +139,12 @@ class AutorouteResolver implements AutorouteResolverInterface
         return $model;
     }
 
-    public function deleteByRoute(string $uri, array $parameters): void
+    public function deleteByRoute(string $uri, array $parameters): Model
     {
         $model = $this->getRouteModel($uri, $parameters);
         $model->delete();
+
+        return $model;
     }
 
     public function listByRoute(string $uri, array $parameters): Collection
@@ -180,6 +186,42 @@ class AutorouteResolver implements AutorouteResolverInterface
         $parentBaseName = array_pop($modelBaseNames);
 
         return $action . $parentBaseName; // -> "listUser" (list user Posts !)
+    }
+
+    //
+    // RESPONSE
+    //
+
+    public function toModelResponse(
+        int $status,
+        array|null $schema,
+        Model $model
+    ): Response {
+        if (!$schema) {
+            // No Content (~204)
+            return new VoidResponse($status);
+        }
+
+        $model->setVisible(array_keys($schema));
+
+        return (new JsonResource($model))->response()->setStatusCode($status);
+    }
+
+    public function toModelsResponse(
+        int $status,
+        array|null $schema,
+        Collection $models
+    ): Response {
+        if (!$schema) {
+            // No Content (~204)
+            return new VoidResponse($status);
+        }
+
+        $models->each->setVisible(array_keys($schema));
+
+        return JsonResource::collection($models)
+            ->response()
+            ->setStatusCode($status);
     }
 
     //

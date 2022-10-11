@@ -35,7 +35,7 @@ paths:
               schema:
                 type: array
                 items:
-                  - $ref: "#/components/schemas/User"
+                  $ref: "#/components/schemas/User"
 
   /users/{user_id}:
     parameters:
@@ -81,7 +81,7 @@ paths:
               schema:
                 type: array
                 items:
-                  - $ref: "#/components/schemas/Post"
+                  $ref: "#/components/schemas/Post"
     post:
       requestBody:
         $ref: "#/components/requestBodies/Post"
@@ -100,6 +100,14 @@ paths:
     put:
       requestBody:
         $ref: "#/components/requestBodies/Post"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+
     delete:
       responses:
         "204":
@@ -111,9 +119,8 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  - $ref: "#/components/schemas/Post"
+                $ref: "#/components/schemas/Post"
+
 components:
   schemas:
     id:
@@ -137,8 +144,6 @@ components:
         id:
           $ref: "#/components/schemas/id"
         title:
-          type: string
-        description:
           type: string
 
   parameters:

@@ -2,6 +2,7 @@
 namespace Tests\Feature;
 
 use App\Models\Post;
+use App\Models\User;
 
 class UpdateResourceTest extends FeatureTestCase
 {
@@ -15,26 +16,26 @@ class UpdateResourceTest extends FeatureTestCase
     /** @test */
     function can_update_resource()
     {
-        $this->putJson("/api/users/1", [
+        $res = $this->putJson("/api/users/1", [
             "name" => "LN",
-        ])
-            ->assertStatus(200)
-            ->assertJson([
-                "name" => "LN",
-            ]);
+        ])->assertStatus(200);
+
+        $user = User::find(1);
+
+        $this->assertEquals("LN", $user->name);
+        $this->assertEquals('""', $res->getContent());
     }
 
     /** @test */
     function can_update_resource_deep()
     {
-        $this->actingAs($this->alice)
+        $res = $this->actingAs($this->alice)
             ->putJson("/api/users/1/posts/1", [
                 "title" => "Post 1 (modified)",
             ])
             ->assertStatus(200)
-            ->assertJson([
-                "title" => "Post 1 (modified)",
-            ]);
+            ->assertJsonPath("data.user_id", null)
+            ->assertJsonPath("data.title", "Post 1 (modified)");
     }
 
     /** @test */

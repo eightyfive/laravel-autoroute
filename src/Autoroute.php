@@ -3,10 +3,12 @@ namespace Eyf\Autoroute;
 
 use Illuminate\Routing\Router;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use cebe\openapi\Reader;
 use cebe\openapi\spec\PathItem;
 use cebe\openapi\spec\OpenApi;
 use cebe\openapi\spec\Operation;
+use cebe\openapi\spec\Schema;
 
 class Autoroute
 {
@@ -67,28 +69,29 @@ class Autoroute
             return [];
         }
 
-        if ($operation->requestBody->content === null) {
-            return [];
-        }
-
         $mediaType = $operation->requestBody->content["application/json"];
 
         if (!$mediaType) {
+            // Validate nothing
             return [];
         }
 
+        return $this->schemaToRules($mediaType->schema);
+    }
+
+    protected function schemaToRules(Schema $schema): array
+    {
+        if ($schema->type !== "object") {
+            throw new AutorouteException(
+                "Unsupported schema type: " . $schema->type
+            );
+        }
+
         $rules = [];
-        $schema = $mediaType->schema;
         $requiredNames = $schema->required ?? [];
 
         foreach ($requiredNames as $name) {
             $rules[$name] = ["required"];
-        }
-
-        if ($schema->type !== "object") {
-            throw new AutorouteException(
-                "Request body type not supported: " . $schema->type
-            );
         }
 
         foreach ($schema->properties as $name => $property) {
@@ -123,6 +126,163 @@ class Autoroute
         }
 
         return $rules;
+    }
+
+    public function toModelResponse(
+        string $routeId,
+        string $action,
+        Model $model
+    ) {
+        if ($action === static::ACTION_CREATE) {
+            return $this->getModelResponse(
+                $routeId,
+                static::METHOD_CREATE,
+                $model,
+                [201, 204, 200]
+            );
+        }
+
+        if ($action === static::ACTION_READ) {
+            return $this->getModelResponse(
+                $routeId,
+                static::METHOD_READ,
+                $model,
+                [200]
+            );
+        }
+
+        if ($action === static::ACTION_UPDATE) {
+            return $this->getModelResponse(
+                $routeId,
+                static::METHOD_UPDATE,
+                $model,
+                [200]
+            );
+        }
+
+        if ($action === static::ACTION_DELETE) {
+            return $this->getModelResponse(
+                $routeId,
+                static::METHOD_DELETE,
+                $model,
+                [204, 200]
+            );
+        }
+
+        throw new AutorouteException("Unsupported action: " . $action);
+    }
+
+    public function toModelsResponse(
+        string $routeId,
+        string $action,
+        Collection $models
+    ) {
+        if ($action === static::ACTION_LIST) {
+            return $this->getModelsResponse(
+                $routeId,
+                static::METHOD_LIST,
+                $models,
+                [200]
+            );
+        }
+
+        throw new AutorouteException("Unsupported action: " . $action);
+    }
+
+    protected function getModelResponse(
+        string $routeId,
+        string $method,
+        Model $model,
+        array $statuses
+    ) {
+        [$status, $schema] = $this->getResponseSchema(
+            $routeId,
+            $method,
+            $statuses
+        );
+
+        return $this->resolver->toModelResponse($status, $schema, $model);
+    }
+
+    protected function getModelsResponse(
+        string $routeId,
+        string $method,
+        Collection $models,
+        array $statuses
+    ) {
+        [$status, $schema] = $this->getResponseSchema(
+            $routeId,
+            $method,
+            $statuses
+        );
+
+        return $this->resolver->toModelsResponse($status, $schema, $models);
+    }
+
+    protected function getResponseSchema(
+        string $routeId,
+        string $method,
+        array $statuses
+    ): array {
+        [$spec, $uri] = $this->parseRouteId($routeId);
+
+        $operation = $this->findOperation($spec, $uri, $method);
+
+        $status = $this->findResponseStatus($operation, $statuses);
+
+        $res = $operation->responses[strval($status)];
+
+        if (!$res->content) {
+            return [$status, null];
+        }
+
+        if (!$res->content["application/json"]) {
+            throw new AutorouteException("Unsupported response content type");
+        }
+
+        $schema = $res->content["application/json"]->schema;
+
+        if (!in_array($schema->type, ["object", "array"])) {
+            throw new AutorouteException(
+                "Unsupported schema type: " . $schema->type
+            );
+        }
+
+        if ($schema->type === "array") {
+            $schema = $this->schemaToArray($schema->items);
+        } else {
+            $schema = $this->schemaToArray($schema);
+        }
+
+        return [$status, $schema];
+    }
+
+    protected function findResponseStatus(
+        Operation $operation,
+        array $statuses
+    ): int {
+        foreach ($statuses as $status) {
+            $res = $operation->responses[strval($status)];
+
+            if ($res) {
+                return $status;
+            }
+        }
+
+        throw new AutorouteException(
+            "No response found: " . implode(", ", $statuses)
+        );
+    }
+
+    protected function schemaToArray(Schema $schema)
+    {
+        $data = [];
+
+        foreach ($schema->properties as $name => $value) {
+            $data[$name] = $value;
+        }
+
+        return $data;
     }
 
     protected function findOperation(
