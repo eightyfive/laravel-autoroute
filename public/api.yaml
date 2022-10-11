@@ -20,17 +20,11 @@ paths:
       security: []
       responses:
         "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/User"
+          $ref: "#/components/responses/users"
     post:
       security: []
       requestBody:
-        $ref: "#/components/requestBodies/User"
+        $ref: "#/components/requestBodies/register"
       responses:
         "201":
           $ref: "#/components/responses/204"
@@ -42,25 +36,11 @@ paths:
       security: []
       responses:
         "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
+          $ref: "#/components/responses/user"
     put:
       security: []
       requestBody:
-        description: User request body
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - name
-              properties:
-                name:
-                  type: string
+        $ref: "#/components/requestBodies/user"
       responses:
         "200":
           $ref: "#/components/responses/204"
@@ -71,23 +51,13 @@ paths:
     get:
       responses:
         "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Post"
+          $ref: "#/components/responses/posts"
     post:
       requestBody:
-        $ref: "#/components/requestBodies/Post"
+        $ref: "#/components/requestBodies/post"
       responses:
         "201":
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Post"
+          $ref: "#/components/responses/post"
 
   /users/{user_id}/posts/{post_id}:
     parameters:
@@ -96,27 +66,35 @@ paths:
     get:
       responses:
         "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Post"
+          $ref: "#/components/responses/post"
     put:
       requestBody:
-        $ref: "#/components/requestBodies/Post"
+        $ref: "#/components/requestBodies/post"
       responses:
         "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Post"
+          $ref: "#/components/responses/post"
     delete:
       responses:
         "204":
-          description: Success
+          $ref: "#/components/responses/204"
 
 components:
+  parameters:
+    user_id:
+      in: path
+      name: user_id
+      schema:
+        type: integer
+      required: true
+      description: User ID
+    post_id:
+      in: path
+      name: post_id
+      schema:
+        type: integer
+      required: true
+      description: Post ID
+
   schemas:
     User:
       type: object
@@ -128,7 +106,6 @@ components:
         email:
           type: string
           format: email
-
     Post:
       type: object
       properties:
@@ -137,40 +114,8 @@ components:
         title:
           type: string
 
-  parameters:
-    user_id:
-      in: path
-      name: user_id
-      schema:
-        type: integer
-      required: true
-      description: User ID
-
-    post_id:
-      in: path
-      name: post_id
-      schema:
-        type: integer
-      required: true
-      description: Post ID
-
   requestBodies:
-    Post:
-      description: Post request body
-      required: true
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - title
-            properties:
-              title:
-                type: string
-                format: min:3
-
-    User:
-      description: User request body
+    register:
       required: true
       content:
         application/json:
@@ -192,8 +137,63 @@ components:
               device_name:
                 type: string
                 format: "between:5,10"
+    user:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+    post:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - title
+            properties:
+              title:
+                type: string
+                format: min:3
 
   responses:
+    users:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/User"
+
+    user:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/User"
+
+    posts:
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Post"
+
+    post:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Post"
+
     "401":
       description: Unauthorized
       content:
@@ -208,6 +208,6 @@ components:
       description: No Content
 
   securitySchemes:
-    "auth":
+    auth:
       type: http
       scheme: bearer
