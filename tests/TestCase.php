@@ -2,6 +2,7 @@
 namespace Tests;
 
 use Orchestra\Testbench\TestCase as Test;
+use Laravel\Sanctum\SanctumServiceProvider;
 
 use Eyf\Autoroute\Autoroute;
 use Eyf\Autoroute\AutorouteServiceProvider;
@@ -10,7 +11,7 @@ class TestCase extends Test
 {
     protected function getPackageProviders($app)
     {
-        return [AutorouteServiceProvider::class];
+        return [SanctumServiceProvider::class, AutorouteServiceProvider::class];
     }
 
     public function getEnvironmentSetUp($app)

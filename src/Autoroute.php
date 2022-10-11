@@ -371,8 +371,7 @@ class Autoroute
 
             foreach ($securities as $security) {
                 if (isset($security->{"auth:sanctum"})) {
-                    // TODO
-                    // $route->middleware("auth:sanctum");
+                    $route->middleware("auth:sanctum");
                 }
             }
         }

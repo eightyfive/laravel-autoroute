@@ -1,6 +1,8 @@
 <?php
 namespace Tests\Feature;
 
+use Laravel\Sanctum\Sanctum;
+
 use App\Models\Post;
 
 class ListResourceTest extends FeatureTestCase
@@ -17,9 +19,9 @@ class ListResourceTest extends FeatureTestCase
     /** @test */
     function cannot_list_resource_403()
     {
-        $this->actingAs($this->bob)
-            ->getJson("/api/users/1/posts")
-            ->assertStatus(403);
+        Sanctum::actingAs($this->bob);
+
+        $this->getJson("/api/users/1/posts")->assertStatus(403);
     }
 
     /** @test */
@@ -29,8 +31,9 @@ class ListResourceTest extends FeatureTestCase
         Post::create(["title" => "Post 2", "user_id" => 2]);
         Post::create(["title" => "Post 3", "user_id" => 1]);
 
-        $this->actingAs($this->alice)
-            ->getJson("/api/users/1/posts")
+        Sanctum::actingAs($this->alice);
+
+        $this->getJson("/api/users/1/posts")
             ->assertStatus(200)
             ->assertJsonPath("data.0.id", 1)
             ->assertJsonPath("data.0.user_id", null)

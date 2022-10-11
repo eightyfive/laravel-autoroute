@@ -1,6 +1,8 @@
 <?php
 namespace Tests\Feature;
 
+use Laravel\Sanctum\Sanctum;
+
 use App\Models\Post;
 use App\Models\User;
 
@@ -29,10 +31,11 @@ class UpdateResourceTest extends FeatureTestCase
     /** @test */
     function can_update_resource_deep()
     {
-        $res = $this->actingAs($this->alice)
-            ->putJson("/api/users/1/posts/1", [
-                "title" => "Post 1 (modified)",
-            ])
+        Sanctum::actingAs($this->alice);
+
+        $this->putJson("/api/users/1/posts/1", [
+            "title" => "Post 1 (modified)",
+        ])
             ->assertStatus(200)
             ->assertJsonPath("data.user_id", null)
             ->assertJsonPath("data.title", "Post 1 (modified)");
@@ -41,20 +44,20 @@ class UpdateResourceTest extends FeatureTestCase
     /** @test */
     function cannot_update_resource_422_required()
     {
-        $this->actingAs($this->alice)
-            ->putJson("/api/users/1/posts/1", [
-                // "title" => "Post 1", // Missing --> 422
-            ])
-            ->assertStatus(422);
+        Sanctum::actingAs($this->alice);
+
+        $this->putJson("/api/users/1/posts/1", [
+            // "title" => "Post 1", // Missing --> 422
+        ])->assertStatus(422);
     }
 
     /** @test */
     function cannot_update_resource_422_invalid()
     {
-        $this->actingAs($this->alice)
-            ->putJson("/api/users/1/posts/1", [
-                "title" => "P", // Invalid --> 422
-            ])
-            ->assertStatus(422);
+        Sanctum::actingAs($this->alice);
+
+        $this->putJson("/api/users/1/posts/1", [
+            "title" => "P", // Invalid --> 422
+        ])->assertStatus(422);
     }
 }

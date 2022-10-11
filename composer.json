@@ -49,6 +49,7 @@
   "require-dev": {
     "orchestra/testbench": "^7.9",
     "phpunit/phpunit": "^9.5",
-    "laravel/framework": "^9.34"
+    "laravel/framework": "^9.34",
+    "laravel/sanctum": "^3.0"
   }
 }

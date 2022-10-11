@@ -1,6 +1,8 @@
 <?php
 namespace Tests\Feature;
 
+use Laravel\Sanctum\Sanctum;
+
 use App\Models\User;
 
 class CreateResourceTest extends FeatureTestCase
@@ -26,19 +28,11 @@ class CreateResourceTest extends FeatureTestCase
     /** @test */
     function can_create_resource_deep()
     {
-        $this->actingAs($this->alice)
-            ->postJson("/api/users/1/posts", [
-                "title" => "Post 1",
-            ])
-            ->assertStatus(201);
-    }
+        Sanctum::actingAs($this->alice);
 
-    /** @test */
-    function cannot_create_resource_404()
-    {
-        $this->postJson("/api/users/10000000/posts", [
+        $this->postJson("/api/users/1/posts", [
             "title" => "Post 1",
-        ])->assertStatus(404);
+        ])->assertStatus(201);
     }
 
     // TODO: Install auth:sanctum in Test env
@@ -52,11 +46,11 @@ class CreateResourceTest extends FeatureTestCase
     /** @test */
     function cannot_create_resource_403()
     {
-        $this->actingAs($this->bob)
-            ->postJson("/api/users/1/posts", [
-                "title" => "Post 1",
-            ])
-            ->assertStatus(403);
+        Sanctum::actingAs($this->bob);
+
+        $this->postJson("/api/users/1/posts", [
+            "title" => "Post 1",
+        ])->assertStatus(403);
     }
 
     /** @test */
