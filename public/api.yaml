@@ -4,7 +4,7 @@ info:
   version: 0.1.0
 
 security:
-  - "auth:sanctum": []
+  - auth: ["sanctum"]
 
 paths:
   /login:
@@ -16,15 +16,6 @@ paths:
           $ref: "#/components/responses/204"
 
   /users:
-    post:
-      security: []
-      requestBody:
-        $ref: "#/components/requestBodies/User"
-
-      responses:
-        "201":
-          $ref: "#/components/responses/204"
-
     get:
       security: []
       responses:
@@ -36,10 +27,26 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/User"
+    post:
+      security: []
+      requestBody:
+        $ref: "#/components/requestBodies/User"
+      responses:
+        "201":
+          $ref: "#/components/responses/204"
 
   /users/{user_id}:
     parameters:
       - $ref: "#/components/parameters/user_id"
+    get:
+      security: []
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
     put:
       security: []
       requestBody:
@@ -54,20 +61,9 @@ paths:
               properties:
                 name:
                   type: string
-
       responses:
         "200":
           $ref: "#/components/responses/204"
-
-    get:
-      security: []
-      responses:
-        "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
 
   /users/{user_id}/posts:
     parameters:
@@ -97,6 +93,14 @@ paths:
     parameters:
       - $ref: "#/components/parameters/user_id"
       - $ref: "#/components/parameters/post_id"
+    get:
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
     put:
       requestBody:
         $ref: "#/components/requestBodies/Post"
@@ -107,31 +111,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Post"
-
     delete:
       responses:
         "204":
           description: Success
-    get:
-      responses:
-        "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Post"
 
 components:
   schemas:
-    id:
-      type: integer
-      minimum: 1
-
     User:
       type: object
       properties:
         id:
-          $ref: "#/components/schemas/id"
+          type: integer
         name:
           type: string
         email:
@@ -142,7 +133,7 @@ components:
       type: object
       properties:
         id:
-          $ref: "#/components/schemas/id"
+          type: integer
         title:
           type: string
 
@@ -151,7 +142,7 @@ components:
       in: path
       name: user_id
       schema:
-        $ref: "#/components/schemas/id"
+        type: integer
       required: true
       description: User ID
 
@@ -159,7 +150,7 @@ components:
       in: path
       name: post_id
       schema:
-        $ref: "#/components/schemas/id"
+        type: integer
       required: true
       description: Post ID
 
@@ -217,6 +208,6 @@ components:
       description: No Content
 
   securitySchemes:
-    "auth:sanctum":
+    "auth":
       type: http
       scheme: bearer
