@@ -1,6 +1,6 @@
 <?php
 
 return [
-    "routes_dir" => "./routes",
+    "dir" => "public",
     "models_namespace" => "App\\Models",
 ];

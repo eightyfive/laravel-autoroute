@@ -26,10 +26,12 @@ class AutorouteServiceProvider extends ServiceProvider implements
         );
 
         $this->app->singleton(Autoroute::class, function ($app) {
+            $config = $app["config"]->get("autoroute");
+
             return new Autoroute(
                 $app->make(Router::class),
                 $app->make(AutorouteResolverInterface::class),
-                $app->basePath() . "/routes"
+                $app->basePath($config["dir"])
             );
         });
     }

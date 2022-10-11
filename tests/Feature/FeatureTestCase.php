@@ -24,7 +24,7 @@ class FeatureTestCase extends TestCase
 
         $this->autoroute = new Autoroute(
             new Router(new Dispatcher()),
-            __DIR__ . "/../../routes"
+            __DIR__ . "/../../public"
         );
 
         $this->autoroute->createGroup("api.yaml");

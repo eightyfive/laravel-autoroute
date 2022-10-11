@@ -25,7 +25,7 @@ final class AutorouteTest extends TestCase
         $this->router = new Router(new Dispatcher());
         $this->autoroute = new Autoroute(
             $this->router,
-            __DIR__ . "/../../routes"
+            __DIR__ . "/../../public"
         );
     }
 
@@ -44,12 +44,12 @@ final class AutorouteTest extends TestCase
         );
 
         $this->assertEquals(
-            $this->autoroute->getPrefixFromFileName("routes/web_api.yaml"),
+            $this->autoroute->getPrefixFromFileName("dir_name/web_api.yaml"),
             "web_api"
         );
 
         $this->assertEquals(
-            $this->autoroute->getPrefixFromFileName("./routes/internal.yaml"),
+            $this->autoroute->getPrefixFromFileName("./dir_name/internal.yaml"),
             "internal"
         );
     }
@@ -133,10 +133,7 @@ final class AutorouteTest extends TestCase
 
     protected function getRoutes()
     {
-        $routes = $this->router->getRoutes();
-        // $routes->refreshNameLookups();
-
-        return $routes;
+        return $this->router->getRoutes();
     }
 
     protected function getRoute(string $method, string $uri)

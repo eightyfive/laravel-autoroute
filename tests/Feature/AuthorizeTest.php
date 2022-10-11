@@ -89,10 +89,7 @@ final class AuthorizeTest extends FeatureTestCase
 
     protected function getRoutes()
     {
-        $routes = $this->router->getRoutes();
-        // $routes->refreshNameLookups();
-
-        return $routes;
+        return $this->router->getRoutes();
     }
 
     protected function getRoute(string $method, string $uri)

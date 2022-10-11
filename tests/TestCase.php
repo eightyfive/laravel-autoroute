@@ -29,6 +29,6 @@ class TestCase extends Test
 
         // Test "app path" is:
         // vendor/orchestra/testbench-core/laravel/
-        $autoroute->createGroup("../../../../../routes/api.yaml");
+        $autoroute->createGroup("../../../../../public/api.yaml");
     }
 }
