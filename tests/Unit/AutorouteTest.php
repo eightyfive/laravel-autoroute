@@ -7,7 +7,7 @@ use Illuminate\Events\Dispatcher;
 use Tests\TestCase;
 use Tests\Autoroute;
 
-final class AutorouteTest extends TestCase
+class AutorouteTest extends TestCase
 {
     protected Autoroute $autoroute;
     protected Router $router;
@@ -16,23 +16,17 @@ final class AutorouteTest extends TestCase
     {
         parent::setUp();
 
-        $this->createAutoroute();
+        $this->resetAutoroute();
         $this->autoroute->createGroup("api.yaml");
     }
 
-    protected function createAutoroute()
+    protected function resetAutoroute()
     {
         $this->router = new Router(new Dispatcher());
         $this->autoroute = new Autoroute(
             $this->router,
             __DIR__ . "/../../public"
         );
-    }
-
-    protected function resetAutoroute()
-    {
-        unset($this->autoroute);
-        $this->createAutoroute();
     }
 
     /** @test */

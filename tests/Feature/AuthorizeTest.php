@@ -1,12 +1,27 @@
 <?php
 namespace Tests\Feature;
 
+use Illuminate\Routing\Router;
+use Illuminate\Events\Dispatcher;
+
 use Tests\Autoroute;
 use App\Models\User;
 use App\Models\Post;
 
 final class AuthorizeTest extends FeatureTestCase
 {
+    protected Autoroute $autoroute;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $router = new Router(new Dispatcher());
+
+        $this->autoroute = new Autoroute($router, __DIR__ . "/../../public");
+        $this->autoroute->createGroup("api.yaml");
+    }
+
     /** @test */
     public function authorize_create(): void
     {
@@ -81,21 +96,5 @@ final class AuthorizeTest extends FeatureTestCase
 
         $this->assertEquals(Post::class, $modelName);
         $this->assertTrue($this->alice->is($user));
-    }
-
-    //
-    // PROTECTED
-    //
-
-    protected function getRoutes()
-    {
-        return $this->router->getRoutes();
-    }
-
-    protected function getRoute(string $method, string $uri)
-    {
-        $routes = $this->getRoutes()->getRoutesByMethod();
-
-        return $routes[$method][$uri] ?? null;
     }
 }

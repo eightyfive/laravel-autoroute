@@ -2,18 +2,13 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Routing\Router;
-use Illuminate\Events\Dispatcher;
 
 use Tests\TestCase;
-use Tests\Autoroute;
 use App\Models\User;
 
 class FeatureTestCase extends TestCase
 {
     use RefreshDatabase;
-
-    protected Autoroute $autoroute;
 
     protected User $alice;
     protected User $bob;
@@ -22,29 +17,18 @@ class FeatureTestCase extends TestCase
     {
         parent::setUp();
 
-        $this->autoroute = new Autoroute(
-            new Router(new Dispatcher()),
-            __DIR__ . "/../../public"
-        );
-
-        $this->autoroute->createGroup("api.yaml");
-
         // Alice
-        if (!isset($this->alice)) {
-            $this->alice = User::create([
-                "name" => "Alice",
-                "email" => "alice@example.org",
-                "password" => "password",
-            ]);
-        }
+        $this->alice = User::create([
+            "name" => "Alice",
+            "email" => "alice@example.org",
+            "password" => "password",
+        ]);
 
         // Bob
-        if (!isset($this->bob)) {
-            $this->bob = User::create([
-                "name" => "Bob",
-                "email" => "bob@example.org",
-                "password" => "password",
-            ]);
-        }
+        $this->bob = User::create([
+            "name" => "Bob",
+            "email" => "bob@example.org",
+            "password" => "password",
+        ]);
     }
 }

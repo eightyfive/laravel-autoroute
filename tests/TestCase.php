@@ -1,17 +1,13 @@
 <?php
 namespace Tests;
 
+use Orchestra\Testbench\TestCase as Test;
+
 use Eyf\Autoroute\Autoroute;
 use Eyf\Autoroute\AutorouteServiceProvider;
-use Orchestra\Testbench\TestCase as Test;
 
 class TestCase extends Test
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-    }
-
     protected function getPackageProviders($app)
     {
         return [AutorouteServiceProvider::class];
@@ -25,10 +21,16 @@ class TestCase extends Test
         (new \CreateUsersTable())->up();
         (new \CreatePostsTable())->up();
 
+        // Register routes for Testbench app
         $autoroute = $app->make(Autoroute::class);
 
-        // Test "app path" is:
-        // vendor/orchestra/testbench-core/laravel/
+        // Testbench app "base path" is:
+        // vendor/orchestra/testbench-core/laravel
+
+        // Default Autoroute `dir` is:
+        // `base_path('public')`
+
+        // vendor/orchestra/testbench-core/laravel/public/../../../../../public/api.yaml
         $autoroute->createGroup("../../../../../public/api.yaml");
     }
 }
