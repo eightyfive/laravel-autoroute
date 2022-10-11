@@ -35,8 +35,6 @@ class Autoroute
     ) {
         $this->router = $router;
         $this->resolver = $resolver;
-
-        // TODO: Default `dir` = "./public/api.yaml"
         $this->dir = $dir;
     }
 
@@ -367,11 +365,20 @@ class Autoroute
                 compact("uses")
             );
 
+            // Add middlewares
             $securities = $operation->security ?? $spec->security;
 
             foreach ($securities as $security) {
-                if (isset($security->{"auth:sanctum"})) {
-                    $route->middleware("auth:sanctum");
+                $middlewares = $security->getSerializableData();
+
+                foreach ($middlewares as $middleware => $config) {
+                    if (count($config)) {
+                        $route->middleware(
+                            $middleware . ":" . implode(",", $config)
+                        );
+                    } else {
+                        $route->middleware($middleware);
+                    }
                 }
             }
         }
