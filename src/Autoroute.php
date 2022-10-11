@@ -50,7 +50,13 @@ class Autoroute
             $options["prefix"] = $this->getPrefixFromFileName($fileName);
         }
 
-        $spec = Reader::readFromYamlFile(realpath($fileName));
+        $filePath = realpath($fileName);
+
+        if (!file_exists($filePath)) {
+            throw new AutorouteException("File not found: " . $filePath);
+        }
+
+        $spec = Reader::readFromYamlFile($filePath);
 
         $this->addGroup($options["prefix"], $spec, $options);
 
@@ -364,8 +370,9 @@ class Autoroute
             $securities = $operation->security ?? $spec->security;
 
             foreach ($securities as $security) {
-                if (isset($security->Sanctum)) {
-                    $route->middleware("auth:sanctum");
+                if (isset($security->{"auth:sanctum"})) {
+                    // TODO
+                    // $route->middleware("auth:sanctum");
                 }
             }
         }
