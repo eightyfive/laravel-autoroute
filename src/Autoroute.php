@@ -160,7 +160,7 @@ class Autoroute
                 $routeId,
                 static::METHOD_UPDATE,
                 $model,
-                [200]
+                [204, 200]
             );
         }
 
