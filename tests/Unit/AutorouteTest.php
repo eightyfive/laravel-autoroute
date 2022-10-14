@@ -121,6 +121,19 @@ class AutorouteTest extends TestCase
         );
     }
 
+    /** @test */
+    public function schema_to_array(): void
+    {
+        $group = $this->autoroute->getGroup("api");
+
+        $user = $group["spec"]->components->schemas["User"];
+
+        $schema = $this->autoroute->schemaToArray($user);
+
+        $this->assertIsArray($schema);
+        $this->assertEquals(["id", "name", "email"], array_keys($schema));
+    }
+
     //
     // PROTECTED
     //
