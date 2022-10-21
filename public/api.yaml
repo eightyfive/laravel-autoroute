@@ -49,10 +49,16 @@ paths:
     parameters:
       - $ref: "#/components/parameters/user_id"
     get:
+      security:
+        - auth: ["sanctum"]
+        - can: ["listUser", "App\\Models\\Post", "user_id"]
       responses:
         "200":
           $ref: "#/components/responses/posts"
     post:
+      security:
+        - auth: ["sanctum"]
+        - can: ["createUser", "App\\Models\\Post", "user_id"]
       requestBody:
         $ref: "#/components/requestBodies/post"
       responses:
@@ -64,6 +70,9 @@ paths:
       - $ref: "#/components/parameters/user_id"
       - $ref: "#/components/parameters/post_id"
     get:
+      security:
+        - auth: ["sanctum"]
+        - can: ["readUser", "post_id", "user_id"]
       responses:
         "200":
           $ref: "#/components/responses/post"
@@ -74,6 +83,9 @@ paths:
         "200":
           $ref: "#/components/responses/post"
     delete:
+      security:
+        - auth: ["sanctum"]
+        - can: ["deleteUser", "post_id", "user_id"]
       responses:
         "204":
           $ref: "#/components/responses/204"

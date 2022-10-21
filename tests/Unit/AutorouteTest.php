@@ -107,21 +107,6 @@ class AutorouteTest extends TestCase
     }
 
     /** @test */
-    public function is_secured(): void
-    {
-        $this->assertFalse(
-            $this->autoroute->isSecured("api/login", Autoroute::METHOD_CREATE)
-        );
-
-        $this->assertTrue(
-            $this->autoroute->isSecured(
-                "api/users/{user_id}/posts/{post_id}",
-                Autoroute::METHOD_READ
-            )
-        );
-    }
-
-    /** @test */
     public function schema_to_array(): void
     {
         $group = $this->autoroute->getGroup("api");

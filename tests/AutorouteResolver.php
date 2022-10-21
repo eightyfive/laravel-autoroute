@@ -20,11 +20,6 @@ class AutorouteResolver extends Resolver
         return parent::getModelBaseName($segment);
     }
 
-    public function getAbilityName(string $uri, string $action): string
-    {
-        return parent::getAbilityName($uri, $action);
-    }
-
     public function getModelNames(string $uri)
     {
         return parent::getModelNames($uri);

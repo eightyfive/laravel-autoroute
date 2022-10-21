@@ -37,8 +37,10 @@ final class ByRouteTest extends FeatureTestCase
     /** @test */
     public function read_by_route(): void
     {
+        $user = User::find(1);
+
         $user = $this->resolver->readByRoute("/users/{user_id}", [
-            "user_id" => "1",
+            "user_id" => $user,
         ]);
 
         $this->assertInstanceOf(User::class, $user);
@@ -50,11 +52,14 @@ final class ByRouteTest extends FeatureTestCase
     {
         Post::create(["title" => "Post 1", "user_id" => 1]);
 
+        $user = User::find(1);
+        $post = Post::find(1);
+
         $post = $this->resolver->updateByRoute(
             "/users/{user_id}/posts/{post_id}",
             [
-                "user_id" => "1",
-                "post_id" => "1",
+                "user_id" => $user,
+                "post_id" => $post,
             ],
             ["title" => "Post 1 (modified)"]
         );
@@ -67,8 +72,10 @@ final class ByRouteTest extends FeatureTestCase
     {
         Post::create(["title" => "Post 1", "user_id" => 1]);
 
+        $user = User::find(1);
+
         $this->resolver->deleteByRoute("/users/{user_id}", [
-            "user_id" => "1",
+            "user_id" => $user,
         ]);
 
         $user = User::find(1);
@@ -88,8 +95,10 @@ final class ByRouteTest extends FeatureTestCase
         Post::create(["title" => "Post 3", "user_id" => 2]); // User 2
         Post::create(["title" => "Post 4", "user_id" => 1]);
 
+        $user = User::find(1);
+
         $posts = $this->resolver->listByRoute("/users/{user_id}/posts", [
-            "user_id" => "1",
+            "user_id" => $user,
         ]);
 
         $this->assertCount(3, $posts);

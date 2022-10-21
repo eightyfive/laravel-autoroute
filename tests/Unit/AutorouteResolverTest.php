@@ -16,45 +16,6 @@ final class AutorouteResolverTest extends TestCase
     }
 
     /** @test */
-    public function ability_read(): void
-    {
-        $this->assertEquals(
-            "read",
-            $this->resolver->getAbilityName("/users/{user}", "read")
-        );
-    }
-
-    /** @test */
-    public function ability_list(): void
-    {
-        $this->assertEquals(
-            "list",
-            $this->resolver->getAbilityName("/user", "list")
-        );
-    }
-
-    /** @test */
-    public function ability_list_deep(): void
-    {
-        $this->assertEquals(
-            "listUser",
-            $this->resolver->getAbilityName("/users/{user_id}/posts", "list")
-        );
-    }
-
-    /** @test */
-    public function ability_list_deeper(): void
-    {
-        $this->assertEquals(
-            "listPost",
-            $this->resolver->getAbilityName(
-                "/users/{user_id}/posts/{post_id}/posts",
-                "list"
-            )
-        );
-    }
-
-    /** @test */
     public function list_plural_to_base_name(): void
     {
         $this->assertEquals(

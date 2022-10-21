@@ -1,7 +1,6 @@
 <?php
 namespace Eyf\Autoroute;
 
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpFoundation\Response;
 
 use Illuminate\Support\Str;
@@ -21,33 +20,9 @@ class AutorouteResolver implements AutorouteResolverInterface
     // Routing
     //
 
-    public function getRouteModels(string $uri, array $parameters): Collection
+    protected function getResourceModel(array $parameters): Model
     {
-        $modelNames = $this->getModelNames($uri);
-
-        $models = new Collection();
-        $index = 0;
-
-        foreach ($parameters as $parameter) {
-            $model = $this->findModelByParameter(
-                $modelNames[$index],
-                $parameter
-            );
-
-            if ($model === null) {
-                throw new NotFoundHttpException("Not Found");
-            }
-
-            $models->push($model);
-            $index++;
-        }
-
-        return $models;
-    }
-
-    public function getRouteModel(string $uri, array $parameters): Model
-    {
-        $model = $this->getRouteModels($uri, $parameters)->last();
+        $model = end($parameters);
 
         if ($model instanceof Model) {
             return $model;
@@ -58,7 +33,7 @@ class AutorouteResolver implements AutorouteResolverInterface
         );
     }
 
-    public function getRouteModelName(string $uri): string|null
+    public function getResourceModelName(string $uri): string|null
     {
         $modelNames = $this->getModelNames($uri);
         $parameterNames = $this->getParameterNames($uri);
@@ -107,7 +82,7 @@ class AutorouteResolver implements AutorouteResolverInterface
         array $parameters,
         array $data
     ): Model {
-        $modelName = $this->getRouteModelName($uri);
+        $modelName = $this->getResourceModelName($uri);
 
         if (!$modelName) {
             throw new AutorouteException("Invalid create uri: " . $uri);
@@ -124,7 +99,7 @@ class AutorouteResolver implements AutorouteResolverInterface
 
     public function readByRoute(string $uri, array $parameters): Model
     {
-        return $this->getRouteModel($uri, $parameters);
+        return $this->getResourceModel($parameters);
     }
 
     public function updateByRoute(
@@ -132,7 +107,7 @@ class AutorouteResolver implements AutorouteResolverInterface
         array $parameters,
         array $data
     ): Model {
-        $model = $this->getRouteModel($uri, $parameters);
+        $model = $this->getResourceModel($parameters);
         $model->fill($data);
         $model->save();
 
@@ -141,7 +116,7 @@ class AutorouteResolver implements AutorouteResolverInterface
 
     public function deleteByRoute(string $uri, array $parameters): Model
     {
-        $model = $this->getRouteModel($uri, $parameters);
+        $model = $this->getResourceModel($parameters);
         $model->delete();
 
         return $model;
@@ -149,43 +124,23 @@ class AutorouteResolver implements AutorouteResolverInterface
 
     public function listByRoute(string $uri, array $parameters): Collection
     {
-        $modelName = $this->getRouteModelName($uri);
+        $modelName = $this->getResourceModelName($uri);
 
         if (!$modelName) {
             throw new AutorouteException("Invalid list uri: " . $uri);
         }
 
-        $parameterName = $this->getParentParameterName($uri);
-
         $query = call_user_func([$modelName, "query"]);
 
+        $parameterName = $this->getParentParameterName($uri);
+
         if ($parameterName) {
-            $query->where($parameterName, $parameters[$parameterName]);
+            $model = $parameters[$parameterName];
+
+            $query->where($parameterName, $model->id);
         }
 
         return $query->get();
-    }
-
-    //
-    // AUTHORIZATION
-    //
-
-    public function getAbilityName(string $uri, string $action): string
-    {
-        $modelBaseNames = $this->getModelBaseNames($uri);
-
-        if (count($modelBaseNames) === 1) {
-            return $action;
-        }
-
-        // Ex: /users/{user_id}/posts ("list")
-        // ['User', 'Post'];
-
-        array_pop($modelBaseNames); // remove 'Post'
-
-        $parentBaseName = array_pop($modelBaseNames);
-
-        return $action . $parentBaseName; // -> "listUser" (list user Posts !)
     }
 
     //

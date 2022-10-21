@@ -384,59 +384,6 @@ class Autoroute
         }
     }
 
-    public function isSecured(string $routeId, string $method): bool
-    {
-        [$spec, $uri] = $this->parseRouteId($routeId);
-
-        $operation = $this->findOperation($spec, $uri, $method);
-
-        $isSecured = $spec->security !== null && count($spec->security) > 0;
-
-        // TODO: Check if security applied/disabled at upper levels: PathItem, etc...
-        if ($operation->security !== null) {
-            $isSecured = count($operation->security) > 0;
-        }
-
-        return $isSecured;
-    }
-
-    public function authorize(
-        string $action,
-        string $routeId,
-        array $parameters
-    ) {
-        [, $uri] = $this->parseRouteId($routeId);
-
-        $models = $this->resolver->getRouteModels($uri, $parameters);
-
-        $name = $this->resolver->getAbilityName($uri, $action);
-        $args = $this->getAbilityArgs($models, $uri);
-
-        return [$name, $args];
-    }
-
-    protected function getAbilityArgs(Collection $models, string $uri)
-    {
-        $args = $models
-            ->reverse()
-            ->values()
-            ->all(); // Array
-
-        $modelName = $this->resolver->getRouteModelName($uri);
-
-        if ($modelName) {
-            // Ex: `/users`
-            // $this->authorize('list', App\Models\User::class);
-
-            // Ex: `/users/123/posts`
-            // $this->authorize('listUser', App\Models\Post::class, $user);
-
-            array_unshift($args, $modelName);
-        }
-
-        return $args;
-    }
-
     public function queryByRoute(
         string $action,
         string $routeId,

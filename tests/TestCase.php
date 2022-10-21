@@ -1,11 +1,14 @@
 <?php
 namespace Tests;
-
 use Orchestra\Testbench\TestCase as Test;
 use Laravel\Sanctum\SanctumServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 use Eyf\Autoroute\Autoroute;
 use Eyf\Autoroute\AutorouteServiceProvider;
+
+use App\Models\Post;
+use App\Models\User;
 
 class TestCase extends Test
 {
@@ -31,7 +34,14 @@ class TestCase extends Test
         // Default Autoroute `dir` is:
         // `base_path('public')`
 
+        Route::model("user_id", User::class);
+        Route::model("post_id", Post::class);
+
         // vendor/orchestra/testbench-core/laravel/public/../../../../../public/api.yaml
-        $autoroute->createGroup("../../../../../public/api.yaml");
+        $autoroute->createGroup("../../../../../public/api.yaml", [
+            "prefix" => "api",
+            "namespace" => "App\Http\Controllers\Api",
+            "middleware" => ["api"],
+        ]);
     }
 }

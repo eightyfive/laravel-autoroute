@@ -26,13 +26,9 @@ interface AutorouteResolverInterface
 
     public function listByRoute(string $uri, array $parameters): Collection;
 
-    public function getRouteModels(string $uri, array $parameters): Collection;
-
-    public function getRouteModelName(string $uri): string|null;
+    public function getResourceModelName(string $uri): string|null;
 
     public function getOperationId(string $uri, string $method): string;
-
-    public function getAbilityName(string $uri, string $action): string;
 
     public function toModelResponse(
         int $status,

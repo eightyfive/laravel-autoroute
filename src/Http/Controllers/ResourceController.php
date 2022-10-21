@@ -20,22 +20,6 @@ class ResourceController extends Controller
         $route = $request->route();
         $parameters = $route->parameters();
 
-        // Authorize
-        $secured = $this->autoroute->isSecured(
-            $route->uri,
-            Autoroute::METHOD_CREATE
-        );
-
-        if ($secured) {
-            [$ability, $args] = $this->autoroute->authorize(
-                Autoroute::ACTION_CREATE,
-                $route->uri,
-                $parameters
-            );
-
-            $this->authorize($ability, $args);
-        }
-
         // Validate
         $request->validate(
             $this->autoroute->getRequest($route->uri, $request->method())
@@ -62,22 +46,6 @@ class ResourceController extends Controller
         $route = $request->route();
         $parameters = $route->parameters();
 
-        // Authorize
-        $secured = $this->autoroute->isSecured(
-            $route->uri,
-            Autoroute::METHOD_READ
-        );
-
-        if ($secured) {
-            [$ability, $args] = $this->autoroute->authorize(
-                Autoroute::ACTION_READ,
-                $route->uri,
-                $parameters
-            );
-
-            $this->authorize($ability, $args);
-        }
-
         // Query
         $model = $this->autoroute->queryByRoute(
             Autoroute::ACTION_READ,
@@ -97,22 +65,6 @@ class ResourceController extends Controller
     {
         $route = $request->route();
         $parameters = $route->parameters();
-
-        // Authorize
-        $secured = $this->autoroute->isSecured(
-            $route->uri,
-            Autoroute::METHOD_UPDATE
-        );
-
-        if ($secured) {
-            [$ability, $args] = $this->autoroute->authorize(
-                Autoroute::ACTION_UPDATE,
-                $route->uri,
-                $parameters
-            );
-
-            $this->authorize($ability, $args);
-        }
 
         // Validate
         $request->validate(
@@ -140,22 +92,6 @@ class ResourceController extends Controller
         $route = $request->route();
         $parameters = $route->parameters();
 
-        // Authorize
-        $secured = $this->autoroute->isSecured(
-            $route->uri,
-            Autoroute::METHOD_DELETE
-        );
-
-        if ($secured) {
-            [$ability, $args] = $this->autoroute->authorize(
-                Autoroute::ACTION_DELETE,
-                $route->uri,
-                $parameters
-            );
-
-            $this->authorize($ability, $args);
-        }
-
         // Mutate
         $model = $this->autoroute->mutateByRoute(
             Autoroute::ACTION_DELETE,
@@ -176,22 +112,6 @@ class ResourceController extends Controller
     {
         $route = $request->route();
         $parameters = $route->parameters();
-
-        // Authorize
-        $secured = $this->autoroute->isSecured(
-            $route->uri,
-            Autoroute::METHOD_LIST
-        );
-
-        if ($secured) {
-            [$ability, $args] = $this->autoroute->authorize(
-                Autoroute::ACTION_LIST,
-                $route->uri,
-                $parameters
-            );
-
-            $this->authorize($ability, $args);
-        }
 
         // Query
         $models = $this->autoroute->queryByRoute(
