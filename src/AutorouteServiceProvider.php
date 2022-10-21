@@ -20,10 +20,12 @@ class AutorouteServiceProvider extends ServiceProvider implements
             "autoroute"
         );
 
-        $this->app->bind(
-            AutorouteResolverInterface::class,
-            AutorouteResolver::class
-        );
+        if (!$this->app->bound(AutorouteResolverInterface::class)) {
+            $this->app->bind(
+                AutorouteResolverInterface::class,
+                AutorouteResolver::class
+            );
+        }
 
         $this->app->singleton(Autoroute::class, function ($app) {
             $config = $app["config"]->get("autoroute");
