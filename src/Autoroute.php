@@ -278,12 +278,14 @@ class Autoroute
         );
     }
 
-    protected function schemaToArray(Schema $schema)
+    protected function schemaToArray(Schema $schema, $data = [])
     {
-        $data = [];
-
         foreach ($schema->properties as $name => $value) {
-            $data[$name] = $value;
+            if (in_array($value->type, ["object", "array"])) {
+                $data[$name] = $this->schemaToArray($value);
+            } else {
+                $data[$name] = $value->type;
+            }
         }
 
         return $data;

@@ -157,9 +157,9 @@ class AutorouteResolver implements AutorouteResolverInterface
             return new VoidResponse($status);
         }
 
-        $model->setVisible(array_keys($schema));
-
-        return (new JsonResource($model))->response()->setStatusCode($status);
+        return (new SchemaResource($model, $schema))
+            ->response()
+            ->setStatusCode($status);
     }
 
     public function toModelsResponse(
@@ -172,9 +172,7 @@ class AutorouteResolver implements AutorouteResolverInterface
             return new VoidResponse($status);
         }
 
-        $models->each->setVisible(array_keys($schema));
-
-        return JsonResource::collection($models)
+        return (new SchemaResourceCollection($models, $schema))
             ->response()
             ->setStatusCode($status);
     }
