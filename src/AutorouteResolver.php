@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 use Eyf\Autoroute\Http\Controllers\VoidResponse;
-use Illuminate\Http\Resources\Json\JsonResource;
 
 class AutorouteResolver implements AutorouteResolverInterface
 {
@@ -47,7 +46,7 @@ class AutorouteResolver implements AutorouteResolverInterface
         return null;
     }
 
-    public function getOperationId(string $uri, string $verb): string
+    public function getDefaultOperationId(string $uri, string $verb): string
     {
         $method = strtoupper($verb);
 

@@ -5,9 +5,9 @@ use Eyf\Autoroute\AutorouteResolver as Resolver;
 
 class AutorouteResolver extends Resolver
 {
-    public function getOperationId(string $uri, string $method): string
+    public function getDefaultOperationId(string $uri, string $method): string
     {
-        return parent::getOperationId($uri, $method);
+        return parent::getDefaultOperationId($uri, $method);
     }
 
     public function getModelBaseNames(string $uri)

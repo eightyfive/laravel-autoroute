@@ -371,7 +371,7 @@ class Autoroute
         foreach ($path->getOperations() as $method => $operation) {
             $uses =
                 $operation->operationId ??
-                $this->resolver->getOperationId($uri, $method);
+                $this->resolver->getDefaultOperationId($uri, $method);
 
             // Create route
             $route = call_user_func(

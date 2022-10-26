@@ -28,7 +28,7 @@ interface AutorouteResolverInterface
 
     public function getResourceModelName(string $uri): string|null;
 
-    public function getOperationId(string $uri, string $method): string;
+    public function getDefaultOperationId(string $uri, string $method): string;
 
     public function toModelResponse(
         int $status,
