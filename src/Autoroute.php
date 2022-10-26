@@ -407,10 +407,12 @@ class Autoroute
 
         $operation = $this->findOperation($spec, $uri, $request->method());
 
-        list($className, $classMethod) = explode("::", $operation->operationId);
+        $callableOperationId = $this->resolver->getOperationIdCallable(
+            $operation->operationId
+        );
 
         return call_user_func_array(
-            ["App\\Models\\{$className}", $classMethod],
+            $callableOperationId,
             array_reverse($route->parameters())
         );
     }

@@ -41,6 +41,13 @@ class AutorouteResolver implements AutorouteResolverInterface
         return $uses . "ResourceController@" . $action;
     }
 
+    public function getOperationIdCallable(string $operationId): callable
+    {
+        list($className, $classMethod) = explode("::", $operationId);
+
+        return ["App\\Models\\{$className}", $classMethod];
+    }
+
     //
     // RESPONSE
     //

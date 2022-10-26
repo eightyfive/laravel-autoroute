@@ -10,6 +10,8 @@ interface AutorouteResolverInterface
 {
     public function getDefaultOperationId(string $uri, string $method): string;
 
+    public function getOperationIdCallable(string $operationId): callable;
+
     public function toModelResponse(
         int $status,
         array|null $schema,
