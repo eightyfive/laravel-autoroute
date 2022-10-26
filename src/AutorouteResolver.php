@@ -15,37 +15,6 @@ class AutorouteResolver implements AutorouteResolverInterface
     protected $modelNames;
     protected $parameterNames;
 
-    //
-    // Routing
-    //
-
-    protected function getResourceModel(array $parameters): Model
-    {
-        $model = end($parameters);
-
-        if ($model instanceof Model) {
-            return $model;
-        }
-
-        throw new AutorouteException(
-            "Invalid model type: " . get_class($model)
-        );
-    }
-
-    public function getResourceModelName(string $uri): string|null
-    {
-        $modelNames = $this->getModelNames($uri);
-        $parameterNames = $this->getParameterNames($uri);
-
-        $isAnonymous = count($modelNames) > count($parameterNames);
-
-        if ($isAnonymous) {
-            return end($modelNames);
-        }
-
-        return null;
-    }
-
     public function getDefaultOperationId(string $uri, string $verb): string
     {
         $method = strtoupper($verb);
@@ -70,76 +39,6 @@ class AutorouteResolver implements AutorouteResolverInterface
         $uses = "\\Eyf\\Autoroute\\Http\Controllers\\";
 
         return $uses . "ResourceController@" . $action;
-    }
-
-    //
-    // Eloquent
-    //
-
-    public function createByRoute(
-        string $uri,
-        array $parameters,
-        array $data
-    ): Model {
-        $modelName = $this->getResourceModelName($uri);
-
-        if (!$modelName) {
-            throw new AutorouteException("Invalid create uri: " . $uri);
-        }
-
-        $parameterName = $this->getParentParameterName($uri, $parameters);
-
-        if ($parameterName) {
-            $data[$parameterName] = $parameters[$parameterName];
-        }
-
-        return call_user_func([$modelName, "create"], $data);
-    }
-
-    public function readByRoute(string $uri, array $parameters): Model
-    {
-        return $this->getResourceModel($parameters);
-    }
-
-    public function updateByRoute(
-        string $uri,
-        array $parameters,
-        array $data
-    ): Model {
-        $model = $this->getResourceModel($parameters);
-        $model->fill($data);
-        $model->save();
-
-        return $model;
-    }
-
-    public function deleteByRoute(string $uri, array $parameters): Model
-    {
-        $model = $this->getResourceModel($parameters);
-        $model->delete();
-
-        return $model;
-    }
-
-    public function listByRoute(string $uri, array $parameters): Collection
-    {
-        $modelName = $this->getResourceModelName($uri);
-
-        if (!$modelName) {
-            throw new AutorouteException("Invalid list uri: " . $uri);
-        }
-
-        $query = call_user_func([$modelName, "query"]);
-
-        $parameterName = $this->getParentParameterName($uri);
-
-        if ($parameterName) {
-            $model = $parameters[$parameterName];
-
-            $query->where($parameterName, $model->id);
-        }
-
-        return $query->get();
     }
 
     //
@@ -179,11 +78,6 @@ class AutorouteResolver implements AutorouteResolverInterface
     //
     // HELPERS
     //
-
-    protected function findModelByParameter(string $modelName, string $id)
-    {
-        return call_user_func([$modelName, "find"], $id);
-    }
 
     protected function getModelNames(string $uri)
     {
