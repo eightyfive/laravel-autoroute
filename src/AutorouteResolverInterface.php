@@ -8,7 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 
 interface AutorouteResolverInterface
 {
-    public function getDefaultOperationId(string $uri, string $method): string;
+    public function getControllerString(
+        string $operationId,
+        string $uri,
+        string $method
+    ): string;
 
     public function getCallableOperationId(string $operationId): callable;
 

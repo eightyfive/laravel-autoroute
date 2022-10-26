@@ -369,9 +369,17 @@ class Autoroute
     protected function createRoute(string $uri, PathItem $path, OpenApi $spec)
     {
         foreach ($path->getOperations() as $method => $operation) {
-            $uses =
-                $operation->operationId ??
-                $this->resolver->getDefaultOperationId($uri, $method);
+            if (!isset($operation->operationId)) {
+                throw new AutorouteException(
+                    "Operation ID not found: " . $uri . "(" . $method . ")"
+                );
+            }
+
+            $uses = $this->resolver->getControllerString(
+                $operation->operationId,
+                $uri,
+                $method
+            );
 
             // Create route
             $route = call_user_func(

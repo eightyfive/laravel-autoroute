@@ -10,8 +10,22 @@ use Eyf\Autoroute\Http\Controllers\VoidResponse;
 
 class AutorouteResolver implements AutorouteResolverInterface
 {
-    public function getDefaultOperationId(string $uri, string $verb): string
-    {
+    public function getControllerString(
+        string $operationId,
+        string $uri,
+        string $method
+    ): string {
+        if (strpos($operationId, "@") === false) {
+            return $this->getDefaultControllerString($uri, $method);
+        }
+
+        return $operationId;
+    }
+
+    protected function getDefaultControllerString(
+        string $uri,
+        string $verb
+    ): string {
         $method = strtoupper($verb);
 
         $segments = explode("/", ltrim($uri, "/"));
