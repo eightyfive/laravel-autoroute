@@ -24,8 +24,13 @@ class Autoroute extends Service
         return parent::getPrefixFromFileName($fileName);
     }
 
-    public function schemaToArray(Schema $schema)
+    public function schemaToArray(Schema $schema, $data = [])
     {
         return parent::schemaToArray($schema);
+    }
+
+    public function getValidationRulesByRoute(string $uri, string $method)
+    {
+        return parent::getValidationRulesByRoute($uri, $method);
     }
 }

@@ -21,9 +21,7 @@ class ResourceController extends Controller
         $parameters = $route->parameters();
 
         // Validate
-        $request->validate(
-            $this->autoroute->getRequest($route->uri, $request->method())
-        );
+        $request->validate($this->autoroute->getValidationRules($request));
 
         // Mutate
         $model = $this->autoroute->mutateByRoute(
@@ -67,9 +65,7 @@ class ResourceController extends Controller
         $parameters = $route->parameters();
 
         // Validate
-        $request->validate(
-            $this->autoroute->getRequest($route->uri, $request->method())
-        );
+        $request->validate($this->autoroute->getValidationRules($request));
 
         // Mutate
         $model = $this->autoroute->mutateByRoute(

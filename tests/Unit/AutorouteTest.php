@@ -89,7 +89,10 @@ class AutorouteTest extends TestCase
     /** @test */
     public function creates_validation_rules(): void
     {
-        $rules = $this->autoroute->getRequest("api/users", "post");
+        $rules = $this->autoroute->getValidationRulesByRoute(
+            "api/users",
+            "post"
+        );
 
         $this->assertTrue(isset($rules["name"]));
         $this->assertTrue(isset($rules["email"]));

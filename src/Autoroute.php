@@ -1,6 +1,7 @@
 <?php
 namespace Eyf\Autoroute;
 
+use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -63,8 +64,20 @@ class Autoroute
         });
     }
 
-    public function getRequest(string $routeId, string $method)
+    public function getValidationRules(Request $request)
     {
+        $route = $request->route();
+
+        return $this->getValidationRulesByRoute(
+            $route->uri,
+            $request->method()
+        );
+    }
+
+    protected function getValidationRulesByRoute(
+        string $routeId,
+        string $method
+    ) {
         [$spec, $uri] = $this->parseRouteId($routeId);
 
         $operation = $this->findOperation($spec, $uri, $method);
