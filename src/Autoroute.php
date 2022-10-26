@@ -399,44 +399,19 @@ class Autoroute
         }
     }
 
-    public function queryByRoute(
-        string $action,
-        string $routeId,
-        array $parameters
-    ) {
-        [, $uri] = $this->parseRouteId($routeId);
+    public function callOperation(Request $request)
+    {
+        $route = $request->route();
 
-        if ($action === static::ACTION_READ) {
-            return $this->resolver->readByRoute($uri, $parameters);
-        }
+        [$spec, $uri] = $this->parseRouteId($route->uri);
 
-        if ($action === static::ACTION_LIST) {
-            return $this->resolver->listByRoute($uri, $parameters);
-        }
+        $operation = $this->findOperation($spec, $uri, $request->method());
 
-        throw new AutorouteException("Unsupported query action: " . $action);
-    }
+        list($className, $classMethod) = explode("::", $operation->operationId);
 
-    public function mutateByRoute(
-        string $action,
-        string $routeId,
-        array $parameters,
-        array $data
-    ) {
-        [, $uri] = $this->parseRouteId($routeId);
-
-        if ($action === static::ACTION_CREATE) {
-            return $this->resolver->createByRoute($uri, $parameters, $data);
-        }
-
-        if ($action === static::ACTION_UPDATE) {
-            return $this->resolver->updateByRoute($uri, $parameters, $data);
-        }
-
-        if ($action === static::ACTION_DELETE) {
-            return $this->resolver->deleteByRoute($uri, $parameters);
-        }
-
-        throw new AutorouteException("Unsupported mutate action: " . $action);
+        return call_user_func_array(
+            ["App\\Models\\{$className}", $classMethod],
+            array_reverse($route->parameters())
+        );
     }
 }
