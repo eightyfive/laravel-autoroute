@@ -75,7 +75,8 @@ class AutorouteResolver implements AutorouteResolverInterface
             return new VoidResponse($status);
         }
 
-        return (new SchemaResource($model, $schema))
+        return (new SchemaResource($model))
+            ->setSchema($schema)
             ->response()
             ->setStatusCode($status);
     }
@@ -90,7 +91,8 @@ class AutorouteResolver implements AutorouteResolverInterface
             return new VoidResponse($status);
         }
 
-        return (new SchemaResourceCollection($models, $schema))
+        return (new SchemaResourceCollection($models))
+            ->setSchema($schema)
             ->response()
             ->setStatusCode($status);
     }

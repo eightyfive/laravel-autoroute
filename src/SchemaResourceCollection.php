@@ -2,31 +2,34 @@
 namespace Eyf\Autoroute;
 
 use Illuminate\Support\Arr;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class SchemaResourceCollection extends ResourceCollection
 {
     protected $schema;
 
-    public function __construct($resource, array $schema)
+    public function setSchema(array $schema)
     {
-        parent::__construct($resource);
-
         $this->schema = $schema;
+
+        return $this;
     }
 
     public function toArray($request)
     {
         $items = parent::toArray($request);
 
-        $data = [];
+        if ($this->schema) {
+            $data = [];
 
-        foreach ($items as $item) {
-            array_push($data, $this->setVisible($item, $this->schema));
+            foreach ($items as $item) {
+                array_push($data, $this->setVisible($item, $this->schema));
+            }
+
+            return $data;
         }
 
-        return $data;
+        return $items;
     }
 
     protected function setVisible(array $data, array $schema)

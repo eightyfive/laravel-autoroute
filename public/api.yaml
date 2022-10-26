@@ -194,14 +194,12 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/User"
-
     user:
       description: Success
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/User"
-
     posts:
       description: Success
       content:
@@ -210,14 +208,12 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/Post"
-
     post:
       description: Success
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/Post"
-
     "401":
       description: Unauthorized
       content:
@@ -227,7 +223,6 @@ components:
             properties:
               message:
                 type: string
-
     "204":
       description: No Content
 

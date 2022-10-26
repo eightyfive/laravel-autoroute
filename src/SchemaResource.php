@@ -8,21 +8,25 @@ class SchemaResource extends JsonResource
 {
     protected $schema;
 
-    public function __construct($resource, array $schema)
+    public function setSchema(array $schema)
     {
-        parent::__construct($resource);
-
         $this->schema = $schema;
+
+        return $this;
     }
 
     public function toArray($request)
     {
         $data = parent::toArray($request);
 
-        return $this->setVisible($data, $this->schema);
+        if ($this->schema) {
+            return $this->setVisible($data, $this->schema);
+        }
+
+        return $data;
     }
 
-    protected function setVisible(array $data, array $schema)
+    protected function setVisible(array $data, array $schema): array
     {
         $data = Arr::only($data, array_keys($schema));
 

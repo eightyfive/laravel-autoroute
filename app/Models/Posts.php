@@ -3,9 +3,9 @@ namespace App\Models;
 
 class Posts extends Models
 {
-    public function __construct(User $user)
+    public function __construct(Post $post)
     {
-        parent::__construct($user);
+        parent::__construct($post);
     }
 
     public function getByUser(User $user, array $data)
