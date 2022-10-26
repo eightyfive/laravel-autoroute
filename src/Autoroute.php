@@ -419,7 +419,7 @@ class Autoroute
             $operation->operationId
         );
 
-        $args = array_reverse($route->parameters());
+        $args = array_reverse(array_values($route->parameters()));
 
         array_push($args, $request->all());
 
