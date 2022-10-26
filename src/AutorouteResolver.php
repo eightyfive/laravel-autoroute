@@ -40,7 +40,7 @@ class AutorouteResolver implements AutorouteResolverInterface
     {
         list($className, $classMethod) = explode("::", $operationId);
 
-        return ["App\\Models\\{$className}", $classMethod];
+        return [$this->getModelsNamespace() . "\\" . $className, $classMethod];
     }
 
     //
