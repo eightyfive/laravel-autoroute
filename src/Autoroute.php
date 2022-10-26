@@ -407,7 +407,7 @@ class Autoroute
 
         $operation = $this->findOperation($spec, $uri, $request->method());
 
-        $callableOperationId = $this->resolver->getOperationIdCallable(
+        $callableOperationId = $this->resolver->getCallableOperationId(
             $operation->operationId
         );
 
