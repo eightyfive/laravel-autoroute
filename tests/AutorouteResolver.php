@@ -10,33 +10,8 @@ class AutorouteResolver extends Resolver
         return parent::getDefaultOperationId($uri, $method);
     }
 
-    public function getModelBaseNames(string $uri)
-    {
-        return parent::getModelBaseNames($uri);
-    }
-
-    public function getModelBaseName(string $segment)
-    {
-        return parent::getModelBaseName($segment);
-    }
-
-    public function getModelNames(string $uri)
-    {
-        return parent::getModelNames($uri);
-    }
-
     public function getModelsNamespace()
     {
         return parent::getModelsNamespace();
-    }
-
-    public function getParameterNames(string $uri)
-    {
-        return parent::getParameterNames($uri);
-    }
-
-    public function getParentParameterName(string $uri): string|null
-    {
-        return parent::getParentParameterName($uri);
     }
 }
