@@ -52,9 +52,13 @@ class AutorouteResolver implements AutorouteResolverInterface
 
     public function getCallableOperationId(string $operationId): callable
     {
-        list($className, $classMethod) = explode("::", $operationId);
+        list($classBaseName, $classMethod) = explode("::", $operationId);
 
-        return [$this->getModelsNamespace() . "\\" . $className, $classMethod];
+        $className = $this->getModelsNamespace() . "\\" . $classBaseName;
+
+        $instance = app()->make($className);
+
+        return [$instance, $classMethod];
     }
 
     //
