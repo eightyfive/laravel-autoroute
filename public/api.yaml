@@ -17,13 +17,13 @@ paths:
 
   /users:
     get:
-      operationId: Users::list
+      operationId: Users::listByRoute
       security: []
       responses:
         "200":
           $ref: "#/components/responses/users"
     post:
-      operationId: Users::create
+      operationId: Users::createByRoute
       security: []
       requestBody:
         $ref: "#/components/requestBodies/register"
@@ -35,13 +35,13 @@ paths:
     parameters:
       - $ref: "#/components/parameters/user_id"
     get:
-      operationId: Users::read
+      operationId: Users::readByRoute
       security: []
       responses:
         "200":
           $ref: "#/components/responses/user"
     put:
-      operationId: Users::update
+      operationId: Users::updateByRoute
       security: []
       requestBody:
         $ref: "#/components/requestBodies/user"
@@ -53,7 +53,7 @@ paths:
     parameters:
       - $ref: "#/components/parameters/user_id"
     get:
-      operationId: Posts::getByUser
+      operationId: Posts::getByRoute
       security:
         - auth: ["sanctum"]
         - can: ["listUser", "App\\Models\\Post", "user_id"]
@@ -61,7 +61,7 @@ paths:
         "200":
           $ref: "#/components/responses/posts"
     post:
-      operationId: Posts::createByUser
+      operationId: Posts::createByRoute
       security:
         - auth: ["sanctum"]
         - can: ["createUser", "App\\Models\\Post", "user_id"]
@@ -76,7 +76,7 @@ paths:
       - $ref: "#/components/parameters/user_id"
       - $ref: "#/components/parameters/post_id"
     get:
-      operationId: Posts::findByUser
+      operationId: Posts::findByRoute
       security:
         - auth: ["sanctum"]
         - can: ["readUser", "post_id", "user_id"]
@@ -84,14 +84,14 @@ paths:
         "200":
           $ref: "#/components/responses/post"
     put:
-      operationId: Posts::updateByUser
+      operationId: Posts::updateByRoute
       requestBody:
         $ref: "#/components/requestBodies/post"
       responses:
         "200":
           $ref: "#/components/responses/post"
     delete:
-      operationId: Posts::deleteByUser
+      operationId: Posts::deleteByRoute
       security:
         - auth: ["sanctum"]
         - can: ["deleteUser", "post_id", "user_id"]
