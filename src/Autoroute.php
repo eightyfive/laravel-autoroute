@@ -415,10 +415,10 @@ class Autoroute
 
         $operation = $this->findOperation($spec, $uri, $request->method());
 
-        $callableOperationId = $this->resolver->getCallableOperationId(
-            $operation->operationId
+        return $this->resolver->callOperation(
+            $operation->operationId,
+            $route,
+            $request
         );
-
-        return call_user_func($callableOperationId, $route, $request);
     }
 }

@@ -5,6 +5,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 
 use Eyf\Autoroute\Http\Controllers\VoidResponse;
 
@@ -50,7 +52,17 @@ class AutorouteResolver implements AutorouteResolverInterface
         return $uses . "ResourceController@" . $action;
     }
 
-    public function getCallableOperationId(string $operationId): callable
+    public function callOperation(
+        string $operationId,
+        Route $route,
+        Request $request
+    ) {
+        $callableOperationId = $this->getCallableOperationId($operationId);
+
+        return call_user_func_array($callableOperationId, [$route, $request]);
+    }
+
+    protected function getCallableOperationId(string $operationId): callable
     {
         list($classBaseName, $classMethod) = explode("::", $operationId);
 
