@@ -32,7 +32,13 @@ class SchemaResource extends JsonResource
 
         foreach ($schema as $name => $value) {
             if (is_array($value) && isset($data[$name])) {
-                $data[$name] = $this->setVisible($data[$name], $value);
+                if (Arr::isAssoc($data[$name])) {
+                    $data[$name] = $this->setVisible($data[$name], $value);
+                } else {
+                    foreach ($data[$name] as $index => $item) {
+                        $data[$name][$index] = $this->setVisible($item, $value);
+                    }
+                }
             }
         }
 

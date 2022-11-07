@@ -266,9 +266,9 @@ class Autoroute
         }
 
         if ($schema->type === "array") {
-            $schema = $this->schemaToArray($schema->items);
+            $schema = $this->schemaToArray($spec, $schema->items);
         } else {
-            $schema = $this->schemaToArray($schema);
+            $schema = $this->schemaToArray($spec, $schema);
         }
 
         return [$status, $schema];
@@ -291,11 +291,18 @@ class Autoroute
         );
     }
 
-    protected function schemaToArray(Schema $schema, $data = [])
+    protected function schemaToArray(OpenApi $spec, Schema $schema, $data = [])
     {
         foreach ($schema->properties as $name => $value) {
-            if (in_array($value->type, ["object", "array"])) {
-                $data[$name] = $this->schemaToArray($value);
+            if (isset($value->schema) && $value->schema["type"] === "array") {
+                $refPath = explode("/", $value->schema["items"]['$ref']);
+
+                $componentName = array_pop($refPath);
+                $component = $spec->components->schemas[$componentName];
+
+                $data[$name] = $this->schemaToArray($spec, $component);
+            } elseif ($value->type === "object") {
+                $data[$name] = $this->schemaToArray($spec, $value);
             } else {
                 $data[$name] = $value->type;
             }

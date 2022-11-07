@@ -32,13 +32,19 @@ class SchemaResourceCollection extends ResourceCollection
         return $items;
     }
 
-    protected function setVisible(array $data, array $schema)
+    protected function setVisible(array $data, array $schema): array
     {
         $data = Arr::only($data, array_keys($schema));
 
         foreach ($schema as $name => $value) {
             if (is_array($value) && isset($data[$name])) {
-                $data[$name] = $this->setVisible($data[$name], $value);
+                if (Arr::isAssoc($data[$name])) {
+                    $data[$name] = $this->setVisible($data[$name], $value);
+                } else {
+                    foreach ($data[$name] as $index => $item) {
+                        $data[$name][$index] = $this->setVisible($item, $value);
+                    }
+                }
             }
         }
 
