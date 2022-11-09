@@ -19,7 +19,8 @@ interface AutorouteResolverInterface
     public function callOperation(
         string $operationId,
         Route $route,
-        Request $request
+        Request $request,
+        $service = null
     );
 
     public function toModelResponse(

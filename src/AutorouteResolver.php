@@ -55,20 +55,37 @@ class AutorouteResolver implements AutorouteResolverInterface
     public function callOperation(
         string $operationId,
         Route $route,
-        Request $request
+        Request $request,
+        $service = null
     ) {
-        $callableOperationId = $this->getCallableOperationId($operationId);
+        $callableOperation = $this->getCallableOperation(
+            $operationId,
+            $service
+        );
 
-        return call_user_func_array($callableOperationId, [$route, $request]);
+        return call_user_func_array($callableOperation, [$route, $request]);
     }
 
-    protected function getCallableOperationId(string $operationId): callable
-    {
-        list($classBaseName, $classMethod) = explode("::", $operationId);
+    protected function getCallableOperation(
+        string $operationId,
+        $service = null
+    ): callable {
+        if (strpos($operationId, "::") === false) {
+            if (!$service) {
+                throw new AutorouteException(
+                    "Service not found: ???::" . $operationId
+                );
+            }
 
-        $className = $this->getModelsNamespace() . "\\" . $classBaseName;
+            $instance = $service;
+            $classMethod = $operationId;
+        } else {
+            list($classBaseName, $classMethod) = explode("::", $operationId);
 
-        $instance = app()->make($className);
+            $className = $this->getModelsNamespace() . "\\" . $classBaseName;
+
+            $instance = app()->make($className);
+        }
 
         return [$instance, $classMethod];
     }

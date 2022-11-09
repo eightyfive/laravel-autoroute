@@ -39,8 +39,11 @@ class Autoroute
         $this->dir = $dir;
     }
 
-    public function createGroup(string $fileName, array $options = [])
-    {
+    public function createGroup(
+        string $fileName,
+        array $options = [],
+        $service = null
+    ) {
         if ($this->dir) {
             $fileName = "{$this->dir}/{$fileName}";
         }
@@ -52,12 +55,12 @@ class Autoroute
         $filePath = realpath($fileName);
 
         if (!file_exists($filePath)) {
-            throw new AutorouteException("File not found: " . $filePath);
+            throw new AutorouteException("File not found: " . $fileName);
         }
 
         $spec = Reader::readFromYamlFile($filePath);
 
-        $this->addGroup($options["prefix"], $spec, $options);
+        $this->addGroup($options["prefix"], $spec, $options, $service);
 
         $this->router->group($options, function () use ($spec) {
             $this->createRoutes($spec);
@@ -348,7 +351,11 @@ class Autoroute
 
         $group = $this->getGroup($prefix);
 
-        return [$group["spec"], "/" . implode("/", $segments)];
+        return [
+            $group["spec"],
+            "/" . implode("/", $segments),
+            $group["service"],
+        ];
     }
 
     protected function getPrefixFromFileName(string $fileName)
@@ -356,9 +363,13 @@ class Autoroute
         return pathinfo($fileName, PATHINFO_FILENAME);
     }
 
-    protected function addGroup(string $prefix, OpenApi $spec, array $options)
-    {
-        $this->groups[$prefix] = compact("spec", "options");
+    protected function addGroup(
+        string $prefix,
+        OpenApi $spec,
+        array $options,
+        $service = null
+    ) {
+        $this->groups[$prefix] = compact("spec", "options", "service");
     }
 
     protected function getGroup(string $prefix)
@@ -418,14 +429,15 @@ class Autoroute
     {
         $route = $request->route();
 
-        [$spec, $uri] = $this->parseRouteId($route->uri);
+        list($spec, $uri, $service) = $this->parseRouteId($route->uri);
 
         $operation = $this->findOperation($spec, $uri, $request->method());
 
         return $this->resolver->callOperation(
             $operation->operationId,
             $route,
-            $request
+            $request,
+            $service
         );
     }
 }
