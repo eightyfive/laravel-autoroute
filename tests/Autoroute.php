@@ -2,6 +2,7 @@
 namespace Tests;
 
 use Illuminate\Routing\Router;
+use cebe\openapi\spec\OpenApi;
 use cebe\openapi\spec\Schema;
 
 use Eyf\Autoroute\Autoroute as Service;
@@ -24,9 +25,9 @@ class Autoroute extends Service
         return parent::getPrefixFromFileName($fileName);
     }
 
-    public function schemaToArray(Schema $schema, $data = [])
+    public function schemaToArray(OpenApi $spec, Schema $schema, $data = [])
     {
-        return parent::schemaToArray($schema);
+        return parent::schemaToArray($spec, $schema);
     }
 
     public function getValidationRulesByRoute(string $uri, string $method)

@@ -2,6 +2,7 @@
 namespace Eyf\Autoroute;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Routing\Router;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -237,6 +238,27 @@ class Autoroute
         );
 
         return $this->resolver->toModelsResponse($status, $schema, $models);
+    }
+
+    public function getComponentResource(
+        string $prefix,
+        string $componentName,
+        Model $model
+    ): JsonResource {
+        $group = $this->getGroup($prefix);
+
+        $schema = $this->getComponentSchema($group["spec"], $componentName);
+
+        return $this->resolver->toModelResource($model, $schema);
+    }
+
+    protected function getComponentSchema(
+        OpenApi $spec,
+        string $componentName
+    ): array {
+        $component = $spec->components->schemas[$componentName];
+
+        return $this->schemaToArray($spec, $component);
     }
 
     protected function getResponseSchema(

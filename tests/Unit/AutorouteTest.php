@@ -116,7 +116,7 @@ class AutorouteTest extends TestCase
 
         $user = $group["spec"]->components->schemas["User"];
 
-        $schema = $this->autoroute->schemaToArray($user);
+        $schema = $this->autoroute->schemaToArray($group["spec"], $user);
 
         $this->assertIsArray($schema);
         $this->assertEquals(["id", "name", "email"], array_keys($schema));

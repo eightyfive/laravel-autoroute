@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
 use Eyf\Autoroute\Http\Controllers\VoidResponse;
 
@@ -94,6 +96,11 @@ class AutorouteResolver implements AutorouteResolverInterface
     // RESPONSE
     //
 
+    public function toModelResource(Model $model, array $schema): JsonResource
+    {
+        return (new SchemaResource($model))->setSchema($schema);
+    }
+
     public function toModelResponse(
         int $status,
         array|null $schema,
@@ -104,10 +111,9 @@ class AutorouteResolver implements AutorouteResolverInterface
             return new VoidResponse($status);
         }
 
-        return (new SchemaResource($model))
-            ->setSchema($schema)
-            ->response()
-            ->setStatusCode($status);
+        $resource = $this->toModelResource($model, $schema);
+
+        return $resource->response()->setStatusCode($status);
     }
 
     public function toModelsResponse(
@@ -120,10 +126,16 @@ class AutorouteResolver implements AutorouteResolverInterface
             return new VoidResponse($status);
         }
 
-        return (new SchemaResourceCollection($models))
-            ->setSchema($schema)
-            ->response()
-            ->setStatusCode($status);
+        $resources = $this->toModelsResource($models, $schema);
+
+        return $resources->response()->setStatusCode($status);
+    }
+
+    protected function toModelsResource(
+        Collection $models,
+        array $schema
+    ): ResourceCollection {
+        return (new SchemaResourceCollection($models))->setSchema($schema);
     }
 
     //
