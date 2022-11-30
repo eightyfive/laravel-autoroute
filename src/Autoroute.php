@@ -378,6 +378,7 @@ class Autoroute
             array_shift($segments);
         } else {
             // It means only one API has been registered _without_ prefix
+            // (Typically `https://api.example.org`)
             $groups = array_values($this->groups);
             $group = $groups[0] ?? null;
         }
