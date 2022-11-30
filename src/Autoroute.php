@@ -27,8 +27,8 @@ class Autoroute
     const ACTION_LIST = "list";
 
     protected $groups = [];
-    protected $router;
-    protected $resolver;
+    protected Router $router;
+    protected AutorouteResolverInterface $resolver;
 
     public function __construct(
         Router $router,
