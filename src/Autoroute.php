@@ -374,6 +374,11 @@ class Autoroute
 
         $group = $this->getGroup($prefix);
 
+        if (!$group) {
+            $groups = array_values($this->groups);
+            $group = $groups[0];
+        }
+
         return [
             $group["spec"],
             "/" . implode("/", $segments),
