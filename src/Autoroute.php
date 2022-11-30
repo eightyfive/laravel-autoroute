@@ -58,7 +58,7 @@ class Autoroute
         $spec = Reader::readFromYamlFile($filePath);
 
         $this->addGroup(
-            $this->getGroupId($fileName),
+            $options["prefix"] ?? $this->getGroupId($fileName),
             $spec,
             $options,
             $service
@@ -242,11 +242,11 @@ class Autoroute
     }
 
     public function getComponentResource(
-        string $prefix,
+        string $groupId,
         string $componentName,
         Model $model
     ): JsonResource {
-        $group = $this->getGroup($prefix);
+        $group = $this->getGroup($groupId);
 
         $schema = $this->getComponentSchema($group["spec"], $componentName);
 
@@ -374,11 +374,6 @@ class Autoroute
 
         $group = $this->getGroup($prefix);
 
-        if (!$group) {
-            $groups = array_values($this->groups);
-            $group = $groups[0];
-        }
-
         return [
             $group["spec"],
             "/" . implode("/", $segments),
@@ -392,17 +387,25 @@ class Autoroute
     }
 
     protected function addGroup(
-        string $prefix,
+        string $groupId,
         OpenApi $spec,
         array $options,
         $service = null
     ) {
-        $this->groups[$prefix] = compact("spec", "options", "service");
+        $this->groups[$groupId] = compact("spec", "options", "service");
     }
 
-    protected function getGroup(string $prefix)
+    protected function getGroup(string $prefixOrId)
     {
-        return $this->groups[$prefix] ?? null;
+        $group = $this->groups[$prefixOrId] ?? null;
+
+        if (!$group) {
+            // It means only one API has been registered _without_ prefix
+            $groups = array_values($this->groups);
+            $group = $groups[0] ?? null;
+        }
+
+        return $group;
     }
 
     public function createRoutes(OpenApi $spec)
