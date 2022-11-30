@@ -246,7 +246,7 @@ class Autoroute
         string $componentName,
         Model $model
     ): JsonResource {
-        $group = $this->getGroup($groupId);
+        $group = $this->groups[$groupId] ?? null;
 
         $schema = $this->getComponentSchema($group["spec"], $componentName);
 
@@ -369,16 +369,22 @@ class Autoroute
     protected function parseRouteId(string $routeId)
     {
         $segments = explode("/", $routeId);
+        $prefix = $segments[0];
 
-        $prefix = array_shift($segments);
+        $group = $this->groups[$prefix] ?? null;
 
-        $group = $this->getGroup($prefix);
+        if ($group) {
+            // Remove `prefix` from URI identifier
+            array_shift($segments);
+        } else {
+            // It means only one API has been registered _without_ prefix
+            $groups = array_values($this->groups);
+            $group = $groups[0] ?? null;
+        }
 
-        return [
-            $group["spec"],
-            "/" . implode("/", $segments),
-            $group["service"],
-        ];
+        $uri = "/" . implode("/", $segments);
+
+        return [$group["spec"], $uri, $group["service"]];
     }
 
     protected function getGroupId(string $fileName)
@@ -393,19 +399,6 @@ class Autoroute
         $service = null
     ) {
         $this->groups[$groupId] = compact("spec", "options", "service");
-    }
-
-    protected function getGroup(string $prefixOrId)
-    {
-        $group = $this->groups[$prefixOrId] ?? null;
-
-        if (!$group) {
-            // It means only one API has been registered _without_ prefix
-            $groups = array_values($this->groups);
-            $group = $groups[0] ?? null;
-        }
-
-        return $group;
     }
 
     public function createRoutes(OpenApi $spec)
