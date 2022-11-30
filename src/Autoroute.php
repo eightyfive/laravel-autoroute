@@ -26,9 +26,11 @@ class Autoroute
     const ACTION_DELETE = "delete";
     const ACTION_LIST = "list";
 
-    protected $groups = [];
     protected Router $router;
     protected AutorouteResolverInterface $resolver;
+    protected OpenApi $spec;
+    protected string|null $prefix;
+    protected $service;
 
     public function __construct(
         Router $router,
@@ -55,17 +57,12 @@ class Autoroute
             throw new AutorouteException("File not found: " . $fileName);
         }
 
-        $spec = Reader::readFromYamlFile($filePath);
+        $this->spec = Reader::readFromYamlFile($filePath);
+        $this->prefix = $options["prefix"] ?? null;
+        $this->service = $service;
 
-        $this->addGroup(
-            $options["prefix"] ?? $this->getGroupId($fileName),
-            $spec,
-            $options,
-            $service
-        );
-
-        $this->router->group($options, function () use ($spec) {
-            $this->createRoutes($spec);
+        $this->router->group($options, function () {
+            $this->createRoutes($this->spec);
         });
     }
 
@@ -83,9 +80,9 @@ class Autoroute
         string $routeId,
         string $method
     ) {
-        [$spec, $uri] = $this->parseRouteId($routeId);
+        $uri = $this->getUri($routeId);
 
-        $operation = $this->findOperation($spec, $uri, $method);
+        $operation = $this->findOperation($this->spec, $uri, $method);
 
         if ($operation->requestBody === null) {
             return [];
@@ -242,13 +239,10 @@ class Autoroute
     }
 
     public function getComponentResource(
-        string $groupId,
         string $componentName,
         Model $model
     ): JsonResource {
-        $group = $this->groups[$groupId] ?? null;
-
-        $schema = $this->getComponentSchema($group["spec"], $componentName);
+        $schema = $this->getComponentSchema($this->spec, $componentName);
 
         return $this->resolver->toModelResource($model, $schema);
     }
@@ -267,9 +261,9 @@ class Autoroute
         string $method,
         array $statuses
     ): array {
-        [$spec, $uri] = $this->parseRouteId($routeId);
+        $uri = $this->getUri($routeId);
 
-        $operation = $this->findOperation($spec, $uri, $method);
+        $operation = $this->findOperation($this->spec, $uri, $method);
 
         $status = $this->findResponseStatus($operation, $statuses);
 
@@ -292,9 +286,9 @@ class Autoroute
         }
 
         if ($schema->type === "array") {
-            $schema = $this->schemaToArray($spec, $schema->items);
+            $schema = $this->schemaToArray($this->spec, $schema->items);
         } else {
-            $schema = $this->schemaToArray($spec, $schema);
+            $schema = $this->schemaToArray($this->spec, $schema);
         }
 
         return [$status, $schema];
@@ -366,40 +360,18 @@ class Autoroute
         throw new AutorouteException("PathItem not found: " . $uri);
     }
 
-    protected function parseRouteId(string $routeId)
+    protected function getUri(string $routeId)
     {
-        $segments = explode("/", $routeId);
-        $prefix = $segments[0];
+        if ($this->prefix) {
+            $segments = explode("/", $routeId);
 
-        $group = $this->groups[$prefix] ?? null;
-
-        if ($group) {
-            // Remove `prefix` from URI identifier
+            // Remove prefix from URI identifier
             array_shift($segments);
-        } else {
-            // It means only one API has been registered _without_ prefix
-            // (Typically `https://api.example.org`)
-            $groups = array_values($this->groups);
-            $group = $groups[0] ?? null;
+
+            return "/" . implode("/", $segments);
         }
 
-        $uri = "/" . implode("/", $segments);
-
-        return [$group["spec"], $uri, $group["service"]];
-    }
-
-    protected function getGroupId(string $fileName)
-    {
-        return pathinfo($fileName, PATHINFO_FILENAME);
-    }
-
-    protected function addGroup(
-        string $groupId,
-        OpenApi $spec,
-        array $options,
-        $service = null
-    ) {
-        $this->groups[$groupId] = compact("spec", "options", "service");
+        return "/" . $routeId;
     }
 
     public function createRoutes(OpenApi $spec)
@@ -454,15 +426,19 @@ class Autoroute
     {
         $route = $request->route();
 
-        list($spec, $uri, $service) = $this->parseRouteId($route->uri);
+        $uri = $this->getUri($route->uri);
 
-        $operation = $this->findOperation($spec, $uri, $request->method());
+        $operation = $this->findOperation(
+            $this->spec,
+            $uri,
+            $request->method()
+        );
 
         return $this->resolver->callOperation(
             $operation->operationId,
             $route,
             $request,
-            $service
+            $this->service
         );
     }
 }
