@@ -49,10 +49,6 @@ class Autoroute
             $fileName = "{$this->dir}/{$fileName}";
         }
 
-        if (!isset($options["prefix"])) {
-            $options["prefix"] = $this->getPrefixFromFileName($fileName);
-        }
-
         $filePath = realpath($fileName);
 
         if (!file_exists($filePath)) {
@@ -61,7 +57,12 @@ class Autoroute
 
         $spec = Reader::readFromYamlFile($filePath);
 
-        $this->addGroup($options["prefix"], $spec, $options, $service);
+        $this->addGroup(
+            $this->getGroupId($fileName),
+            $spec,
+            $options,
+            $service
+        );
 
         $this->router->group($options, function () use ($spec) {
             $this->createRoutes($spec);
@@ -380,7 +381,7 @@ class Autoroute
         ];
     }
 
-    protected function getPrefixFromFileName(string $fileName)
+    protected function getGroupId(string $fileName)
     {
         return pathinfo($fileName, PATHINFO_FILENAME);
     }
