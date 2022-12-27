@@ -314,13 +314,8 @@ class Autoroute
     protected function schemaToArray(OpenApi $spec, Schema $schema, $data = [])
     {
         foreach ($schema->properties as $name => $value) {
-            if (isset($value->schema) && $value->schema["type"] === "array") {
-                $refPath = explode("/", $value->schema["items"]['$ref']);
-
-                $componentName = array_pop($refPath);
-                $component = $spec->components->schemas[$componentName];
-
-                $data[$name] = $this->schemaToArray($spec, $component);
+            if ($value->type === "array" && isset($value->items->properties)) {
+                $data[$name] = $this->schemaToArray($spec, $value->items);
             } elseif ($value->type === "object") {
                 $data[$name] = $this->schemaToArray($spec, $value);
             } else {
