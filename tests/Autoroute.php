@@ -15,14 +15,9 @@ class Autoroute extends Service
         parent::__construct($router, new AutorouteResolver(), $dir);
     }
 
-    public function getGroup(string $prefix)
+    public function getSchemaOf(string $componentName): array
     {
-        return parent::getGroup($prefix);
-    }
-
-    public function getPrefixFromFileName(string $fileName)
-    {
-        return parent::getPrefixFromFileName($fileName);
+        return parent::getComponentSchema($this->spec, $componentName);
     }
 
     public function schemaToArray(OpenApi $spec, Schema $schema, $data = [])

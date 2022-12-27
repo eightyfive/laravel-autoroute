@@ -23,7 +23,10 @@ class Users extends Models
 
     public function readByRoute(Route $route)
     {
-        return $route->parameter("user_id");
+        $user = $route->parameter("user_id");
+        $user->load("posts");
+
+        return $user;
     }
 
     public function updateByRoute(Route $route, Request $request)

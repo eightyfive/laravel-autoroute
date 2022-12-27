@@ -17,7 +17,9 @@ class AutorouteTest extends TestCase
         parent::setUp();
 
         $this->resetAutoroute();
-        $this->autoroute->createGroup("api.yaml");
+        $this->autoroute->createGroup("api.yaml", [
+            "prefix" => "api",
+        ]);
     }
 
     protected function resetAutoroute()
@@ -27,44 +29,6 @@ class AutorouteTest extends TestCase
             $this->router,
             __DIR__ . "/../../public"
         );
-    }
-
-    /** @test */
-    public function get_prefix_from_file_name(): void
-    {
-        $this->assertEquals(
-            $this->autoroute->getPrefixFromFileName("api.yaml"),
-            "api"
-        );
-
-        $this->assertEquals(
-            $this->autoroute->getPrefixFromFileName("dir_name/web_api.yaml"),
-            "web_api"
-        );
-
-        $this->assertEquals(
-            $this->autoroute->getPrefixFromFileName("./dir_name/internal.yaml"),
-            "internal"
-        );
-    }
-
-    /** @test */
-    public function creates_group(): void
-    {
-        $this->assertNotEquals($this->autoroute->getGroup("api"), null);
-    }
-
-    /** @test */
-    public function creates_group_custom_prefix(): void
-    {
-        $this->resetAutoroute();
-
-        $this->autoroute->createGroup("api.yaml", [
-            "prefix" => "external",
-        ]);
-
-        $this->assertEquals($this->autoroute->getGroup("api"), null);
-        $this->assertNotEquals($this->autoroute->getGroup("external"), null);
     }
 
     /** @test */
@@ -112,14 +76,19 @@ class AutorouteTest extends TestCase
     /** @test */
     public function schema_to_array(): void
     {
-        $group = $this->autoroute->getGroup("api");
-
-        $user = $group["spec"]->components->schemas["User"];
-
-        $schema = $this->autoroute->schemaToArray($group["spec"], $user);
+        $schema = $this->autoroute->getSchemaOf("User");
 
         $this->assertIsArray($schema);
-        $this->assertEquals(["id", "name", "email"], array_keys($schema));
+
+        $this->assertEquals(
+            ["id", "name", "email", "posts"],
+            array_keys($schema)
+        );
+
+        $this->assertEquals($schema["posts"], [
+            "id" => "integer",
+            "title" => "string",
+        ]);
     }
 
     //
