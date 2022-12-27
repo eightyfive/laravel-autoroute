@@ -311,15 +311,15 @@ class Autoroute
         );
     }
 
-    protected function schemaToArray(OpenApi $spec, Schema $schema, $data = [])
+    protected function schemaToArray(OpenApi $spec, Schema $object, $data = [])
     {
-        foreach ($schema->properties as $name => $value) {
-            if ($value->type === "array" && isset($value->items->properties)) {
-                $data[$name] = $this->schemaToArray($spec, $value->items);
-            } elseif ($value->type === "object") {
-                $data[$name] = $this->schemaToArray($spec, $value);
+        foreach ($object->properties as $name => $property) {
+            if ($property->type === "array") {
+                $data[$name] = $this->schemaToArray($spec, $property->items);
+            } elseif ($property->type === "object") {
+                $data[$name] = $this->schemaToArray($spec, $property);
             } else {
-                $data[$name] = $value->type;
+                $data[$name] = $property->type;
             }
         }
 
