@@ -121,21 +121,16 @@ class Autoroute
             // https://swagger.io/docs/specification/data-models/data-types/
 
             if ($property->type === "array") {
-                throw new AutorouteException(
-                    "Validation type not supported: array"
-                );
+                $typeRule = "array";
+            } elseif ($property->type === "object") {
+                $typeRule =
+                    "array:" . implode(",", array_keys($property->properties));
+            } else {
+                $typeRule =
+                    $property->type === "number" ? "numeric" : $property->type;
             }
 
-            if ($property->type === "object") {
-                throw new AutorouteException(
-                    "Validation type not supported: object"
-                );
-            }
-
-            array_push(
-                $rules[$name],
-                $property->type === "number" ? "numeric" : $property->type
-            );
+            array_push($rules[$name], $typeRule);
 
             if (isset($property->format)) {
                 $formatRules = explode("|", $property->format);
