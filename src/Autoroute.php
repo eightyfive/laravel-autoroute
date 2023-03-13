@@ -323,7 +323,7 @@ class Autoroute
                         $property->items
                     );
                 }
-            } elseif (isset($property->allOff)) {
+            } elseif (isset($property->allOf)) {
                 $data[$name] = $this->allOfToArray($spec, $property->allOf);
             } elseif ($property->type === "object") {
                 $data[$name] = $this->schemaToArray($spec, $property);
