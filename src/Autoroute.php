@@ -45,9 +45,9 @@ class Autoroute
         $this->prefix = null;
     }
 
-    public function createGroup(
+    public function init(
         string $fileName,
-        array $options = [],
+        string $prefix = null,
         $service = null
     ) {
         if ($this->dir) {
@@ -61,9 +61,12 @@ class Autoroute
         }
 
         $this->spec = Reader::readFromYamlFile($filePath);
-        $this->prefix = $options["prefix"] ?? null;
+        $this->prefix = $prefix;
         $this->service = $service;
+    }
 
+    public function createGroup(array $options = [])
+    {
         $this->router->group($options, function () {
             $this->createRoutes($this->spec);
         });
