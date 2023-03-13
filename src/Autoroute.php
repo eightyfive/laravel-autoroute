@@ -42,6 +42,7 @@ class Autoroute
         $this->router = $router;
         $this->resolver = $resolver;
         $this->dir = $dir;
+        $this->prefix = null;
     }
 
     public function createGroup(
