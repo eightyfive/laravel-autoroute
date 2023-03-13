@@ -312,12 +312,36 @@ class Autoroute
     {
         foreach ($object->properties as $name => $property) {
             if ($property->type === "array") {
-                $data[$name] = $this->schemaToArray($spec, $property->items);
+                if (isset($property->items->allOf)) {
+                    $data[$name] = $this->allOfToArray(
+                        $spec,
+                        $property->items->allOf
+                    );
+                } else {
+                    $data[$name] = $this->schemaToArray(
+                        $spec,
+                        $property->items
+                    );
+                }
+            } elseif (isset($property->allOff)) {
+                $data[$name] = $this->allOfToArray($spec, $property->allOf);
             } elseif ($property->type === "object") {
                 $data[$name] = $this->schemaToArray($spec, $property);
             } else {
                 $data[$name] = $property->type;
             }
+        }
+
+        return $data;
+    }
+
+    protected function allOfToArray(OpenApi $spec, array $allOf)
+    {
+        $data = [];
+
+        // `allOf` children are `object`
+        foreach ($allOf as $object) {
+            $data = array_merge($data, $this->schemaToArray($spec, $object));
         }
 
         return $data;
