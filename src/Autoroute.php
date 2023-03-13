@@ -26,9 +26,10 @@ class Autoroute
     const ACTION_DELETE = "delete";
     const ACTION_LIST = "list";
 
+    protected string|null $dir;
     protected Router $router;
     protected AutorouteResolverInterface $resolver;
-    protected OpenApi $spec;
+    protected OpenApi|null $spec;
     protected string|null $prefix;
     protected $service;
 
@@ -37,6 +38,7 @@ class Autoroute
         AutorouteResolverInterface $resolver,
         string $dir = null
     ) {
+        $this->spec = null;
         $this->router = $router;
         $this->resolver = $resolver;
         $this->dir = $dir;
