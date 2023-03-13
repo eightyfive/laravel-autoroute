@@ -27,6 +27,7 @@ class Autoroute
     const ACTION_LIST = "list";
 
     protected string|null $dir;
+    protected array $groupOptions;
     protected Router $router;
     protected AutorouteResolverInterface $resolver;
     protected OpenApi|null $spec;
@@ -42,14 +43,12 @@ class Autoroute
         $this->router = $router;
         $this->resolver = $resolver;
         $this->dir = $dir;
+        $this->groupOptions = [];
         $this->prefix = null;
     }
 
-    public function init(
-        string $fileName,
-        string $prefix = null,
-        $service = null
-    ) {
+    public function init(string $fileName, array $options = [], $service = null)
+    {
         if ($this->dir) {
             $fileName = "{$this->dir}/{$fileName}";
         }
@@ -61,13 +60,14 @@ class Autoroute
         }
 
         $this->spec = Reader::readFromYamlFile($filePath);
-        $this->prefix = $prefix;
+        $this->prefix = $options["prefix"] ?? null;
+        $this->groupOptions = $options;
         $this->service = $service;
     }
 
-    public function createGroup(array $options = [])
+    public function registerRoutes()
     {
-        $this->router->group($options, function () {
+        $this->router->group($this->groupOptions, function () {
             $this->createRoutes($this->spec);
         });
     }
