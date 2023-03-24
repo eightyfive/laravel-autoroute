@@ -280,16 +280,16 @@ class Autoroute
 
         $schema = $res->content["application/json"]->schema;
 
-        if (!in_array($schema->type, ["object", "array"])) {
+        if (isset($schema->allOf)) {
+            $schema = $this->allOfToArray($this->spec, $schema->allOf);
+        } elseif ($schema->type === "array") {
+            $schema = $this->schemaToArray($this->spec, $schema->items);
+        } elseif ($schema->type === "object") {
+            $schema = $this->schemaToArray($this->spec, $schema);
+        } else {
             throw new AutorouteException(
                 "Unsupported schema type: " . $schema->type
             );
-        }
-
-        if ($schema->type === "array") {
-            $schema = $this->schemaToArray($this->spec, $schema->items);
-        } else {
-            $schema = $this->schemaToArray($this->spec, $schema);
         }
 
         return [$status, $schema];
