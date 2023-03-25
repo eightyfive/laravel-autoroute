@@ -254,7 +254,7 @@ class Autoroute
     ): array {
         $component = $spec->components->schemas[$componentName];
 
-        return $this->schemaToArray($spec, $component);
+        return $this->schemaToArray($component);
     }
 
     protected function getResponseSchema(
@@ -278,19 +278,9 @@ class Autoroute
             throw new AutorouteException("Unsupported response content type");
         }
 
-        $schema = $res->content["application/json"]->schema;
-
-        if (isset($schema->allOf)) {
-            $schema = $this->allOfToArray($this->spec, $schema->allOf);
-        } elseif ($schema->type === "array") {
-            $schema = $this->schemaToArray($this->spec, $schema->items);
-        } elseif ($schema->type === "object") {
-            $schema = $this->schemaToArray($this->spec, $schema);
-        } else {
-            throw new AutorouteException(
-                "Unsupported schema type: " . $schema->type
-            );
-        }
+        $schema = $this->schemaToArray(
+            $res->content["application/json"]->schema
+        );
 
         return [$status, $schema];
     }
@@ -312,25 +302,34 @@ class Autoroute
         );
     }
 
-    protected function schemaToArray(OpenApi $spec, Schema $object, $data = [])
+    protected function schemaToArray(Schema $schema)
+    {
+        if (isset($schema->allOf)) {
+            $schema = $this->allOfToArray($schema->allOf);
+        } elseif ($schema->type === "array") {
+            $schema = $this->schemaToArray($schema->items);
+        } elseif ($schema->type === "object") {
+            $schema = $this->objectToArray($schema);
+        } else {
+            throw new AutorouteException(
+                "Unsupported schema type: " . $schema->type
+            );
+        }
+
+        return $schema;
+    }
+
+    protected function objectToArray(Schema $object, $data = [])
     {
         foreach ($object->properties as $name => $property) {
             if ($property->type === "array") {
                 if (isset($property->items->allOf)) {
-                    $data[$name] = $this->allOfToArray(
-                        $spec,
-                        $property->items->allOf
-                    );
+                    $data[$name] = $this->allOfToArray($property->items->allOf);
                 } else {
-                    $data[$name] = $this->schemaToArray(
-                        $spec,
-                        $property->items
-                    );
+                    $data[$name] = $this->objectToArray($property->items);
                 }
-            } elseif (isset($property->allOf)) {
-                $data[$name] = $this->allOfToArray($spec, $property->allOf);
             } elseif ($property->type === "object") {
-                $data[$name] = $this->schemaToArray($spec, $property);
+                $data[$name] = $this->objectToArray($property);
             } else {
                 $data[$name] = $property->type;
             }
@@ -339,13 +338,13 @@ class Autoroute
         return $data;
     }
 
-    protected function allOfToArray(OpenApi $spec, array $allOf)
+    protected function allOfToArray(array $allOf)
     {
         $data = [];
 
         // `allOf` children are `object`
         foreach ($allOf as $object) {
-            $data = array_merge($data, $this->schemaToArray($spec, $object));
+            $data = array_merge($data, $this->schemaToArray($object));
         }
 
         return $data;
