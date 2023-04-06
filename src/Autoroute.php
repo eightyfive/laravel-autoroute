@@ -136,6 +136,10 @@ class Autoroute
                     $property->type === "number" ? "numeric" : $property->type;
             }
 
+            if (isset($property->nullable) && $property->nullable === true) {
+                array_push($rules[$name], "nullable");
+            }
+
             array_push($rules[$name], $typeRule);
 
             if (isset($property->format)) {
