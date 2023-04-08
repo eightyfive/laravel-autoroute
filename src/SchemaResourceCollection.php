@@ -42,7 +42,12 @@ class SchemaResourceCollection extends ResourceCollection
                     $data[$name] = $this->setVisible($data[$name], $value);
                 } else {
                     foreach ($data[$name] as $index => $item) {
-                        $data[$name][$index] = $this->setVisible($item, $value);
+                        if (is_array($item) && Arr::isAssoc($item)) {
+                            $data[$name][$index] = $this->setVisible(
+                                $item,
+                                $value
+                            );
+                        }
                     }
                 }
             }
