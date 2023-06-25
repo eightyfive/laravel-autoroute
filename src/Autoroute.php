@@ -332,6 +332,8 @@ class Autoroute
                 } else {
                     $data[$name] = $this->objectToArray($property->items);
                 }
+            } elseif (isset($property->allOf)) {
+                $data[$name] = $this->allOfToArray($property->allOf);
             } elseif ($property->type === "object") {
                 $data[$name] = $this->objectToArray($property);
             } else {
