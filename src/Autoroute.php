@@ -431,8 +431,22 @@ class Autoroute
             // Add middlewares
             $securities = $operation->security ?? $spec->security;
 
-            foreach ($securities as $security) {
-                $middlewares = $security->getSerializableData();
+            if (
+                is_object($securities) &&
+                method_exists($securities, "getSerializableData")
+            ) {
+                $securities = $securities->getSerializableData();
+            }
+
+            foreach (($securities ?? []) as $security) {
+                if (
+                    is_object($security) &&
+                    method_exists($security, "getSerializableData")
+                ) {
+                    $middlewares = $security->getSerializableData();
+                } else {
+                    $middlewares = $security;
+                }
 
                 foreach ($middlewares as $middleware => $config) {
                     if (count($config)) {
